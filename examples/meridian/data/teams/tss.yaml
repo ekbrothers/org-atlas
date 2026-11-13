@@ -31,6 +31,10 @@ items:
     itlt:
       - ref: person:nikhil-kim
         scope: Shared services
+    notes:
+      - text: Runs the monthly Snowflake cost review. Requests for new warehouses go through the Data Governance Council.
+        tags:
+          - process
   - id: identity-access
     name: Identity & Access
     parent: tss
@@ -71,3 +75,5 @@ items:
     itlt:
       - ref: person:nikhil-kim
         scope: Shared services
+    notes:
+      - Vendor staff cover nights and weekends. Escalate P1s to the Service Manager directly.

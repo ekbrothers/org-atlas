@@ -12,7 +12,7 @@ Org Atlas charts are plain data, so any LLM can write them. The quickest route i
 4. **Validate:** `npm run validate -- data/atlas.json`. Send any errors back to the LLM and ask it to fix them. `npm run validate -- --json data/atlas.json` returns the result as JSON, which works well for automated tool loops.
 5. **Preview:** `npm run dev`.
 
-To **change an existing chart**, export everything as one bundle with `npm run export -- --out current.json`, give that to the LLM with your requested changes, and replace your data with what it returns.
+To **change an existing chart**, the simplest route is the **context pack**: `npm run export -- --pack --out atlas-pack.json` writes one JSON with the instructions, schema, full vocabulary and all current data. Give the LLM that single file plus your request ("add a Data Science team that owns these two models", "draw who supports Snowflake"), and save what it returns in `data/`. A returned pack or bundle can be dropped in as is. For smaller context windows use `--slim` (no schema, minified). `npm run export -- --out current.json` gives just the data.
 
 ## The bundle format
 
@@ -50,7 +50,7 @@ A complete working example is in [`examples/bundle/data/atlas.json`](../examples
 | `persona` | `id`, `name` | `internal` (false for customers, suppliers and other outside users), `size`, `icon` |
 | `committee` | `id`, `name` | `type`, `purpose`, `cadence`, `chair` (person id), `members` (person ids or `{ person, role, representing }`) |
 
-Every entity also accepts `description`, `tags`, `links` (named URLs), `order` and `meta` (free-form). Unknown fields are rejected so typos are caught; prefix your own fields with `x-` to keep them.
+Every entity also accepts `description`, `tags`, `links` (named URLs), `order`, `meta` (free-form) and `notes` (context: a string, or a list of `{ text, author, date, tags, private }`; private notes never appear on the site). Unknown fields are rejected so typos are caught; prefix your own fields with `x-` to keep them.
 
 Allowed values for `tier`, `discipline`, `employment`, team `type`, `hosting`, `criticality` and `lifecycle` are listed in the schema and on the site's **Legend** page.
 

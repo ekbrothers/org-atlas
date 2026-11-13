@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import PersonChip from '../../components/PersonChip.astro';
 import TeamResponsibilities from '../../components/TeamResponsibilities.astro';
+import Notes from '../../components/Notes.astro';
 import { atlas, href } from '../../lib/atlas';
 import { headcount } from '../../../../engine/lib/model.mjs';
 
@@ -101,6 +102,7 @@ const siblings = team.unit?.teams.filter((t: any) => t !== team) ?? [];
     </div>
 
     <aside class="side-col">
+      <Notes entity={team} title="Team notes" />
       <section class="panel side">
         <h2 class="eyebrow">Discipline mix</h2>
         <ul class="disc-list">

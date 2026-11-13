@@ -7,6 +7,7 @@ import RelLine from './RelLine.astro';
 import RelationshipMap from './RelationshipMap.astro';
 import ContextDiagram from './ContextDiagram.astro';
 import StackChips from './StackChips.astro';
+import Notes from './Notes.astro';
 import { atlas, href } from '../lib/atlas';
 
 interface Props {
@@ -85,6 +86,8 @@ const links = entity.links ? Object.entries(entity.links) : [];
     )}
   </div>
 </header>
+
+<Notes entity={entity} />
 
 {
   children.length > 0 && (

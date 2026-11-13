@@ -10,7 +10,6 @@ interface Props {
   logo?: boolean;
 }
 const { entity, logo = true } = Astro.props;
-const primaryTeam = entity.kind === 'person' ? entity.teamRefs?.find((r: any) => r.primary)?.team : null;
 const url =
   entity.kind === 'team'
     ? href(`teams/${entity.id}/`)
@@ -20,8 +19,8 @@ const url =
         ? href(`products/${entity.id}/`)
         : entity.kind === 'committee'
           ? href(`committees/${entity.id}/`)
-        : primaryTeam
-          ? href(`teams/${primaryTeam.id}/`)
+        : entity.kind === 'person'
+          ? href(`people/${entity.id}/`)
           : null;
 const icon =
   entity.kind === 'committee'

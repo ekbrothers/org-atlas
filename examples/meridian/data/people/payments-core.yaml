@@ -10,6 +10,12 @@ items:
     memberships:
       - team: payments-core
         primary: true
+    notes:
+      - text: Primary contact for PCI audits and card scheme reviews.
+        tags:
+          - compliance
+      - text: Covering the Lending Platform manager role informally while the seat is open.
+        private: true
   - id: zain-kowalski
     name: Zain Kowalski
     role: Tech Lead

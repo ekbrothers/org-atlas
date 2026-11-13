@@ -6,6 +6,7 @@ import Icon from '../../components/Icon.astro';
 import PersonChip from '../../components/PersonChip.astro';
 import EntityRef from '../../components/EntityRef.astro';
 import RelLine from '../../components/RelLine.astro';
+import Notes from '../../components/Notes.astro';
 import { atlas, href } from '../../lib/atlas';
 
 export function getStaticPaths() {
@@ -87,6 +88,7 @@ const links = c.links ? Object.entries(c.links) : [];
     </div>
 
     <aside>
+      <Notes entity={c} />
       {
         outgoing.map((g: any) => (
           <section class="panel side">

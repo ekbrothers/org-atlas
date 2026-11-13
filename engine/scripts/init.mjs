@@ -162,6 +162,9 @@ site:
   # true blocks search engine indexing (robots.txt + meta tag).
   noindex: ${noindex}
 
+  # false hides all notes on the site (they stay in the data for LLMs and exports).
+  showNotes: true
+
 data:
   # Folder holding your YAML or JSON data, relative to this file.
   dir: data

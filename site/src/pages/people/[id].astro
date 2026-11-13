@@ -1,0 +1,232 @@
+---
+// One person: their teams and roles, what they lead, committee seats,
+// everything they are responsible for, and notes.
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import Avatar from '../../components/Avatar.astro';
+import EntityRef from '../../components/EntityRef.astro';
+import RelLine from '../../components/RelLine.astro';
+import Notes from '../../components/Notes.astro';
+import { atlas, href } from '../../lib/atlas';
+
+export function getStaticPaths() {
+  return atlas().model.people.map((p: any) => ({ params: { id: p.id }, props: { id: p.id } }));
+}
+const { model, vocab } = atlas();
+const p = model.get('person', Astro.props.id);
+const tier = vocab.tier[p.tier];
+const discipline = p.discipline ? vocab.discipline[p.discipline] : null;
+const employment = vocab.employmentById[p.employment];
+const primary = p.teamRefs.find((r: any) => r.primary)?.team;
+
+const leads = [
+  ...(model.organization.leadPerson === p ? [model.organization] : []),
+  ...model.units.filter((u: any) => u.leadPerson === p),
+  ...model.teams.filter((t: any) => t.leadPerson === p),
+];
+const responsibilities = vocab.relTypes
+  .filter((t: any) => !t.structural)
+  .map((t: any) => ({ t, edges: model.edgesFrom(p, t.id) }))
+  .filter((g: any) => g.edges.length);
+const seatRole = (r: string) => vocab.seatRole[r]?.label ?? r;
+---
+
+<Base title={p.displayName}>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href={href('org/')}>Org chart</a>
+    {
+      primary?.unit && (
+        <>
+          <Icon name="chevron-right" size={12} />
+          <a href={href(`org/?bu=${primary.unit.id}`)}>{primary.unit.name}</a>
+        </>
+      )
+    }
+    {
+      primary && (
+        <>
+          <Icon name="chevron-right" size={12} />
+          <a href={href(`teams/${primary.id}/`)}>{primary.name}</a>
+        </>
+      )
+    }
+    <Icon name="chevron-right" size={12} />
+    <span aria-current="page">{p.displayName}</span>
+  </nav>
+
+  <header class="head panel">
+    <Avatar person={p} size="lg" />
+    <div>
+      <span class="eyebrow">{p.employment === 'vacancy' ? 'Open position' : 'Person'}</span>
+      <h1>{p.displayName}</h1>
+      {p.role && p.name && <p class="role">{p.role}</p>}
+      <div class="facts">
+        {tier && <span class="pill">{tier.icon && <Icon name={tier.icon} size={12} />} {tier.label}</span>}
+        {discipline && <span class="pill"><Icon name={discipline.icon} size={12} /> {discipline.label}</span>}
+        {employment && <span class="pill">{employment.label}</span>}
+        {p.location && <span class="pill"><Icon name="location" size={12} /> {p.location}</span>}
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <Notes entity={p} title={`Notes about ${p.name ?? 'this position'}`} />
+
+      {
+        p.teamRefs.length > 0 && (
+          <section class="panel block">
+            <h2 class="eyebrow">Teams</h2>
+            <ul class="plain">
+              {p.teamRefs.map((r: any) => (
+                <li>
+                  <EntityRef entity={r.team} />
+                  <span class="muted small">
+                    {[r.primary ? 'Primary team' : 'Shared member', r.role].filter(Boolean).join(' | ')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        responsibilities.length > 0 && (
+          <section class="panel block">
+            <h2 class="eyebrow">Responsibilities</h2>
+            {responsibilities.map((g: any) => (
+              <div class="rel-group">
+                <h3>
+                  <RelLine type={g.t} width={24} label />
+                </h3>
+                <ul class="plain">
+                  {g.edges.map((e: any) => (
+                    <li>
+                      <EntityRef entity={e.to} />
+                      {(e.scope || e.note) && <span class="muted small">{e.scope ?? e.note}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        )
+      }
+    </div>
+
+    <aside>
+      {
+        leads.length > 0 && (
+          <section class="panel block">
+            <h2 class="eyebrow">
+              <Icon name="star" size={14} /> Leads
+            </h2>
+            <ul class="plain">
+              {leads.map((x: any) => (
+                <li>
+                  <EntityRef entity={x} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+      {
+        p.seats.length > 0 && (
+          <section class="panel block">
+            <h2 class="eyebrow">
+              <Icon name="law" size={14} /> Committee seats
+            </h2>
+            <ul class="plain">
+              {p.seats.map((s: any) => (
+                <li>
+                  <EntityRef entity={s.committee} />
+                  <span class="muted small">{seatRole(s.role)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .head {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 20px 24px;
+    border-top: 4px solid var(--navy);
+    margin-bottom: 24px;
+  }
+  .head h1 {
+    font-size: 1.6rem;
+    color: var(--navy);
+    margin: 2px 0;
+  }
+  .role {
+    margin: 0 0 8px;
+    color: var(--muted);
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+  }
+  .block {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .block h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .rel-group + .rel-group {
+    margin-top: 14px;
+  }
+  .rel-group h3 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .plain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .plain li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .small {
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

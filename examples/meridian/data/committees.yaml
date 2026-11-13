@@ -41,6 +41,8 @@ items:
       - claims-processing
     reports-to:
       - person:nikhil-kim
+    notes:
+      - Submit designs by Thursday for the following review. Templates are in Confluence.
   - id: change-advisory-board
     name: Change Advisory Board
     type: change-advisory-board

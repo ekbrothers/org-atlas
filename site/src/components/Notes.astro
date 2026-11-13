@@ -1,0 +1,90 @@
+---
+// Context notes on any entity. Private notes and, when site.showNotes is false,
+// all notes are left out of the site (they stay in the data).
+import Icon from './Icon.astro';
+import { atlas } from '../lib/atlas';
+
+interface Props {
+  entity: any;
+  title?: string;
+}
+const { entity, title = 'Notes' } = Astro.props;
+const { config } = atlas();
+const notes = config.site.showNotes ? (entity.publicNotes ?? []) : [];
+// Turn bare URLs into links; everything else is plain text.
+const parts = (text: string) => String(text).split(/(https?:\/\/[^\s)]+)/g);
+---
+
+{
+  notes.length > 0 && (
+    <section class="panel notes">
+      <h2 class="eyebrow">
+        <Icon name="note" size={14} /> {title}
+      </h2>
+      <ul>
+        {notes.map((n: any) => (
+          <li>
+            <p>
+              {parts(n.text).map((p, i) => (i % 2 ? <a href={p}>{p}</a> : p))}
+            </p>
+            {(n.author || n.date || n.tags?.length) && (
+              <span class="meta">
+                {[n.author, n.date].filter(Boolean).join(', ')}
+                {n.tags?.map((t: string) => (
+                  <span class="tag">{t}</span>
+                ))}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .notes {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--gold);
+  }
+  .notes h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  li + li {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+    white-space: pre-line;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .tag {
+    background: var(--surface-tint);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 0 7px;
+    font-weight: 600;
+  }
+</style>

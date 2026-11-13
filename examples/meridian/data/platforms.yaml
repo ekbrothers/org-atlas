@@ -310,3 +310,5 @@ items:
     criticality: T2
     lifecycle: deprecated
     description: Old file-transfer server still used by some supplier integrations. Nobody owns it.
+    notes:
+      - No owner since the 2025 reorganization. Supplier Gateway still depends on it for three suppliers; replacement is unfunded.

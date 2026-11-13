@@ -32,6 +32,33 @@ export function buildSchema(vocab = loadVocab()) {
     tags: { type: 'array', items: { type: 'string' } },
     links: { type: 'object', additionalProperties: { type: 'string' }, description: 'Named URLs, e.g. { "runbook": "https://..." }.' },
     meta: { type: 'object', description: 'Free-form extra data. Ignored by the engine.' },
+    notes: {
+      description:
+        'Context notes: a string, or a list of strings or { text, author, date, tags, private }. Notes with private: true stay in the data (for LLMs and exports) but are never shown on the site.',
+      anyOf: [
+        { type: 'string' },
+        {
+          type: 'array',
+          items: {
+            anyOf: [
+              { type: 'string' },
+              {
+                type: 'object',
+                properties: {
+                  text: { type: 'string', minLength: 1 },
+                  author: { type: 'string' },
+                  date: { type: 'string', description: 'ISO date, e.g. 2026-11-13.' },
+                  tags: { type: 'array', items: { type: 'string' } },
+                  private: { type: 'boolean' },
+                },
+                required: ['text'],
+                additionalProperties: false,
+              },
+            ],
+          },
+        },
+      ],
+    },
   };
   const strict = (properties, required = ['id']) => ({
     type: 'object',

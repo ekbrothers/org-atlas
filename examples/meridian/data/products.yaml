@@ -163,6 +163,11 @@ items:
     itlt:
       - ref: person:maya-zhang
         scope: Financial Services portfolio
+    notes:
+      - text: Models are retrained monthly. Next independent validation is due 2027-01; see the Model Risk Committee.
+        date: 2026-11-01
+        tags:
+          - model-risk
   - id: mobile-banking
     name: Mobile Banking App
     owners:

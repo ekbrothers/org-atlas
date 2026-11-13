@@ -19,7 +19,7 @@ const shownRole = role ?? person.role;
   <Avatar person={person} size={size} />
   <div class="chip-text">
     <span class="chip-name">
-      {person.displayName}
+      <a class="chip-link" href={href(`people/${person.id}/`)}>{person.displayName}</a>
       {isLead && <span class="tag tag-lead">Lead</span>}
     </span>
     {shownRole && person.name && <span class="chip-role">{shownRole}</span>}
@@ -53,6 +53,12 @@ const shownRole = role ?? person.role;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
+  }
+  .chip-link {
+    color: inherit;
+  }
+  .chip-link:hover {
+    color: var(--link);
   }
   .chip-sm .chip-name {
     font-size: 13px;

@@ -329,6 +329,14 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     }
   }
 
+  // Notes on any entity: normalized to [{ text, author, date, tags, private }]
+  for (const kind of ENTITY_KINDS) {
+    for (const e of byKind[kind].values()) {
+      e.noteList = [].concat(e.notes ?? []).map((n) => (typeof n === 'string' ? { text: n } : { ...n }));
+      e.publicNotes = e.noteList.filter((n) => !n.private);
+    }
+  }
+
   // Nested products (e.g. models inside the product that uses them)
   for (const p of products.values()) p.children = [];
   for (const p of products.values()) {

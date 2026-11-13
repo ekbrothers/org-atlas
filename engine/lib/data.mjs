@@ -35,7 +35,10 @@ export function loadData(dataDir, { only } = {}) {
       }
       continue;
     }
-    files.push({ path, rel, doc: parsed.toJS() ?? {} });
+    let doc = parsed.toJS() ?? {};
+    // A context pack (npm run export -- --pack) carries its chart in `data`.
+    if (doc && typeof doc === 'object' && doc['org-atlas-pack'] && doc.data) doc = doc.data;
+    files.push({ path, rel, doc });
   }
   return { files, errors };
 }

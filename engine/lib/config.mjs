@@ -46,6 +46,8 @@ export function loadConfig() {
       title: raw.site?.title ?? raw.organization?.name ?? 'Org Atlas',
       domain: raw.site?.domain ?? null,
       noindex: raw.site?.noindex ?? false,
+      // false hides every note on the site (notes still stay in the data for LLMs and exports)
+      showNotes: raw.site?.showNotes ?? true,
     },
     dataDir: resolve(configDir, raw.data?.dir ?? 'data'),
     iconsDir: resolve(configDir, raw.icons?.dir ?? 'overrides/icons'),

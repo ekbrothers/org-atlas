@@ -712,6 +712,25 @@ for (const p of products) {
   if (a) p.itlt = [{ ref: pers(a[0]), scope: a[1] }];
 }
 
+// Notes: context on teams, people, products and committees. One is private:
+// it stays in the data for LLMs and exports, but is never shown on the site.
+const T = (id) => teams.find((t) => t.id === id);
+const person = (id) => all.find((p) => p.id === id);
+T('payments-core').notes = [
+  { text: 'Moving card settlement onto Kafka; target is end of Q2. On-call rota is shared with SRE during the migration.', author: 'Engineering Manager', date: '2026-10-02', tags: ['roadmap'] },
+  'PCI DSS scope: everything this team owns is in scope. Changes go through the Change Advisory Board.',
+];
+T('data-platform').notes = [{ text: 'Runs the monthly Snowflake cost review. Requests for new warehouses go through the Data Governance Council.', tags: ['process'] }];
+T('it-service-desk').notes = ['Vendor staff cover nights and weekends. Escalate P1s to the Service Manager directly.'];
+person(leadOf('payments-core')).notes = [
+  { text: 'Primary contact for PCI audits and card scheme reviews.', tags: ['compliance'] },
+  { text: 'Covering the Lending Platform manager role informally while the seat is open.', private: true },
+];
+person(cto).notes = ['Chairs the ITLT and the Security Steering Committee. Prefers written proposals one week before ITLT.'];
+products.find((a) => a.id === 'fraud-scoring').notes = [{ text: 'Models are retrained monthly. Next independent validation is due 2027-01; see the Model Risk Committee.', date: '2026-11-01', tags: ['model-risk'] }];
+P('legacy-sftp').notes = ['No owner since the 2025 reorganization. Supplier Gateway still depends on it for three suppliers; replacement is unfunded.'];
+committees.find((c) => c.id === 'architecture-review-board').notes = ['Submit designs by Thursday for the following review. Templates are in Confluence.'];
+
 // Tidy empty arrays.
 for (const list of [platforms, products]) for (const e of list) for (const k of Object.keys(e)) if (Array.isArray(e[k]) && !e[k].length) delete e[k];
 

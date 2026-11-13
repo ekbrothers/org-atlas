@@ -11,6 +11,13 @@ items:
     itlt:
       - ref: person:maya-zhang
         scope: Financial Services portfolio
+    notes:
+      - text: Moving card settlement onto Kafka; target is end of Q2. On-call rota is shared with SRE during the migration.
+        author: Engineering Manager
+        date: 2026-10-02
+        tags:
+          - roadmap
+      - "PCI DSS scope: everything this team owns is in scope. Changes go through the Change Advisory Board."
   - id: lending-platform
     name: Lending Platform
     parent: fs

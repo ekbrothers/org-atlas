@@ -46,6 +46,8 @@ items:
     memberships:
       - team: executive-leadership
         primary: true
+    notes:
+      - Chairs the ITLT and the Security Steering Committee. Prefers written proposals one week before ITLT.
   - id: tomas-laurent
     name: Tomas Laurent
     role: Chief Financial Officer

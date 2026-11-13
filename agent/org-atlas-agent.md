@@ -31,7 +31,9 @@ Output a single JSON object, and nothing else when the caller asks for raw outpu
 
 ## Entity kinds and fields
 
-All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbook": "https://..." }`), `order` and `meta`.
+All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbook": "https://..." }`), `order`, `meta` and `notes`.
+
+`notes` gives context about a person, team, product or anything else: a string, or a list of strings or `{ "text": "...", "author": "...", "date": "2026-11-13", "tags": [...], "private": true }`. Private notes stay in the data but are never shown on the site. Keep notes factual and work-related; never record sensitive personal information (health, performance reviews, compensation).
 
 ### `organization`
 
