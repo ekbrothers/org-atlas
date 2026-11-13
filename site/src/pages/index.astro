@@ -1,0 +1,172 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadConfig, resolveSite } from '../../../engine/lib/config.mjs';
+import { loadData, countKinds } from '../../../engine/lib/data.mjs';
+
+const atlas = loadConfig();
+const { site } = resolveSite(atlas);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const { files } = loadData(atlas.dataDir);
+const kinds = Object.entries(countKinds(files));
+
+const phases = [
+  { n: 0, name: 'Foundations', detail: 'Scaffold, local preview, GitHub Pages deploy', done: true },
+  { n: 1, name: 'Schema and vocabulary', detail: 'Entities, relationships, person categories, validation, demo enterprise' },
+  { n: 2, name: 'Design language and icons', detail: 'Tokens, Octicons, platform logos, legend' },
+  { n: 3, name: 'First views', detail: 'Org chart, team pages, ownership, search, question catalog' },
+  { n: 4, name: 'Graph explorer', detail: 'Semantic zoom, filters, deep links, impact analysis' },
+];
+---
+
+<Base>
+  <section class="hero">
+    <h1>{atlas.organization.name}</h1>
+    <p class="lead">
+      An interactive map of the organization: business units, teams, people, solutions and the platforms they run on.
+    </p>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h2>Data</h2>
+      <p class="big">{files.length}</p>
+      <p class="muted">YAML file{files.length === 1 ? '' : 's'} loaded</p>
+      {
+        kinds.length > 0 && (
+          <ul class="kinds">
+            {kinds.map(([kind, n]) => (
+              <li>
+                <code>{kind}</code> {n}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </article>
+
+    <article class="card">
+      <h2>Deployment</h2>
+      <dl>
+        <dt>Base path</dt>
+        <dd><code>{base}</code></dd>
+        <dt>Public URL</dt>
+        <dd>{site ? <code>{site.replace(/\/$/, '') + base}</code> : <span class="muted">No GitHub remote detected</span>}</dd>
+        <dt>Indexing</dt>
+        <dd>{atlas.site.noindex ? 'Blocked (noindex)' : 'Allowed'}</dd>
+      </dl>
+    </article>
+  </section>
+
+  <section>
+    <h2>Roadmap</h2>
+    <ol class="phases">
+      {
+        phases.map((p) => (
+          <li class={p.done ? 'done' : ''}>
+            <span class="status">{p.done ? 'Done' : 'Planned'}</span>
+            <strong>
+              Phase {p.n}: {p.name}
+            </strong>
+            <span class="muted">{p.detail}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    margin: 0 0 8px;
+  }
+  .lead {
+    font-size: 18px;
+    color: var(--fg-muted);
+    max-width: 60ch;
+    margin: 0 0 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    background: var(--bg-subtle);
+  }
+  .card h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    margin: 0 0 8px;
+  }
+  .big {
+    font-size: 36px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .muted {
+    color: var(--fg-muted);
+  }
+  .card p.muted {
+    margin: 0;
+  }
+  .kinds {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+  }
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    margin: 0;
+    font-size: 14px;
+  }
+  dt {
+    color: var(--fg-muted);
+  }
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .phases {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .phases li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .phases li:first-child {
+    border-top: none;
+  }
+  .status {
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0 8px;
+    color: var(--fg-muted);
+  }
+  .done .status {
+    color: var(--success);
+    border-color: var(--success);
+  }
+</style>

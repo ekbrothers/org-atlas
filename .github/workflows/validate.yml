@@ -1,0 +1,42 @@
+# Checks data and makes sure the site builds on every pull request.
+name: Validate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ASTRO_TELEMETRY_DISABLED: 1
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run validate
+
+      - run: npx astro build
+
+      # The upstream toolkit repo must never contain user-owned files, so that
+      # people who clone it can pull updates without merge conflicts.
+      # This step only runs in the upstream repo, not in your copy.
+      - name: Upstream guard (no user-owned files)
+        if: github.repository == 'ekbrothers/org-atlas'
+        run: |
+          for p in data atlas.config.yaml overrides; do
+            if [ -e "$p" ]; then
+              echo "::error::'$p' is user-owned and must not be committed to the upstream toolkit repo."
+              exit 1
+            fi
+          done

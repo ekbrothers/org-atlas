@@ -1,0 +1,68 @@
+# Builds the site and deploys it to GitHub Pages on every push to main.
+# One-time setup: Settings > Pages > Build and deployment > Source: "GitHub Actions".
+# The base path (/<repo>/ or / for <owner>.github.io repos and custom domains)
+# is detected automatically from GITHUB_REPOSITORY and atlas.config.yaml.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; let an in-progress deploy finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  ASTRO_TELEMETRY_DISABLED: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Upstream toolkit repo only: user-owned files must never be committed there.
+      - name: Upstream guard (no user-owned files)
+        if: github.repository == 'ekbrothers/org-atlas'
+        run: |
+          for p in data atlas.config.yaml overrides; do
+            if [ -e "$p" ]; then
+              echo "::error::'$p' is user-owned and must not be committed to the upstream toolkit repo."
+              exit 1
+            fi
+          done
+
+      # Invalid data fails here, so the last good site stays live.
+      - run: npm run validate
+
+      - uses: actions/configure-pages@v5
+
+      - run: npx astro build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,180 @@
+---
+import '../styles/global.css';
+import { loadConfig } from '../../../engine/lib/config.mjs';
+
+interface Props {
+  title?: string;
+}
+
+const atlas = loadConfig();
+const { title } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const pageTitle = title ? `${title} | ${atlas.site.title}` : atlas.site.title;
+
+// Views that arrive in later phases are shown greyed out so the shape of the
+// site is visible from day one.
+const nav = [
+  { label: 'Home', href: base, ready: true },
+  { label: 'Org chart', ready: false },
+  { label: 'Teams', ready: false },
+  { label: 'Explorer', ready: false },
+  { label: 'Legend', ready: false },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {atlas.site.noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('atlas-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href={base}>
+          <img src={`${base}favicon.svg`} alt="" width="24" height="24" />
+          <span>{atlas.site.title}</span>
+        </a>
+        <nav aria-label="Main">
+          {
+            nav.map((item) =>
+              item.ready ? (
+                <a href={item.href}>{item.label}</a>
+              ) : (
+                <span class="soon" title="Coming in a later phase">
+                  {item.label}
+                </span>
+              ),
+            )
+          }
+        </nav>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme">Theme</button>
+      </div>
+    </header>
+
+    {
+      atlas.demo && (
+        <div class="demo-banner">
+          <div class="container">
+            Demo mode: showing <code>examples/minimal</code>. Run <code>npm run init</code> to use your own data.
+          </div>
+        </div>
+      )
+    }
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="container site-footer">
+      Built with <a href="https://github.com/ekbrothers/org-atlas">Org Atlas</a>
+    </footer>
+
+    <script is:inline>
+      document.querySelector('.theme-toggle').addEventListener('click', () => {
+        const root = document.documentElement;
+        const current =
+          root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem('atlas-theme', next);
+        } catch {}
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-subtle);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 56px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  nav {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  nav a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--accent);
+  }
+  .soon {
+    color: var(--fg-muted);
+    opacity: 0.6;
+    cursor: default;
+  }
+  @media (max-width: 640px) {
+    .header-inner {
+      gap: 8px 16px;
+      padding-top: 10px;
+    }
+    .brand {
+      flex: 1;
+    }
+    nav {
+      order: 3;
+      flex-basis: 100%;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      white-space: nowrap;
+    }
+  }
+  .theme-toggle {
+    font: inherit;
+    font-size: 13px;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .demo-banner {
+    background: var(--attention-subtle);
+    border-bottom: 1px solid var(--attention-border);
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  main {
+    padding-top: 32px;
+    padding-bottom: 48px;
+  }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    padding-bottom: 32px;
+    font-size: 13px;
+    color: var(--fg-muted);
+  }
+</style>

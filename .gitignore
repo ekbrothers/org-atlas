@@ -1,0 +1,12 @@
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# OS / editor noise
+.DS_Store
+*.log
+
+# NOTE: data/, atlas.config.yaml and overrides/ are NOT ignored.
+# In your own copy you commit them. In the upstream toolkit repo they
+# simply never exist (CI enforces this), so pulling updates never conflicts.
