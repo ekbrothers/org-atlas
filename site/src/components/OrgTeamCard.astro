@@ -26,10 +26,10 @@ const searchText = [
   .toLowerCase();
 const others = team.members.filter((m: any) => m.person !== team.leadPerson);
 const owned = model.edgesFrom(team, 'owner').map((e: any) => e.to);
-// Everything this team is involved with: any accountability link, plus platforms its owned applications use.
+// Everything this team is involved with: any accountability link, plus platforms its owned products use.
 const involved = new Set<string>();
 for (const e of model.edgesFrom(team)) involved.add(`${e.to.kind}:${e.to.id}`);
-for (const a of owned.filter((x: any) => x.kind === 'application'))
+for (const a of owned.filter((x: any) => x.kind === 'product'))
   for (const u of model.edgesFrom(a, 'uses')) involved.add(`platform:${u.to.id}`);
 ---
 

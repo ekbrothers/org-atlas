@@ -2,15 +2,15 @@
 
 **Diagrams as data for technical enterprises.** Describe your business units, teams, people, solutions and platforms in YAML, and Org Atlas turns them into an interactive, filterable site you can deploy to GitHub Pages.
 
-> **Status: early.** Working today: org chart, team pages, platforms and applications with logos and (shared) ownership, a relationship registry, a JSON Schema and LLM-friendly bundle files, a fictional demo enterprise, and GitHub Pages deployment. The interactive graph explorer is next. See [docs/PLAN.md](docs/PLAN.md).
+> **Status: early.** Working today: org chart, team pages, platforms and products with logos and (shared) ownership, a relationship registry, a JSON Schema and LLM-friendly bundle files, a fictional demo enterprise, and GitHub Pages deployment. The interactive graph explorer is next. See [docs/PLAN.md](docs/PLAN.md).
 
 ## What you get
 
 - **Org chart:** organization, business units and teams as a tree. Filter by business unit, team type or discipline, search for people or roles, and switch between a Teams view and a People view. Filters are kept in the URL, so you can share a filtered view as a link.
 - **Team pages:** each team's lead and members grouped by tier, shared members, open positions and discipline mix.
-- **Platforms:** every shared platform (Snowflake, GitHub Enterprise, Nexus, Kafka, in-house platforms...) with its logo, owners, shared ownership with a scope per owner, supporting teams, and the applications that use it.
-- **Applications:** who owns, supports and operates each application, its stakeholders, the platforms it runs on and the applications it depends on.
-- **Relationship maps:** each platform and application page draws who is accountable on one side and technical links on the other, with line styles from the relationship registry.
+- **Platforms:** every shared platform (Snowflake, GitHub Enterprise, Nexus, Kafka, in-house platforms...) with its logo, owners, shared ownership with a scope per owner, supporting teams, and the products that use it.
+- **Products:** who owns, supports and operates each product, its stakeholders, the platforms it runs on and the products it depends on.
+- **Relationship maps:** each platform and product page draws who is accountable on one side and technical links on the other, with line styles from the relationship registry.
 - **Relationships:** every relationship type (owner, supporting, operator, stakeholder, sponsor, SME, escalation, uses, depends on, built on, plus structural ones) and every relationship in your data, searchable.
 - **Legend:** what every badge, ring, line and icon means, generated from the same vocabulary files the site renders with.
 - **Demo data:** *Meridian Dynamics*, a fictional enterprise with 6 business units, 22 teams and about 150 people.
@@ -71,7 +71,7 @@ items:
 
 People can belong to several teams. They appear on every team, marked as shared on all but their primary one. An open position is a person with `employment: vacancy` and no name.
 
-Platforms and applications carry their relationships inline, or as separate entries:
+Platforms and products carry their relationships inline, or as separate entries:
 
 ```yaml
 # data/platforms.yaml
@@ -89,8 +89,8 @@ items:
 ```
 
 ```yaml
-# data/applications.yaml
-kind: application
+# data/products.yaml
+kind: product
 items:
   - id: checkout
     name: Checkout
@@ -101,7 +101,7 @@ items:
     depends-on: [payments-gateway]
 ```
 
-The same relationship as an explicit entry: `{ from: team:storefront, type: owner, to: application:checkout }`. Every type is defined in [`engine/vocab/relationships.yaml`](engine/vocab/relationships.yaml).
+The same relationship as an explicit entry: `{ from: team:storefront, type: owner, to: product:checkout }`. Every type is defined in [`engine/vocab/relationships.yaml`](engine/vocab/relationships.yaml).
 
 ## Building charts with an LLM
 

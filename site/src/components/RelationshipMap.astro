@@ -1,5 +1,5 @@
 ---
-// A three-column relationship diagram around one platform or application:
+// A three-column relationship diagram around one platform or product:
 //   left   who is accountable (owner, supporting, operator, stakeholder, ...)
 //   center the entity
 //   right  technical links (uses / used by, depends on, built on)
@@ -36,7 +36,7 @@ const right = vocab.relTypes
   .filter((g: any) => g.items.length);
 
 const owners = model.edgesTo(entity, 'owner');
-const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Application';
+const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Product';
 ---
 
 <div class="map">

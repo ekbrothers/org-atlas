@@ -401,7 +401,7 @@
           "description": "Built in-house."
         },
         "owners": {
-          "description": "Owner (relationship \"owner\"): Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
+          "description": "Owner (relationship \"owner\"): Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
           "anyOf": [
             {
               "anyOf": [
@@ -1132,7 +1132,7 @@
       },
       "additionalProperties": false
     },
-    "application": {
+    "product": {
       "type": "object",
       "properties": {
         "kind": {
@@ -1218,14 +1218,16 @@
         },
         "type": {
           "enum": [
+            "product",
             "application",
             "solution",
             "service",
-            "product"
+            "data-product",
+            "ml-model"
           ]
         },
         "owners": {
-          "description": "Owner (relationship \"owner\"): Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
+          "description": "Owner (relationship \"owner\"): Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
           "anyOf": [
             {
               "anyOf": [
@@ -1859,7 +1861,7 @@
           ]
         },
         "platforms": {
-          "description": "Uses (relationship \"uses\"): The application runs on, or makes use of, the platform. Bare ids are platform ids.",
+          "description": "Uses (relationship \"uses\"): The product runs on, or makes use of, the platform. Bare ids are platform ids.",
           "anyOf": [
             {
               "anyOf": [
@@ -1953,7 +1955,7 @@
           ]
         },
         "depends-on": {
-          "description": "Depends on (relationship \"depends-on\"): The application calls or needs another application to work. Bare ids are application ids.",
+          "description": "Depends on (relationship \"depends-on\"): The product calls or needs another product to work. Bare ids are product ids.",
           "anyOf": [
             {
               "anyOf": [
@@ -2117,7 +2119,7 @@
         },
         "purpose": {
           "type": "string",
-          "description": "Why an application uses a platform."
+          "description": "Why a product uses a platform."
         },
         "note": {
           "type": "string"
@@ -2143,8 +2145,11 @@
             "team",
             "person",
             "platform",
+            "product",
             "application",
-            "solution"
+            "app",
+            "solution",
+            "bu"
           ]
         }
       },
@@ -2228,6 +2233,21 @@
           "if": {
             "properties": {
               "kind": {
+                "const": "product"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/product"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
                 "const": "application"
               }
             },
@@ -2236,7 +2256,22 @@
             ]
           },
           "then": {
-            "$ref": "#/definitions/application"
+            "$ref": "#/definitions/product"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "app"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/product"
           }
         },
         {
@@ -2251,7 +2286,22 @@
             ]
           },
           "then": {
-            "$ref": "#/definitions/application"
+            "$ref": "#/definitions/product"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "bu"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/business-unit"
           }
         }
       ]
@@ -2307,8 +2357,11 @@
               "team",
               "person",
               "platform",
+              "product",
               "application",
+              "app",
               "solution",
+              "bu",
               "relationship",
               "relationships"
             ]
@@ -2489,6 +2542,40 @@
             "if": {
               "properties": {
                 "kind": {
+                  "const": "product"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/product"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/product"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
                   "const": "application"
                 }
               },
@@ -2508,14 +2595,48 @@
                   "items": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/application"
+                      "$ref": "#/definitions/product"
                     }
                   }
                 },
                 "additionalProperties": false
               },
               "else": {
-                "$ref": "#/definitions/application"
+                "$ref": "#/definitions/product"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "app"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/product"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/product"
               }
             }
           },
@@ -2542,14 +2663,48 @@
                   "items": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/definitions/application"
+                      "$ref": "#/definitions/product"
                     }
                   }
                 },
                 "additionalProperties": false
               },
               "else": {
-                "$ref": "#/definitions/application"
+                "$ref": "#/definitions/product"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "bu"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/business-unit"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/business-unit"
               }
             }
           },

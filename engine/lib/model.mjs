@@ -1,7 +1,7 @@
 // Builds the in-memory model from parsed data files and reports problems.
 //
-// Entity kinds: organization, business-unit, team, person, platform, application
-// (`solution` is accepted as another name for `application`).
+// Entity kinds: organization, business-unit, team, person, platform, product
+// (`solution` is accepted as another name for `product`).
 //
 // A data file (YAML or JSON) can take any of these shapes:
 //
@@ -19,7 +19,7 @@
 //                                 relationships: [ {from: ..., type: ..., to: ...} ]
 //
 // Relationships can also be written inline on the entity, e.g. a platform's
-// `owners: [data-platform]` or an application's `platforms: [snowflake]`.
+// `owners: [data-platform]` or a product's `platforms: [snowflake]`.
 // See engine/vocab/relationships.yaml for every type and its inline field.
 
 import { readFileSync } from 'node:fs';
@@ -28,8 +28,9 @@ import { parse } from 'yaml';
 import { ROOT } from './config.mjs';
 import { resolveLogo } from './logos.mjs';
 
-export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'platform', 'application'];
-const KIND_ALIASES = { solution: 'application', app: 'application', bu: 'business-unit', 'business_unit': 'business-unit' };
+export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'platform', 'product'];
+// Other names accepted for a kind. `application` was the original name for `product`.
+export const KIND_ALIASES = { application: 'product', app: 'product', solution: 'product', bu: 'business-unit', business_unit: 'business-unit' };
 
 export function loadVocab() {
   const people = parse(readFileSync(resolve(ROOT, 'engine/vocab/people.yaml'), 'utf8'));
@@ -84,7 +85,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
       return;
     }
     entity.id = String(entity.id);
-    if (written === 'solution' && entity.type == null) entity.type = 'solution';
+    if ((written === 'solution' || written === 'application') && entity.type == null) entity.type = written;
     if (byKind[kind].has(entity.id)) {
       errors.push({ rel, message: `Duplicate ${kind} id "${entity.id}" (also in ${byKind[kind].get(entity.id)._file}).` });
       return;
@@ -118,7 +119,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   const teams = byKind.team;
   const people = byKind.person;
   const platforms = byKind.platform;
-  const applications = byKind.application;
+  const products = byKind.product;
 
   if (orgs.length > 1) errors.push({ rel: orgs[1]._file, message: 'Only one organization is allowed.' });
   const organization = orgs[0] ?? { id: 'org', kind: 'organization', name: 'Organization' };
@@ -173,7 +174,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   if (organization.lead) organization.leadPerson = people.get(organization.lead) ?? null;
 
   // Logos
-  for (const kind of ['platform', 'application']) {
+  for (const kind of ['platform', 'product']) {
     for (const e of byKind[kind].values()) {
       const logo = resolveLogo(e.logo, { iconsDir, fallback: kind === 'platform' ? 'package' : 'apps' });
       if (!logo.ok) errors.push({ rel: e._file, message: `${kind} "${e.id}": ${logo.error}` });
@@ -184,7 +185,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   // 4. Inline relationships -> entries
   const inlineTarget = vocab.relTypes.filter((t) => t.inline);
   const inlineSource = vocab.relTypes.filter((t) => t['inline-on-source']);
-  for (const kind of ['platform', 'application']) {
+  for (const kind of ['platform', 'product']) {
     for (const e of byKind[kind].values()) {
       for (const t of inlineTarget) {
         if (!t.to.includes(kind) || e[t.inline] == null) continue;
@@ -314,7 +315,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     teams: [...teams.values()],
     people: [...people.values()],
     platforms: [...platforms.values()].sort(byName),
-    applications: [...applications.values()].sort(byName),
+    products: [...products.values()].sort(byName),
     edges,
     team: (id) => teams.get(id),
     get,

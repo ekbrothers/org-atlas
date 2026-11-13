@@ -52,14 +52,14 @@ const peopleIn = (u: any) =>
         </select>
       </label>
       <label class="field">
-        <span class="field-label">Platform or application</span>
+        <span class="field-label">Platform or product</span>
         <select id="f-rel">
           <option value="">Any</option>
           <optgroup label="Platforms">
             {model.platforms.map((p: any) => <option value={`platform:${p.id}`}>{p.name}</option>)}
           </optgroup>
-          <optgroup label="Applications">
-            {model.applications.map((a: any) => <option value={`application:${a.id}`}>{a.name}</option>)}
+          <optgroup label="Products">
+            {model.products.map((a: any) => <option value={`product:${a.id}`}>{a.name}</option>)}
           </optgroup>
         </select>
       </label>

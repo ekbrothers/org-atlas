@@ -55,7 +55,7 @@ items:
     category: infrastructure
     hosting: cloud
     criticality: T0
-    description: Shared container platform that most applications run on.
+    description: Shared container platform that most products run on.
     owners:
       - cloud-platform
     operators:
@@ -68,7 +68,7 @@ items:
     category: integration
     hosting: cloud
     criticality: T0
-    description: Event streaming backbone between applications.
+    description: Event streaming backbone between products.
     owners:
       - ref: data-platform
         scope: Topics, schemas and connectors
@@ -192,7 +192,7 @@ items:
     vendor: Cloudflare
     hosting: saas
     criticality: T0
-    description: CDN, DNS and web application firewall.
+    description: CDN, DNS and web product firewall.
     owners:
       - cloud-platform
     supporting:

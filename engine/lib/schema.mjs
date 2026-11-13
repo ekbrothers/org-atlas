@@ -4,10 +4,12 @@
 // Used by `npm run validate` (with Ajv), written to schema/atlas.schema.json by
 // `npm run schema`, and published with the site for editors and LLMs.
 
-import { ENTITY_KINDS, loadVocab } from './model.mjs';
+import { ENTITY_KINDS, KIND_ALIASES, loadVocab } from './model.mjs';
+
+// Kinds accepted in files: canonical kinds plus their other names (e.g. application -> product).
+const ALIAS_KINDS = Object.keys(KIND_ALIASES).filter((k) => ENTITY_KINDS.includes(KIND_ALIASES[k]) && /^[a-z-]+$/.test(k));
 
 const ID = { type: 'string', pattern: '^[A-Za-z0-9][A-Za-z0-9._-]*$', description: 'Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. "payments-core".' };
-const REF_KINDS = [...ENTITY_KINDS, 'solution'];
 const REF = {
   type: 'string',
   minLength: 1,
@@ -99,7 +101,7 @@ export function buildSchema(vocab = loadVocab()) {
       },
     }),
     platform: strict({ ...tech, ...inlineFields('platform') }, ['id', 'name']),
-    application: strict({ ...tech, type: { enum: ['application', 'solution', 'service', 'product'] }, ...inlineFields('application') }, ['id', 'name']),
+    product: strict({ ...tech, type: { enum: ['product', 'application', 'solution', 'service', 'data-product', 'ml-model'] }, ...inlineFields('product') }, ['id', 'name']),
     relationship: {
       type: 'object',
       properties: {
@@ -108,7 +110,7 @@ export function buildSchema(vocab = loadVocab()) {
         from: REF,
         to: REF,
         scope: { type: 'string', description: 'Which part this covers, e.g. for shared ownership.' },
-        purpose: { type: 'string', description: 'Why an application uses a platform.' },
+        purpose: { type: 'string', description: 'Why a product uses a platform.' },
         note: { type: 'string' },
       },
       required: ['type', 'from', 'to'],
@@ -116,15 +118,15 @@ export function buildSchema(vocab = loadVocab()) {
     },
   };
 
-  const kindEnum = [...ENTITY_KINDS, 'solution', 'relationship'];
-  const kindDef = (k) => (k === 'solution' ? 'application' : k);
+  const kindEnum = [...ENTITY_KINDS, ...ALIAS_KINDS, 'relationship'];
+  const kindDef = (k) => KIND_ALIASES[k] ?? k;
 
   // A bundle entity must carry `kind`; dispatch on it.
   const bundleEntity = {
     type: 'object',
     required: ['kind'],
-    properties: { kind: { enum: [...ENTITY_KINDS, 'solution'] } },
-    allOf: [...ENTITY_KINDS, 'solution'].map((k) => ({
+    properties: { kind: { enum: [...ENTITY_KINDS, ...ALIAS_KINDS] } },
+    allOf: [...ENTITY_KINDS, ...ALIAS_KINDS].map((k) => ({
       if: { properties: { kind: { const: k } }, required: ['kind'] },
       then: { $ref: `#/definitions/${kindDef(k)}` },
     })),

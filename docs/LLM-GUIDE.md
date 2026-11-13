@@ -23,12 +23,12 @@ To **change an existing chart**, export everything as one bundle with `npm run e
     { "kind": "team", "id": "data-eng", "name": "Data Engineering", "parent": "product", "type": "platform", "lead": "raj-patel" },
     { "kind": "person", "id": "raj-patel", "name": "Raj Patel", "role": "Data Engineering Lead", "tier": "team-lead", "discipline": "data", "memberships": ["data-eng"] },
     { "kind": "platform", "id": "snowflake", "name": "Snowflake", "logo": "si:snowflake", "category": "data", "criticality": "T1" },
-    { "kind": "application", "id": "revenue-reports", "name": "Revenue Reports", "logo": "octicon:graph" }
+    { "kind": "product", "id": "revenue-reports", "name": "Revenue Reports", "logo": "octicon:graph" }
   ],
   "relationships": [
     { "from": "team:data-eng", "type": "owner", "to": "platform:snowflake" },
-    { "from": "team:data-eng", "type": "owner", "to": "application:revenue-reports" },
-    { "from": "application:revenue-reports", "type": "uses", "to": "platform:snowflake", "purpose": "Warehouse" }
+    { "from": "team:data-eng", "type": "owner", "to": "product:revenue-reports" },
+    { "from": "product:revenue-reports", "type": "uses", "to": "platform:snowflake", "purpose": "Warehouse" }
   ]
 }
 ```
@@ -44,7 +44,7 @@ A complete working example is in [`examples/bundle/data/atlas.json`](../examples
 | `team` | `id`, `name` | `parent` (business unit id), `type`, `lead` (person id) |
 | `person` | `id`, and `name` unless `employment: vacancy` | `role` (free text), `tier`, `discipline`, `employment`, `memberships` |
 | `platform` | `id`, `name` | `logo`, `category`, `vendor`, `hosting`, `criticality`, `lifecycle`, `proprietary` |
-| `application` | `id`, `name` | as platform, plus `type` (application, solution, service, product) |
+| `product` | `id`, `name` | as platform, plus `type` (product, solution, service, product) |
 
 Every entity also accepts `description`, `tags`, `links` (named URLs), `order` and `meta` (free-form). Unknown fields are rejected so typos are caught; prefix your own fields with `x-` to keep them.
 
@@ -56,15 +56,15 @@ Each relationship is `{ "from": "kind:id", "type": "...", "to": "kind:id" }`, wi
 
 | Type | From | To | Meaning |
 |---|---|---|---|
-| `owner` | team, person | platform, application | Accountable. **Several owners = shared ownership**; give each a `scope` |
-| `supporting` | team, person | platform, application | Does real work on it without being accountable |
-| `operator` | team, person | platform, application | Runs it day to day or holds the pager |
-| `stakeholder` | person, team | platform, application | Affected by changes |
-| `sponsor` | person, team | platform, application | Funds or champions it |
-| `sme` | person, team | platform, application | Subject-matter expert |
-| `escalation` | person, team | platform, application | Who to escalate to |
-| `uses` | application | platform | The application runs on or uses the platform (`purpose`) |
-| `depends-on` | application | application | The application needs another application |
+| `owner` | team, person | platform, product | Accountable. **Several owners = shared ownership**; give each a `scope` |
+| `supporting` | team, person | platform, product | Does real work on it without being accountable |
+| `operator` | team, person | platform, product | Runs it day to day or holds the pager |
+| `stakeholder` | person, team | platform, product | Affected by changes |
+| `sponsor` | person, team | platform, product | Funds or champions it |
+| `sme` | person, team | platform, product | Subject-matter expert |
+| `escalation` | person, team | platform, product | Who to escalate to |
+| `uses` | product | platform | The product runs on or uses the platform (`purpose`) |
+| `depends-on` | product | product | The product needs another product |
 | `built-on` | platform | platform | A platform built on another platform |
 
 Team membership, leads and business units are **not** relationships: set them with `memberships`, `lead` and `parent`.
@@ -91,7 +91,7 @@ Rules:
 - Follow the attached JSON Schema exactly. Do not invent fields; use "x-" prefixed
   fields for anything extra.
 - Every entity has "kind" and a stable "id" (lowercase, dashes, e.g. "data-platform").
-- Kinds: organization (exactly one), business-unit, team, person, platform, application.
+- Kinds: organization (exactly one), business-unit, team, person, platform, product.
 - Teams: "parent" is a business-unit id, "lead" is a person id.
 - People: "role" is free text. "tier" is one of executive, senior-leader, manager,
   team-lead, principal, ic. "memberships" lists team ids; mark one
@@ -100,18 +100,18 @@ Rules:
 - Relationships use "kind:id" at both ends, e.g.
   { "from": "team:data-platform", "type": "owner", "to": "platform:snowflake" }.
   Types: owner, supporting, operator, stakeholder, sponsor, sme, escalation
-  (team/person -> platform/application), uses (application -> platform),
-  depends-on (application -> application), built-on (platform -> platform).
+  (team/person -> platform/product), uses (product -> platform),
+  depends-on (product -> product), built-on (platform -> platform).
 - Shared ownership: add one "owner" relationship per owning team, each with a
   "scope" saying what that team owns.
-- Every platform and application should have at least one owner.
+- Every platform and product should have at least one owner.
 - Logos: "si:<simpleicons slug>" for well-known products, "octicon:<name>" for
   generic or unknown ones, "custom:<name>" only if told a custom SVG exists.
 - Do not invent people's names. If names are not given, use roles such as
   "Data Engineer 1", or model the seat as a vacancy.
 
 Here is the organization to model:
-<describe the business units, teams, people, platforms, applications and who owns,
+<describe the business units, teams, people, platforms, products and who owns,
 supports and uses what>
 ````
 

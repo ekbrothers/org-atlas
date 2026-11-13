@@ -18,14 +18,14 @@
 #   structural   true = derived from entity fields rather than written as an entry
 
 relationship-types:
-  # ---- Accountability: who is responsible for a platform or application ----
+  # ---- Accountability: who is responsible for a platform or product ----
   - id: owner
     label: Owner
     inverse: Owned by
     category: accountability
-    description: Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what.
+    description: Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what.
     from: [team, person]
-    to: [platform, application]
+    to: [platform, product]
     default-from: team
     inline: owners
     attributes: [scope, note]
@@ -39,7 +39,7 @@ relationship-types:
     category: accountability
     description: Does real work on it (engineering, support, operations) without being accountable.
     from: [team, person]
-    to: [platform, application]
+    to: [platform, product]
     default-from: team
     inline: supporting
     attributes: [scope, note]
@@ -52,7 +52,7 @@ relationship-types:
     category: accountability
     description: Runs it day to day or carries the on-call pager.
     from: [team, person]
-    to: [platform, application]
+    to: [platform, product]
     default-from: team
     inline: operators
     attributes: [scope, note]
@@ -65,7 +65,7 @@ relationship-types:
     category: accountability
     description: Cares about the outcome and is affected by changes.
     from: [team, person]
-    to: [platform, application]
+    to: [platform, product]
     default-from: person
     inline: stakeholders
     attributes: [note]
@@ -78,7 +78,7 @@ relationship-types:
     category: accountability
     description: Funds it or champions it at executive level.
     from: [team, person]
-    to: [platform, application]
+    to: [platform, product]
     default-from: person
     inline: sponsors
     attributes: [note]
@@ -91,7 +91,7 @@ relationship-types:
     category: accountability
     description: Knows it deeply and is the go-to person for questions.
     from: [person, team]
-    to: [platform, application]
+    to: [platform, product]
     default-from: person
     inline: smes
     attributes: [note]
@@ -104,22 +104,22 @@ relationship-types:
     category: accountability
     description: Who to escalate to when something is wrong and the owner is not responding.
     from: [person, team]
-    to: [platform, application]
+    to: [platform, product]
     default-from: person
     inline: escalation
     attributes: [note]
     style: { line: solid, weight: 1, glyph: alert }
     aliases: [escalate, escalation-contact]
 
-  # ---- Technical: how applications and platforms connect ----
+  # ---- Technical: how products and platforms connect ----
   - id: uses
     label: Uses
     inverse: Used by
     category: technical
-    description: The application runs on, or makes use of, the platform.
-    from: [application]
+    description: The product runs on, or makes use of, the platform.
+    from: [product]
     to: [platform]
-    default-from: application
+    default-from: product
     inline-on-source: platforms
     default-to: platform
     attributes: [purpose, note]
@@ -130,12 +130,12 @@ relationship-types:
     label: Depends on
     inverse: Depended on by
     category: technical
-    description: The application calls or needs another application to work.
-    from: [application]
-    to: [application]
-    default-from: application
+    description: The product calls or needs another product to work.
+    from: [product]
+    to: [product]
+    default-from: product
     inline-on-source: depends-on
-    default-to: application
+    default-to: product
     attributes: [purpose, note]
     style: { line: solid, weight: 1, glyph: arrow-right }
     aliases: [depends, calls]

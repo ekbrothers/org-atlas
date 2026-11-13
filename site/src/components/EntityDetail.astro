@@ -1,5 +1,5 @@
 ---
-// Detail page body for a platform or application.
+// Detail page body for a platform or product.
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import EntityRef from './EntityRef.astro';
@@ -13,11 +13,11 @@ interface Props {
 const { entity } = Astro.props;
 const { model, vocab } = atlas();
 const isPlatform = entity.kind === 'platform';
-const section = isPlatform ? { label: 'Platforms', to: 'platforms/' } : { label: 'Applications', to: 'applications/' };
+const section = isPlatform ? { label: 'Platforms', to: 'platforms/' } : { label: 'Products', to: 'products/' };
 
 const facts = [
   ['Category', entity.category],
-  ['Type', !isPlatform ? (entity.type ?? 'application') : null],
+  ['Type', !isPlatform ? (entity.type ?? 'product') : null],
   ['Vendor', entity.vendor],
   ['Hosting', entity.hosting],
   ['Criticality', entity.criticality],
@@ -43,7 +43,7 @@ const links = entity.links ? Object.entries(entity.links) : [];
 <header class="head panel">
   <Logo entity={entity} size={64} />
   <div class="head-text">
-    <span class="eyebrow">{isPlatform ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Application'}</span>
+    <span class="eyebrow">{isPlatform ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Product'}</span>
     <h1>{entity.name}</h1>
     {entity.description && <p class="muted">{entity.description}</p>}
   </div>
@@ -101,14 +101,14 @@ const links = entity.links ? Object.entries(entity.links) : [];
 </div>
 
 <section class="panel block">
-  <h2 class="eyebrow">{isPlatform ? `Applications using ${entity.name}` : `Platforms ${entity.name} uses`} <span class="n">{usage.length}</span></h2>
+  <h2 class="eyebrow">{isPlatform ? `Products using ${entity.name}` : `Platforms ${entity.name} uses`} <span class="n">{usage.length}</span></h2>
   {usage.length === 0 && <p class="muted">None recorded.</p>}
   {
     usage.length > 0 && (
       <table>
         <thead>
           <tr>
-            <th>{isPlatform ? 'Application' : 'Platform'}</th>
+            <th>{isPlatform ? 'Product' : 'Platform'}</th>
             <th>Purpose</th>
             <th>Owned by</th>
           </tr>

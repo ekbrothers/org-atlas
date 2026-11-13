@@ -66,7 +66,7 @@ function finish({ errors = [], warnings = [], files = 0, model = null }) {
     teams: model.teams.length,
     people: model.people.length,
     platforms: model.platforms.length,
-    applications: model.applications.length,
+    products: model.products.length,
     relationships: model.edges.length,
   };
   if (asJson) {
@@ -81,7 +81,7 @@ function finish({ errors = [], warnings = [], files = 0, model = null }) {
   }
   console.log(
     `\n✔ ${files} data file(s) OK: ${counts.businessUnits} business unit(s), ${counts.teams} team(s), ${counts.people} people, ` +
-      `${counts.platforms} platform(s), ${counts.applications} application(s), ${counts.relationships} relationship(s)` +
+      `${counts.platforms} platform(s), ${counts.products} product(s), ${counts.relationships} relationship(s)` +
       (warnings.length ? `, ${warnings.length} warning(s)` : ''),
   );
   process.exit(0);

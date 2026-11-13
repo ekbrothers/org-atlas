@@ -1,17 +1,17 @@
 ---
-// Filterable card grid of platforms or applications.
+// Filterable card grid of platforms or products.
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import EntityRef from './EntityRef.astro';
 import { atlas, href } from '../lib/atlas';
 
 interface Props {
-  kind: 'platform' | 'application';
+  kind: 'platform' | 'product';
 }
 const { kind } = Astro.props;
 const { model } = atlas();
-const list = kind === 'platform' ? model.platforms : model.applications;
-const path = kind === 'platform' ? 'platforms' : 'applications';
+const list = kind === 'platform' ? model.platforms : model.products;
+const path = kind === 'platform' ? 'platforms' : 'products';
 const categories = [...new Set(list.map((e: any) => (kind === 'platform' ? e.category : e.criticality)).filter(Boolean))].sort();
 const ownerTeams = [...new Map(list.flatMap((e: any) => model.edgesTo(e, 'owner').map((x: any) => [x.from.id, x.from]))).values()].sort(
   (a: any, b: any) => a.name.localeCompare(b.name),
@@ -85,7 +85,7 @@ const usageCount = (e: any) => (kind === 'platform' ? model.edgesTo(e, 'uses').l
             </div>
           )}
           <div class="foot muted small">
-            <Icon name="plug" size={12} /> {kind === 'platform' ? `Used by ${usageCount(e)} application${usageCount(e) === 1 ? '' : 's'}` : `Uses ${usageCount(e)} platform${usageCount(e) === 1 ? '' : 's'}`}
+            <Icon name="plug" size={12} /> {kind === 'platform' ? `Used by ${usageCount(e)} product${usageCount(e) === 1 ? '' : 's'}` : `Uses ${usageCount(e)} platform${usageCount(e) === 1 ? '' : 's'}`}
           </div>
         </li>
       );

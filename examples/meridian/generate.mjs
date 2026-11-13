@@ -273,7 +273,7 @@ share('data-platform', 'data', 'fraud-risk-analytics', 'Data platform liaison');
 share('site-reliability-engineering', 'sre', 'payments-core', 'Embedded SRE');
 
 // ---------------------------------------------------------------------------
-// Platforms and applications
+// Platforms and products
 const all = [...people.values()].flat();
 const leadOf = (teamId) => teams.find((t) => t.id === teamId).lead;
 const unitLeadOf = (teamId) => units.find((u) => u.id === teams.find((t) => t.id === teamId).parent).lead;
@@ -309,12 +309,12 @@ const platforms = [
   },
   {
     id: 'kubernetes', name: 'Kubernetes', logo: 'si:kubernetes', category: 'infrastructure', hosting: 'cloud', criticality: 'T0',
-    description: 'Shared container platform that most applications run on.',
+    description: 'Shared container platform that most products run on.',
     owners: ['cloud-platform'], operators: ['site-reliability-engineering'], sponsors: [pers(cto)],
   },
   {
     id: 'kafka', name: 'Kafka', logo: 'si:apachekafka', category: 'integration', hosting: 'cloud', criticality: 'T0',
-    description: 'Event streaming backbone between applications.',
+    description: 'Event streaming backbone between products.',
     owners: [
       { ref: 'data-platform', scope: 'Topics, schemas and connectors' },
       { ref: 'site-reliability-engineering', scope: 'Clusters and uptime' },
@@ -336,7 +336,7 @@ const platforms = [
   { id: 'vault', name: 'HashiCorp Vault', logo: 'si:vault', category: 'security', vendor: 'HashiCorp', hosting: 'self-hosted', criticality: 'T0', description: 'Secrets management and encryption as a service.', owners: ['security-engineering'], operators: ['cloud-platform'], 'built-on': ['kubernetes'] },
   { id: 'terraform', name: 'Terraform Cloud', logo: 'si:terraform', category: 'infrastructure', vendor: 'HashiCorp', hosting: 'saas', criticality: 'T2', description: 'Infrastructure as code runs and state.', owners: ['cloud-platform'] },
   { id: 'databricks', name: 'Databricks', logo: 'si:databricks', category: 'data', vendor: 'Databricks', hosting: 'saas', criticality: 'T2', description: 'Machine learning and notebook platform.', owners: ['data-platform'], supporting: [{ ref: 'fraud-risk-analytics', scope: 'Model training workspaces' }] },
-  { id: 'cloudflare', name: 'Cloudflare', logo: 'si:cloudflare', category: 'infrastructure', vendor: 'Cloudflare', hosting: 'saas', criticality: 'T0', description: 'CDN, DNS and web application firewall.', owners: ['cloud-platform'], supporting: [{ ref: 'security-engineering', scope: 'WAF rules' }] },
+  { id: 'cloudflare', name: 'Cloudflare', logo: 'si:cloudflare', category: 'infrastructure', vendor: 'Cloudflare', hosting: 'saas', criticality: 'T0', description: 'CDN, DNS and web product firewall.', owners: ['cloud-platform'], supporting: [{ ref: 'security-engineering', scope: 'WAF rules' }] },
   { id: 'jira', name: 'Jira', logo: 'si:jira', category: 'collaboration', vendor: 'Atlassian', hosting: 'saas', criticality: 'T2', description: 'Work tracking for every team.', owners: ['it-service-desk'] },
   {
     id: 'confluence', name: 'Confluence', logo: 'si:confluence', category: 'collaboration', vendor: 'Atlassian', hosting: 'saas', criticality: 'T3', description: 'Company wiki and documentation.',
@@ -367,14 +367,14 @@ const app = (id, name, owner, platformsUsed, extra = {}) => ({
   ...extra,
 });
 const use = (id, purpose) => ({ ref: id, purpose });
-const applications = [
+const products = [
   app('payments-gateway', 'Payments Gateway', 'payments-core',
     [use('kubernetes', 'Runtime'), use('kafka', 'Payment events'), use('postgresql', 'Transactions'), use('vault', 'Card keys'), use('datadog', 'Monitoring')],
     { description: 'Routes card and real-time payments to processors.', criticality: 'T0', logo: 'octicon:credit-card', operators: ['site-reliability-engineering'], sponsors: compact([pers(cfo)]) }),
   app('card-authorization', 'Card Authorization', 'payments-core', [use('kubernetes', 'Runtime'), use('redis', 'Velocity checks')],
     { description: 'Approves or declines card transactions in real time.', criticality: 'T0', logo: 'octicon:shield-check', 'depends-on': ['payments-gateway', 'fraud-scoring'] }),
-  app('loan-origination', 'Loan Origination', 'lending-platform', [use('kubernetes', 'Runtime'), use('postgresql', 'Applications'), use('meridian-rules', 'Underwriting rules')],
-    { description: 'Loan applications, decisions and document collection.', criticality: 'T1', logo: 'octicon:file-badge' }),
+  app('loan-origination', 'Loan Origination', 'lending-platform', [use('kubernetes', 'Runtime'), use('postgresql', 'Products'), use('meridian-rules', 'Underwriting rules')],
+    { description: 'Loa products, decisions and document collection.', criticality: 'T1', logo: 'octicon:file-badge' }),
   app('fraud-scoring', 'Fraud Scoring', 'fraud-risk-analytics', [use('snowflake', 'Feature store'), use('kafka', 'Transaction stream'), use('databricks', 'Model training'), use('informatica', 'Historical data loads')],
     { description: 'Machine learning models that score transactions for fraud.', criticality: 'T0', logo: 'octicon:graph', supporting: [{ ref: 'data-platform', scope: 'Pipelines' }] }),
   app('mobile-banking', 'Mobile Banking App', 'digital-banking-apps', [use('kubernetes', 'API backend'), use('okta', 'Customer login')],
@@ -410,7 +410,7 @@ const applications = [
     { description: 'Employee requests for access, hardware and software.', criticality: 'T2', logo: 'octicon:checklist' }),
 ];
 // Tidy empty arrays.
-for (const list of [platforms, applications]) for (const e of list) for (const k of Object.keys(e)) if (Array.isArray(e[k]) && !e[k].length) delete e[k];
+for (const list of [platforms, products]) for (const e of list) for (const k of Object.keys(e)) if (Array.isArray(e[k]) && !e[k].length) delete e[k];
 
 // Write files
 rmSync(OUT, { recursive: true, force: true });
@@ -432,7 +432,7 @@ for (const [teamId, list] of people) {
   write(`people/${teamId}.yaml`, { kind: 'person', items: list });
 }
 write('platforms.yaml', { kind: 'platform', items: platforms });
-write('applications.yaml', { kind: 'application', items: applications });
+write('products.yaml', { kind: 'product', items: products });
 
 const total = [...people.values()].flat().length;
-console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${applications.length} applications -> ${OUT}`);
+console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${products.length} products -> ${OUT}`);

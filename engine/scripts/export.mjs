@@ -9,7 +9,7 @@
 import { writeFileSync } from 'node:fs';
 import { loadConfig } from '../lib/config.mjs';
 import { loadData } from '../lib/data.mjs';
-import { buildModel, loadVocab, ENTITY_KINDS } from '../lib/model.mjs';
+import { buildModel, loadVocab, ENTITY_KINDS, KIND_ALIASES } from '../lib/model.mjs';
 
 const args = process.argv.slice(2);
 const outIdx = args.indexOf('--out');
@@ -31,7 +31,6 @@ if (model.errors.length) {
 
 // Inline relationship fields to strip, since every relationship is exported explicitly.
 const inlineFields = new Set(vocab.relTypes.flatMap((t) => [t.inline, t['inline-on-source']]).filter(Boolean));
-const KIND_ALIASES = { solution: 'application' };
 const entities = [];
 for (const { doc } of raw) {
   if (!doc || typeof doc !== 'object') continue;
@@ -39,7 +38,7 @@ for (const { doc } of raw) {
     kind = KIND_ALIASES[kind] ?? kind;
     if (!ENTITY_KINDS.includes(kind)) return;
     const clean = { kind };
-    for (const [k, v] of Object.entries(item)) if (k !== 'kind' && !(['platform', 'application'].includes(kind) && inlineFields.has(k))) clean[k] = v;
+    for (const [k, v] of Object.entries(item)) if (k !== 'kind' && !(['platform', 'product'].includes(kind) && inlineFields.has(k))) clean[k] = v;
     entities.push(clean);
   };
   if (Array.isArray(doc.entities)) for (const e of doc.entities) push(e, e.kind);

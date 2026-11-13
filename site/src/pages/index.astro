@@ -11,21 +11,21 @@ const stats = [
   { n: model.people.length - open, label: 'People', icon: 'person' },
   { n: open, label: 'Open positions', icon: 'person-add' },
   { n: model.platforms.length, label: 'Platforms', icon: 'stack' },
-  { n: model.applications.length, label: 'Applications', icon: 'apps' },
+  { n: model.products.length, label: 'Products', icon: 'apps' },
 ];
 
 const views = [
   { title: 'Org chart', to: 'org/', icon: 'organization', text: 'Business units and teams as a tree. Filter by unit, team type or discipline, and switch to see every person.' },
   { title: 'Teams', to: 'teams/', icon: 'people', text: 'Every team with its lead and headcount. Open one to see members grouped by tier.' },
-  { title: 'Platforms', to: 'platforms/', icon: 'stack', text: 'Shared platforms with logos, their owners (including shared ownership) and the applications that use them.' },
-  { title: 'Applications', to: 'applications/', icon: 'apps', text: 'Applications and solutions, who owns and supports them, and the platforms they run on.' },
+  { title: 'Platforms', to: 'platforms/', icon: 'stack', text: 'Shared platforms with logos, their owners (including shared ownership) and the products that use them.' },
+  { title: 'Products', to: 'products/', icon: 'apps', text: 'Products and solutions, who owns and supports them, and the platforms they run on.' },
   { title: 'Relationships', to: 'relationships/', icon: 'link', text: 'Every relationship type and how it is drawn, plus every relationship in the data.' },
   { title: 'Legend', to: 'legend/', icon: 'book', text: 'What each icon, badge, ring and line style means.' },
 ];
 
 const phases = [
   { n: 0, name: 'Foundations', detail: 'Scaffold, local preview, GitHub Pages deploy', status: 'Done' },
-  { n: 1, name: 'Schema and vocabulary', detail: 'Org model, platforms, applications, relationship registry and JSON Schema done', status: 'In progress' },
+  { n: 1, name: 'Schema and vocabulary', detail: 'Org model, platforms, products, relationship registry and JSON Schema done', status: 'In progress' },
   { n: 2, name: 'Design language and icons', detail: 'Tokens, platform logos, full legend', status: 'Planned' },
   { n: 3, name: 'First views', detail: 'Org chart and team pages started; ownership, search and question catalog next', status: 'In progress' },
   { n: 4, name: 'Graph explorer', detail: 'Semantic zoom, filters, deep links, impact analysis', status: 'Planned' },
