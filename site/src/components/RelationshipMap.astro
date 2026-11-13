@@ -23,7 +23,7 @@ const lineCss = (t: any) => {
 };
 
 const left = vocab.relTypes
-  .filter((t: any) => t.category === 'accountability')
+  .filter((t: any) => t.category === 'accountability' || t.category === 'governance')
   .map((t: any) => ({ t, label: t.inverse, items: model.edgesTo(entity, t.id).map((e: any) => ({ other: e.from, e })) }))
   .filter((g: any) => g.items.length);
 
@@ -36,7 +36,7 @@ const right = vocab.relTypes
   .filter((g: any) => g.items.length);
 
 const owners = model.edgesTo(entity, 'owner');
-const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Product';
+const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.kind === 'team' ? 'Team' : entity.type === 'solution' ? 'Solution' : 'Product';
 ---
 
 <div class="map">
@@ -91,6 +91,9 @@ const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.type === 'sol
                 <span class="conn conn-left" style={`border-top:${lineCss(g.t)}`} aria-hidden="true" />
                 <EntityRef entity={other} />
                 {e.purpose && <span class="detail">{e.purpose}</span>}
+                {(e.environments || e.regions) && (
+                  <span class="detail">{[[].concat(e.environments ?? []).join(', '), [].concat(e.regions ?? []).join(', ')].filter(Boolean).join(' | ')}</span>
+                )}
               </li>
             ))}
           </ul>

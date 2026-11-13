@@ -1,0 +1,25 @@
+# Committees, boards, councils and other cross-cutting groups.
+# Engine-owned defaults; icons are Octicon names.
+#
+# A committee is not part of the reporting line. It has a chair, members who
+# each hold a seat role, a cadence, and relationships to what it governs,
+# advises or approves (see relationships.yaml).
+
+committee-types:
+  - { id: review-board, label: Review board, icon: law, description: "Reviews designs or decisions against standards, e.g. an Architecture Review Board." }
+  - { id: change-advisory-board, label: Change advisory board, icon: checklist, description: "Approves changes to production systems (CAB)." }
+  - { id: steering-committee, label: Steering committee, icon: north-star, description: "Sets direction and priorities for a program or area." }
+  - { id: governance-board, label: Governance board, icon: shield-check, description: "Owns policy and risk decisions, e.g. a Model Risk Committee." }
+  - { id: council, label: Council, icon: organization, description: "Cross-business-unit group that sets shared standards, e.g. a Data Governance Council." }
+  - { id: advisory-board, label: Advisory board, icon: light-bulb, description: "Gives advice without decision rights; may include external advisors." }
+  - { id: community-of-practice, label: Community of practice, icon: people, description: "Guild or chapter that shares practice across teams." }
+  - { id: working-group, label: Working group, icon: tools, description: "Time-boxed group formed for a specific problem." }
+
+seat-roles:
+  - { id: chair, label: Chair, icon: star-fill, rank: 1 }
+  - { id: vice-chair, label: Vice chair, icon: star, rank: 2 }
+  - { id: secretary, label: Secretary, icon: pencil, rank: 3 }
+  - { id: voting-member, label: Voting member, icon: check-circle, rank: 4 }
+  - { id: member, label: Member, icon: person, rank: 5 }
+  - { id: advisor, label: Advisor, icon: light-bulb, rank: 6 }
+  - { id: observer, label: Observer, icon: eye, rank: 7 }

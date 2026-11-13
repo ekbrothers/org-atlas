@@ -409,6 +409,132 @@ const products = [
   app('service-catalog', 'Service Catalog', 'it-service-desk', [use('servicenow', 'Requests and approvals')],
     { description: 'Employee requests for access, hardware and software.', criticality: 'T2', logo: 'octicon:checklist' }),
 ];
+// Deployments: products that ran "on" Kubernetes are deployed to it, with environments and regions.
+const customerFacing = new Set(['payments-gateway', 'card-authorization', 'mobile-banking', 'storefront-web', 'checkout', 'member-portal-app', 'identity-gateway']);
+const deploy = (ref, environments, regions) => ({ ref, environments, regions });
+for (const a of products) {
+  const k8s = (a.platforms ?? []).find((u) => u.ref === 'kubernetes');
+  if (k8s) {
+    a.platforms = a.platforms.filter((u) => u !== k8s);
+    a['deployed-to'] = [deploy('kubernetes', ['production', 'staging', 'development'], customerFacing.has(a.id) ? ['us-east', 'eu-west'] : ['us-east'])];
+  }
+}
+const extraDeploys = {
+  'storefront-web': [deploy('cloudflare', ['production'], ['global'])],
+  'fraud-scoring': [deploy('databricks', ['production', 'staging'], ['us-east'])],
+  'order-service': [deploy('kubernetes', ['production', 'staging', 'development'], ['us-east'])],
+  'pricing-engine': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
+  'supplier-gateway': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
+  'clinical-data-exchange': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
+  'general-ledger': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
+  'hr-hub': [deploy('workday', ['production', 'sandbox'], ['us-east'])],
+  'service-catalog': [deploy('servicenow', ['production', 'development'], ['us-east'])],
+};
+for (const [id, list] of Object.entries(extraDeploys)) {
+  const a = products.find((x) => x.id === id);
+  a['deployed-to'] = [...(a['deployed-to'] ?? []), ...list];
+}
+
+// The change advisory board approves production changes to every T0 product.
+for (const a of products) if (a.criticality === 'T0') a.approvers = [{ ref: 'change-advisory-board', scope: 'Production changes' }];
+products.find((a) => a.id === 'fraud-scoring').approvers.push({ ref: 'model-risk-committee', scope: 'Model releases' });
+
+// ---------------------------------------------------------------------------
+// Committees and boards
+const unitLead = (unitId) => units.find((u) => u.id === unitId).lead;
+const seat = (person, role, representing) => (person ? { person, role, ...(representing ? { representing } : {}) } : null);
+const committees = [
+  {
+    id: 'architecture-review-board', name: 'Architecture Review Board', type: 'review-board', cadence: 'Every two weeks',
+    purpose: 'Reviews significant designs against architecture standards before build starts.',
+    chair: leadOf('enterprise-architecture'),
+    members: compact([
+      seat(expert('enterprise-architecture', 'architecture'), 'secretary', 'enterprise-architecture'),
+      seat(leadOf('cloud-platform'), 'voting-member', 'cloud-platform'),
+      seat(leadOf('security-engineering'), 'voting-member', 'security-engineering'),
+      seat(leadOf('data-platform'), 'voting-member', 'data-platform'),
+      seat(expert('payments-core'), 'voting-member', 'payments-core'),
+      seat(expert('claims-processing'), 'voting-member', 'claims-processing'),
+      seat(cto, 'advisor'),
+    ]),
+    governs: [
+      { ref: 'platform:kubernetes', scope: 'Architecture standards' },
+      { ref: 'platform:kafka', scope: 'Event and schema standards' },
+      { ref: 'platform:github-enterprise', scope: 'Repository and CI standards' },
+    ],
+    advises: ['payments-core', 'storefront', 'claims-processing'],
+    'reports-to': [pers(cto)],
+  },
+  {
+    id: 'change-advisory-board', name: 'Change Advisory Board', type: 'change-advisory-board', cadence: 'Weekly',
+    purpose: 'Approves production changes to T0 products and reviews failed changes.',
+    chair: leadOf('it-service-desk'),
+    members: compact([
+      seat(leadOf('site-reliability-engineering'), 'voting-member', 'site-reliability-engineering'),
+      seat(leadOf('cloud-platform'), 'voting-member', 'cloud-platform'),
+      seat(leadOf('security-engineering'), 'voting-member', 'security-engineering'),
+      seat(leadOf('identity-access'), 'voting-member', 'identity-access'),
+      seat(leadOf('payments-core'), 'observer', 'payments-core'),
+    ]),
+    'reports-to': [pers(cto)],
+  },
+  {
+    id: 'data-governance-council', name: 'Data Governance Council', type: 'council', cadence: 'Monthly',
+    purpose: 'Sets data classification, access and retention policy across business units.',
+    chair: leadOf('data-platform'),
+    members: compact([
+      seat(expert('data-platform', 'data'), 'secretary', 'data-platform'),
+      seat(leadOf('finance-systems'), 'voting-member', 'finance-systems'),
+      seat(leadOf('clinical-data'), 'voting-member', 'clinical-data'),
+      seat(leadOf('fraud-risk-analytics'), 'voting-member', 'fraud-risk-analytics'),
+      seat(leadOf('legal-compliance-tech'), 'voting-member', 'legal-compliance-tech'),
+    ]),
+    governs: [
+      { ref: 'platform:snowflake', scope: 'Classification and access policy' },
+      { ref: 'platform:informatica', scope: 'Data movement approvals' },
+      { ref: 'platform:databricks', scope: 'Workspace access policy' },
+    ],
+    'reports-to': [pers(cfo)],
+  },
+  {
+    id: 'model-risk-committee', name: 'Model Risk Committee', type: 'governance-board', cadence: 'Monthly',
+    purpose: 'Approves machine learning models for production and reviews model validation results.',
+    chair: cfo,
+    members: compact([
+      seat(leadOf('fraud-risk-analytics'), 'member', 'fraud-risk-analytics'),
+      seat(expert('fraud-risk-analytics', 'data'), 'voting-member', 'fraud-risk-analytics'),
+      seat(leadOf('legal-compliance-tech'), 'voting-member', 'legal-compliance-tech'),
+      seat(expert('enterprise-architecture', 'architecture'), 'advisor', 'enterprise-architecture'),
+    ]),
+    governs: [{ ref: 'product:fraud-scoring', scope: 'Model validation and approval' }],
+    'reports-to': ['team:executive-leadership'],
+  },
+  {
+    id: 'security-steering-committee', name: 'Security Steering Committee', type: 'steering-committee', cadence: 'Quarterly',
+    purpose: 'Sets security priorities, accepts risk and funds security programs.',
+    chair: cto,
+    members: compact([
+      seat(leadOf('security-engineering'), 'secretary', 'security-engineering'),
+      seat(leadOf('identity-access'), 'voting-member', 'identity-access'),
+      seat(unitLead('fs'), 'voting-member', 'business-unit:fs'),
+      seat(unitLead('hc'), 'voting-member', 'business-unit:hc'),
+      seat(unitLead('rc'), 'voting-member', 'business-unit:rc'),
+    ]),
+    governs: [{ ref: 'platform:okta', scope: 'Identity policy' }, { ref: 'platform:vault', scope: 'Secrets policy' }],
+    'reports-to': ['team:executive-leadership'],
+  },
+  {
+    id: 'platform-engineering-guild', name: 'Platform Engineering Guild', type: 'community-of-practice', cadence: 'Monthly',
+    purpose: 'Shares platform practices and feeds requests back to the platform teams.',
+    chair: leadOf('cloud-platform'),
+    members: compact([
+      ...(people.get('site-reliability-engineering') ?? []).filter((p) => p.employment === 'fte' && p.tier === 'ic').slice(0, 2).map((p) => seat(p.id, 'member', 'site-reliability-engineering')),
+      ...['payments-core', 'storefront', 'member-portal'].map((t) => seat(expert(t), 'member', t)),
+    ]),
+    advises: ['cloud-platform', 'site-reliability-engineering'],
+  },
+];
+
 // Tidy empty arrays.
 for (const list of [platforms, products]) for (const e of list) for (const k of Object.keys(e)) if (Array.isArray(e[k]) && !e[k].length) delete e[k];
 
@@ -433,6 +559,7 @@ for (const [teamId, list] of people) {
 }
 write('platforms.yaml', { kind: 'platform', items: platforms });
 write('products.yaml', { kind: 'product', items: products });
+write('committees.yaml', { kind: 'committee', items: committees });
 
 const total = [...people.values()].flat().length;
-console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${products.length} products -> ${OUT}`);
+console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${products.length} products, ${committees.length} committees -> ${OUT}`);

@@ -1,0 +1,106 @@
+---
+// A committee, board or council. Drawn with a gold left rule and a square
+// badge so it reads as cross-cutting, not part of the reporting line.
+import Icon from './Icon.astro';
+import PersonChip from './PersonChip.astro';
+import Logo from './Logo.astro';
+import { atlas, href } from '../lib/atlas';
+
+interface Props {
+  committee: any;
+}
+const { committee: c } = Astro.props;
+const { model, vocab } = atlas();
+const type = vocab.committeeType[c.type];
+const governs = model.edgesFrom(c, 'governs').map((e: any) => e.to);
+const approves = model.edgesFrom(c, 'approver').map((e: any) => e.to);
+---
+
+<article class="committee-card" data-committee={c.id}>
+  <header>
+    <span class="badge"><Icon name={type?.icon ?? 'law'} size={16} /></span>
+    <div>
+      <a class="name" href={href(`committees/${c.id}/`)}>{c.name}</a>
+      <span class="meta">{[type?.label, c.cadence].filter(Boolean).join(' | ')}</span>
+    </div>
+  </header>
+  {c.chairPerson && <PersonChip person={c.chairPerson} role="Chair" size="sm" />}
+  {
+    (governs.length > 0 || approves.length > 0) && (
+      <div class="scope">
+        {governs.length > 0 && <span class="label">Governs</span>}
+        {governs.slice(0, 6).map((e: any) => (e.kind === 'team' ? <span class="txt">{e.name}</span> : <Logo entity={e} size={20} />))}
+        {approves.length > 0 && <span class="label">Approves {approves.length}</span>}
+      </div>
+    )
+  }
+  <footer><Icon name="people" size={13} /> {c.seats.length} seat{c.seats.length === 1 ? '' : 's'}</footer>
+</article>
+
+<style>
+  .committee-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+  }
+  header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  header > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .badge {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 4px;
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  .name {
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    align-items: center;
+  }
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .txt {
+    font-size: 12px;
+  }
+  footer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+</style>

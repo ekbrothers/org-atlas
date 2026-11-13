@@ -28,13 +28,18 @@ import { parse } from 'yaml';
 import { ROOT } from './config.mjs';
 import { resolveLogo } from './logos.mjs';
 
-export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'platform', 'product'];
+export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'platform', 'product', 'committee'];
 // Other names accepted for a kind. `application` was the original name for `product`.
-export const KIND_ALIASES = { application: 'product', app: 'product', solution: 'product', bu: 'business-unit', business_unit: 'business-unit' };
+export const KIND_ALIASES = {
+  application: 'product', app: 'product', solution: 'product',
+  bu: 'business-unit', business_unit: 'business-unit',
+  board: 'committee', council: 'committee', guild: 'committee', forum: 'committee',
+};
 
 export function loadVocab() {
   const people = parse(readFileSync(resolve(ROOT, 'engine/vocab/people.yaml'), 'utf8'));
   const rels = parse(readFileSync(resolve(ROOT, 'engine/vocab/relationships.yaml'), 'utf8'));
+  const gov = parse(readFileSync(resolve(ROOT, 'engine/vocab/governance.yaml'), 'utf8'));
   const index = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
   const relTypes = rels['relationship-types'];
   const relAlias = {};
@@ -51,6 +56,10 @@ export function loadVocab() {
     discipline: index(people.disciplines),
     employmentById: index(people.employment),
     teamType: index(people['team-types']),
+    committeeTypes: gov['committee-types'],
+    seatRoles: gov['seat-roles'],
+    committeeType: index(gov['committee-types']),
+    seatRole: index(gov['seat-roles']),
     relTypes,
     relType: index(relTypes),
     relAlias,
@@ -120,6 +129,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   const people = byKind.person;
   const platforms = byKind.platform;
   const products = byKind.product;
+  const committees = byKind.committee;
 
   if (orgs.length > 1) errors.push({ rel: orgs[1]._file, message: 'Only one organization is allowed.' });
   const organization = orgs[0] ?? { id: 'org', kind: 'organization', name: 'Organization' };
@@ -173,6 +183,41 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   }
   if (organization.lead) organization.leadPerson = people.get(organization.lead) ?? null;
 
+  // Committees: seats (chair, members with roles)
+  for (const p of people.values()) p.seats = [];
+  for (const c of committees.values()) {
+    if (c.type && !vocab.committeeType[c.type]) errors.push({ rel: c._file, message: `committee "${c.id}": unknown type "${c.type}".` });
+    const seats = new Map();
+    for (const m of [].concat(c.members ?? [])) {
+      const seat = typeof m === 'string' ? { person: m } : { ...m };
+      seat.role ??= 'member';
+      if (!vocab.seatRole[seat.role]) errors.push({ rel: c._file, message: `committee "${c.id}": unknown seat role "${seat.role}".` });
+      const person = people.get(String(seat.person ?? '').replace(/^person:/, ''));
+      if (!person) {
+        errors.push({ rel: c._file, message: `committee "${c.id}": member "${seat.person}" is not a known person.` });
+        continue;
+      }
+      let representing = null;
+      if (seat.representing) {
+        const [rk, rid] = String(seat.representing).includes(':') ? String(seat.representing).split(':') : ['team', seat.representing];
+        representing = byKind[normKind(rk)]?.get(rid) ?? null;
+        if (!representing) errors.push({ rel: c._file, message: `committee "${c.id}": representing "${seat.representing}" does not exist.` });
+      }
+      seats.set(person.id, { person, role: seat.role, representing, note: seat.note ?? null });
+    }
+    if (c.chair) {
+      const chair = people.get(String(c.chair).replace(/^person:/, ''));
+      if (!chair) errors.push({ rel: c._file, message: `committee "${c.id}": chair "${c.chair}" is not a known person.` });
+      else seats.set(chair.id, { ...(seats.get(chair.id) ?? { person: chair, representing: null, note: null }), role: 'chair' });
+    }
+    const rankOf = (r) => vocab.seatRole[r]?.rank ?? 99;
+    c.seats = [...seats.values()].sort((a, b) => rankOf(a.role) - rankOf(b.role) || a.person.displayName.localeCompare(b.person.displayName));
+    c.chairPerson = c.seats.find((x) => x.role === 'chair')?.person ?? null;
+    for (const seat of c.seats) seat.person.seats.push({ committee: c, role: seat.role });
+    if (!c.chairPerson) warnings.push({ rel: c._file, message: `committee "${c.id}" has no chair.` });
+    if (!c.seats.length) warnings.push({ rel: c._file, message: `committee "${c.id}" has no members.` });
+  }
+
   // Logos
   for (const kind of ['platform', 'product']) {
     for (const e of byKind[kind].values()) {
@@ -185,7 +230,8 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   // 4. Inline relationships -> entries
   const inlineTarget = vocab.relTypes.filter((t) => t.inline);
   const inlineSource = vocab.relTypes.filter((t) => t['inline-on-source']);
-  for (const kind of ['platform', 'product']) {
+  for (const kind of ENTITY_KINDS) {
+    if (['person', 'team', 'organization', 'business-unit'].includes(kind)) continue;
     for (const e of byKind[kind].values()) {
       for (const t of inlineTarget) {
         if (!t.to.includes(kind) || e[t.inline] == null) continue;
@@ -300,7 +346,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   }
   for (const p of people.values()) {
     const leads = organization.lead === p.id || [...units.values()].some((u) => u.lead === p.id);
-    if (!p.memberships.length && !leads && !edgesFrom(p).length)
+    if (!p.memberships.length && !leads && !p.seats.length && !edgesFrom(p).length)
       warnings.push({ rel: p._file, message: `person "${p.id}" is not on any team.` });
   }
 
@@ -316,6 +362,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     people: [...people.values()],
     platforms: [...platforms.values()].sort(byName),
     products: [...products.values()].sort(byName),
+    committees: [...committees.values()].sort(byOrder),
     edges,
     team: (id) => teams.get(id),
     get,

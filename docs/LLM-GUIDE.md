@@ -44,7 +44,8 @@ A complete working example is in [`examples/bundle/data/atlas.json`](../examples
 | `team` | `id`, `name` | `parent` (business unit id), `type`, `lead` (person id) |
 | `person` | `id`, and `name` unless `employment: vacancy` | `role` (free text), `tier`, `discipline`, `employment`, `memberships` |
 | `platform` | `id`, `name` | `logo`, `category`, `vendor`, `hosting`, `criticality`, `lifecycle`, `proprietary` |
-| `product` | `id`, `name` | as platform, plus `type` (product, solution, service, product) |
+| `product` | `id`, `name` | as platform, plus `type` (product, application, solution, service, data-product, ml-model). `application` and `solution` are accepted as other names for this kind |
+| `committee` | `id`, `name` | `type`, `purpose`, `cadence`, `chair` (person id), `members` (person ids or `{ person, role, representing }`) |
 
 Every entity also accepts `description`, `tags`, `links` (named URLs), `order` and `meta` (free-form). Unknown fields are rejected so typos are caught; prefix your own fields with `x-` to keep them.
 
@@ -62,12 +63,36 @@ Each relationship is `{ "from": "kind:id", "type": "...", "to": "kind:id" }`, wi
 | `stakeholder` | person, team | platform, product | Affected by changes |
 | `sponsor` | person, team | platform, product | Funds or champions it |
 | `sme` | person, team | platform, product | Subject-matter expert |
-| `escalation` | person, team | platform, product | Who to escalate to |
-| `uses` | product | platform | The product runs on or uses the platform (`purpose`) |
+| `escalation` | person, team, committee | platform, product | Who to escalate to |
+| `governs` | committee | platform, product, team | Sets standards or policy for it |
+| `advises` | committee, person, team | platform, product, team, committee | Advises without decision rights |
+| `approver` | committee, person, team | platform, product | Must approve changes or releases |
+| `reports-to` | committee | committee, person, team, business-unit | Where the committee reports |
+| `deployed-to` | product | platform | Where the product is deployed and runs (`environments`, `regions` as lists) |
+| `uses` | product | platform | The product uses the platform, e.g. a database or identity provider (`purpose`) |
 | `depends-on` | product | product | The product needs another product |
 | `built-on` | platform | platform | A platform built on another platform |
 
-Team membership, leads and business units are **not** relationships: set them with `memberships`, `lead` and `parent`.
+Team membership, leads, business units and committee seats are **not** relationships: set them with `memberships`, `lead`, `parent`, `chair` and `members`.
+
+### Committees and boards
+
+Committee types: review-board, change-advisory-board, steering-committee, governance-board, council, advisory-board, community-of-practice, working-group. Seat roles: chair, vice-chair, secretary, voting-member, member, advisor, observer.
+
+```json
+{ "kind": "committee", "id": "architecture-review-board", "name": "Architecture Review Board",
+  "type": "review-board", "cadence": "Every two weeks", "chair": "maya-zhang",
+  "members": [ { "person": "bruno-thorne", "role": "secretary" }, { "person": "rhea-thorne", "role": "voting-member", "representing": "cloud-platform" } ],
+  "governs": [ { "ref": "platform:kubernetes", "scope": "Architecture standards" } ],
+  "advises": ["payments-core"], "reports-to": ["person:nikhil-kim"] }
+```
+
+### Deployments
+
+```json
+{ "from": "product:storefront-web", "type": "deployed-to", "to": "platform:kubernetes",
+  "environments": ["production", "staging"], "regions": ["us-east", "eu-west"] }
+```
 
 ## Logos
 
@@ -91,7 +116,7 @@ Rules:
 - Follow the attached JSON Schema exactly. Do not invent fields; use "x-" prefixed
   fields for anything extra.
 - Every entity has "kind" and a stable "id" (lowercase, dashes, e.g. "data-platform").
-- Kinds: organization (exactly one), business-unit, team, person, platform, product.
+- Kinds: organization (exactly one), business-unit, team, person, platform, product, committee.
 - Teams: "parent" is a business-unit id, "lead" is a person id.
 - People: "role" is free text. "tier" is one of executive, senior-leader, manager,
   team-lead, principal, ic. "memberships" lists team ids; mark one
@@ -101,7 +126,11 @@ Rules:
   { "from": "team:data-platform", "type": "owner", "to": "platform:snowflake" }.
   Types: owner, supporting, operator, stakeholder, sponsor, sme, escalation
   (team/person -> platform/product), uses (product -> platform),
-  depends-on (product -> product), built-on (platform -> platform).
+  deployed-to (product -> platform, with "environments" and "regions" lists),
+  depends-on (product -> product), built-on (platform -> platform),
+  governs / advises / approver / reports-to (committee -> ...).
+- Committees: "chair" is a person id, "members" are person ids or
+  { "person": "...", "role": "voting-member", "representing": "team-id" }.
 - Shared ownership: add one "owner" relationship per owning team, each with a
   "scope" saying what that team owns.
 - Every platform and product should have at least one owner.

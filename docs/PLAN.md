@@ -37,7 +37,7 @@ All of it is described as YAML and rendered as an interactive, filterable site d
 | Organizational | organization, business-unit, department, team, person, position, location, cost-center, legal-entity |
 | Business | capability, solution, initiative, vendor, contract |
 | Technical | platform, system, component, api, datastore, integration, environment |
-| Governance | policy, control, review-board, risk |
+| Governance | committee (review board, change advisory board, council, steering committee, governance board, advisory board, community of practice, working group), policy, control, risk |
 
 Entity kinds are extensible: users can add their own (for example a `guild` that extends `team`) in `overrides/`. Hierarchy levels default to business unit > department > team and are configurable.
 

@@ -28,10 +28,10 @@ const other = vocab.relTypes
 const ownedApps = owned.map((o: any) => o.e.to).filter((x: any) => x.kind === 'product');
 const runsOn = new Map<string, { platform: any; apps: any[] }>();
 for (const a of ownedApps) {
-  for (const u of model.edgesFrom(a, 'uses')) {
+  for (const u of [...model.edgesFrom(a, 'deployed-to'), ...model.edgesFrom(a, 'uses')]) {
     const k = u.to.id;
     if (!runsOn.has(k)) runsOn.set(k, { platform: u.to, apps: [] });
-    runsOn.get(k)!.apps.push(a);
+    if (!runsOn.get(k)!.apps.includes(a)) runsOn.get(k)!.apps.push(a);
   }
 }
 
@@ -47,6 +47,13 @@ for (const { e } of owned) {
     outside.get(k)!.of.add(e.to.name);
   }
 }
+// Committees that govern or advise this team, and committee seats held by its members.
+const governedBy = vocab.relTypes
+  .filter((t: any) => t.category === 'governance')
+  .flatMap((t: any) => model.edgesTo(team, t.id));
+const seats = team.members
+  .filter((m: any) => m.primary)
+  .flatMap((m: any) => m.person.seats.map((s: any) => ({ person: m.person, ...s })));
 const nothing = !owned.length && !other.length;
 ---
 
@@ -118,13 +125,41 @@ const nothing = !owned.length && !other.length;
   runsOn.size > 0 && (
     <section class="group">
       <h2 class="eyebrow">
-        <RelLine type={vocab.relType.uses} width={24} /> Our products run on <span class="n">{runsOn.size}</span>
+        <RelLine type={vocab.relType['deployed-to']} width={24} /> Our products run on and use <span class="n">{runsOn.size}</span>
       </h2>
       <ul class="logo-row">
         {[...runsOn.values()].map(({ platform, apps }) => (
           <li title={`Used by ${apps.map((a) => a.name).join(', ')}`}>
             <EntityRef entity={platform} />
             <span class="muted small">{apps.map((a) => a.name).join(', ')}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  (governedBy.length > 0 || seats.length > 0) && (
+    <section class="group">
+      <h2 class="eyebrow">
+        <Icon name="law" size={14} /> Committees
+      </h2>
+      <ul class="logo-row">
+        {governedBy.map((e: any) => (
+          <li>
+            <EntityRef entity={e.from} />
+            <span class="muted small">
+              {e.rel.label} this team{e.scope ? `: ${e.scope}` : ''}
+            </span>
+          </li>
+        ))}
+        {seats.map((s: any) => (
+          <li>
+            <EntityRef entity={s.committee} />
+            <span class="muted small">
+              {s.person.displayName}, {atlas().vocab.seatRole[s.role]?.label.toLowerCase() ?? s.role}
+            </span>
           </li>
         ))}
       </ul>

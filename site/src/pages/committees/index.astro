@@ -1,0 +1,65 @@
+---
+import Base from '../../layouts/Base.astro';
+import CommitteeCard from '../../components/CommitteeCard.astro';
+import { atlas } from '../../lib/atlas';
+const { model, vocab } = atlas();
+const groups = vocab.committeeTypes
+  .map((t: any) => ({ t, list: model.committees.filter((c: any) => c.type === t.id) }))
+  .filter((g: any) => g.list.length);
+const untyped = model.committees.filter((c: any) => !c.type);
+---
+
+<Base title="Committees">
+  <div class="page-header">
+    <span class="eyebrow">Governance</span>
+    <h1>Committees and boards</h1>
+    <p>
+      {model.committees.length} committees, boards and councils. They sit outside the reporting line: each has a chair, members holding seats, and the
+      platforms, products or teams it governs, advises or approves.
+    </p>
+  </div>
+
+  {
+    groups.map((g: any) => (
+      <section class="group">
+        <h2>{g.t.label}</h2>
+        <p class="muted small">{g.t.description}</p>
+        <div class="grid">
+          {g.list.map((c: any) => (
+            <CommitteeCard committee={c} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+  {
+    untyped.length > 0 && (
+      <section class="group">
+        <h2>Other</h2>
+        <div class="grid">
+          {untyped.map((c: any) => (
+            <CommitteeCard committee={c} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .group {
+    margin-bottom: 28px;
+  }
+  .group h2 {
+    font-size: 1.1rem;
+  }
+  .small {
+    font-size: 13px;
+    margin: 2px 0 12px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+</style>

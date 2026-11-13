@@ -30,7 +30,7 @@ const owned = model.edgesFrom(team, 'owner').map((e: any) => e.to);
 const involved = new Set<string>();
 for (const e of model.edgesFrom(team)) involved.add(`${e.to.kind}:${e.to.id}`);
 for (const a of owned.filter((x: any) => x.kind === 'product'))
-  for (const u of model.edgesFrom(a, 'uses')) involved.add(`platform:${u.to.id}`);
+  for (const u of [...model.edgesFrom(a, 'uses'), ...model.edgesFrom(a, 'deployed-to')]) involved.add(`platform:${u.to.id}`);
 ---
 
 <article

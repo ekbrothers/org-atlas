@@ -11,7 +11,9 @@
 - **Platforms:** every shared platform (Snowflake, GitHub Enterprise, Nexus, Kafka, in-house platforms...) with its logo, owners, shared ownership with a scope per owner, supporting teams, and the products that use it.
 - **Products:** who owns, supports and operates each product, its stakeholders, the platforms it runs on and the products it depends on.
 - **Relationship maps:** each platform and product page draws who is accountable on one side and technical links on the other, with line styles from the relationship registry.
-- **Relationships:** every relationship type (owner, supporting, operator, stakeholder, sponsor, SME, escalation, uses, depends on, built on, plus structural ones) and every relationship in your data, searchable.
+- **Committees and boards:** review boards, change advisory boards, councils, steering committees and guilds, with a chair, seats by role, and what each governs, advises, approves and reports to. Shown on the org chart outside the reporting line.
+- **Deployments:** where each product is deployed (platform, environments, regions), and what each platform hosts.
+- **Relationships:** every relationship type (owner, supporting, operator, stakeholder, sponsor, SME, escalation, governs, advises, approver, reports to, deployed to, uses, depends on, built on, plus structural ones) and every relationship in your data, searchable.
 - **Legend:** what every badge, ring, line and icon means, generated from the same vocabulary files the site renders with.
 - **Demo data:** *Meridian Dynamics*, a fictional enterprise with 6 business units, 22 teams and about 150 people.
 
@@ -95,10 +97,29 @@ items:
   - id: checkout
     name: Checkout
     owners: [storefront, order-management]
+    deployed-to:                 # where it runs
+      - { ref: kubernetes, environments: [production, staging], regions: [us-east, eu-west] }
     platforms:                   # the "uses" relationship
-      - { ref: kubernetes, purpose: Runtime }
       - { ref: kafka, purpose: Order events }
+    approvers: [change-advisory-board]
     depends-on: [payments-gateway]
+```
+
+Committees are their own kind:
+
+```yaml
+# data/committees.yaml
+kind: committee
+items:
+  - id: change-advisory-board
+    name: Change Advisory Board
+    type: change-advisory-board  # review-board | steering-committee | council | governance-board | ...
+    cadence: Weekly
+    chair: amara-gupta
+    members:
+      - { person: kavya-whitfield, role: voting-member, representing: site-reliability-engineering }
+      - { person: felix-abara, role: observer }
+    reports-to: [person:nikhil-kim]
 ```
 
 The same relationship as an explicit entry: `{ from: team:storefront, type: owner, to: product:checkout }`. Every type is defined in [`engine/vocab/relationships.yaml`](engine/vocab/relationships.yaml).

@@ -1,0 +1,265 @@
+---
+// One committee: purpose, cadence, seats grouped by role, and what it governs,
+// advises, approves and reports to.
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import PersonChip from '../../components/PersonChip.astro';
+import EntityRef from '../../components/EntityRef.astro';
+import RelLine from '../../components/RelLine.astro';
+import { atlas, href } from '../../lib/atlas';
+
+export function getStaticPaths() {
+  return atlas().model.committees.map((c: any) => ({ params: { id: c.id }, props: { id: c.id } }));
+}
+const { model, vocab } = atlas();
+const c = model.get('committee', Astro.props.id);
+const type = vocab.committeeType[c.type];
+
+const roleGroups = vocab.seatRoles
+  .map((r: any) => ({ r, seats: c.seats.filter((s: any) => s.role === r.id) }))
+  .filter((g: any) => g.seats.length);
+
+const outgoing = vocab.relTypes
+  .filter((t: any) => t.category === 'governance' || t.category === 'accountability')
+  .map((t: any) => ({ t, edges: model.edgesFrom(c, t.id) }))
+  .filter((g: any) => g.edges.length);
+const incoming = vocab.relTypes
+  .filter((t: any) => t.category === 'governance')
+  .map((t: any) => ({ t, edges: model.edgesTo(c, t.id) }))
+  .filter((g: any) => g.edges.length);
+const represented = [...new Map(c.seats.filter((s: any) => s.representing).map((s: any) => [s.representing.id, s.representing])).values()];
+const primaryTeam = (p: any) => p.teamRefs.find((r: any) => r.primary)?.team;
+const links = c.links ? Object.entries(c.links) : [];
+---
+
+<Base title={c.name}>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href={href('committees/')}>Committees</a>
+    <Icon name="chevron-right" size={12} />
+    <span aria-current="page">{c.name}</span>
+  </nav>
+
+  <header class="head panel">
+    <span class="badge"><Icon name={type?.icon ?? 'law'} size={28} /></span>
+    <div class="head-text">
+      <span class="eyebrow">{type?.label ?? 'Committee'}</span>
+      <h1>{c.name}</h1>
+      {(c.purpose || c.description) && <p class="muted">{c.purpose ?? c.description}</p>}
+      <div class="facts">
+        {c.cadence && <span class="pill"><Icon name="clock" size={12} /> {c.cadence}</span>}
+        <span class="pill"><Icon name="people" size={12} /> {c.seats.length} seats</span>
+        {links.map(([k, v]: any) => <a class="pill" href={v}><Icon name="link-external" size={12} /> {k}</a>)}
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      {
+        roleGroups.map((g: any) => (
+          <section class="group">
+            <h2 class="eyebrow">
+              <Icon name={g.r.icon} size={14} /> {g.r.label}
+              {g.seats.length > 1 ? 's' : ''} <span class="n">{g.seats.length}</span>
+            </h2>
+            <ul class="seats">
+              {g.seats.map((s: any) => (
+                <li class="seat">
+                  <PersonChip person={s.person} size="lg" />
+                  <span class="small muted">
+                    {s.representing ? (
+                      <>
+                        Represents <EntityRef entity={s.representing} />
+                      </>
+                    ) : primaryTeam(s.person) ? (
+                      <>
+                        From <a href={href(`teams/${primaryTeam(s.person).id}/`)}>{primaryTeam(s.person).name}</a>
+                      </>
+                    ) : null}
+                  </span>
+                  {s.note && <span class="small">{s.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+
+    <aside>
+      {
+        outgoing.map((g: any) => (
+          <section class="panel side">
+            <h2 class="eyebrow">
+              <RelLine type={g.t} width={22} /> {g.t.label}
+            </h2>
+            <ul class="plain">
+              {g.edges.map((e: any) => (
+                <li>
+                  <EntityRef entity={e.to} />
+                  {(e.scope || e.note) && <span class="small muted">{e.scope ?? e.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+      {
+        incoming.map((g: any) => (
+          <section class="panel side">
+            <h2 class="eyebrow">
+              <RelLine type={g.t} width={22} /> {g.t.inverse}
+            </h2>
+            <ul class="plain">
+              {g.edges.map((e: any) => (
+                <li>
+                  <EntityRef entity={e.from} />
+                  {(e.scope || e.note) && <span class="small muted">{e.scope ?? e.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+      {
+        represented.length > 0 && (
+          <section class="panel side">
+            <h2 class="eyebrow">Represented</h2>
+            <ul class="plain">
+              {represented.map((r: any) => (
+                <li>
+                  <EntityRef entity={r} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .head {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 20px 24px;
+    border-left: 6px solid var(--gold);
+    margin-bottom: 28px;
+  }
+  .badge {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    flex: none;
+    border-radius: 6px;
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  .head h1 {
+    font-size: 1.75rem;
+    color: var(--navy);
+    margin: 2px 0 4px;
+  }
+  .head p {
+    margin: 0 0 10px;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 28px;
+  }
+  .group {
+    margin-bottom: 24px;
+  }
+  .group h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .n {
+    background: var(--surface-tint);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .seats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .seat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+  }
+  .seat .small {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .small {
+    font-size: 13px;
+  }
+  .side {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .side h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .plain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .plain li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .head {
+      flex-direction: column;
+    }
+  }
+</style>

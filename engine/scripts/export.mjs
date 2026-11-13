@@ -38,7 +38,7 @@ for (const { doc } of raw) {
     kind = KIND_ALIASES[kind] ?? kind;
     if (!ENTITY_KINDS.includes(kind)) return;
     const clean = { kind };
-    for (const [k, v] of Object.entries(item)) if (k !== 'kind' && !(['platform', 'product'].includes(kind) && inlineFields.has(k))) clean[k] = v;
+    for (const [k, v] of Object.entries(item)) if (k !== 'kind' && !inlineFields.has(k)) clean[k] = v;
     entities.push(clean);
   };
   if (Array.isArray(doc.entities)) for (const e of doc.entities) push(e, e.kind);

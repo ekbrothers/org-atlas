@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import PersonChip from '../components/PersonChip.astro';
 import OrgTeamCard from '../components/OrgTeamCard.astro';
+import CommitteeCard from '../components/CommitteeCard.astro';
 import { atlas } from '../lib/atlas';
 
 const { model, vocab } = atlas();
@@ -107,6 +108,23 @@ const peopleIn = (u: any) =>
         </div>
       </div>
     </div>
+
+    {
+      model.committees.length > 0 && (
+        <section class="committees">
+          <div class="committees-head">
+            <span class="eyebrow">Outside the reporting line</span>
+            <h2>Committees and boards</h2>
+            <p class="muted">Cross-cutting groups. Each draws its members from the teams above.</p>
+          </div>
+          <div class="committee-grid">
+            {model.committees.map((c: any) => (
+              <CommitteeCard committee={c} />
+            ))}
+          </div>
+        </section>
+      )
+    }
   </div>
 </Base>
 
@@ -284,6 +302,25 @@ const peopleIn = (u: any) =>
     margin: 0;
     font-size: 13px;
     flex-basis: 100%;
+  }
+
+  .committees {
+    margin-top: 40px;
+    border-top: 2px dashed var(--border);
+    padding-top: 24px;
+  }
+  .committees-head h2 {
+    font-size: 1.2rem;
+    margin: 2px 0 4px;
+  }
+  .committees-head p {
+    margin: 0 0 16px;
+    font-size: 14px;
+  }
+  .committee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
   }
 
   /* Tree */

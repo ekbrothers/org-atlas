@@ -6,8 +6,6 @@ items:
     owners:
       - payments-core
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: kafka
         purpose: Payment events
       - ref: postgresql
@@ -25,13 +23,23 @@ items:
       - site-reliability-engineering
     sponsors:
       - person:tomas-laurent
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: card-authorization
     name: Card Authorization
     owners:
       - payments-core
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: redis
         purpose: Velocity checks
     stakeholders:
@@ -42,13 +50,23 @@ items:
     depends-on:
       - payments-gateway
       - fraud-scoring
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: loan-origination
     name: Loan Origination
     owners:
       - lending-platform
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: postgresql
         purpose: Products
       - ref: meridian-rules
@@ -58,6 +76,14 @@ items:
     description: Loa products, decisions and document collection.
     criticality: T1
     logo: octicon:file-badge
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
   - id: fraud-scoring
     name: Fraud Scoring
     owners:
@@ -79,13 +105,23 @@ items:
     supporting:
       - ref: data-platform
         scope: Pipelines
+    deployed-to:
+      - ref: databricks
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
+      - ref: model-risk-committee
+        scope: Model releases
   - id: mobile-banking
     name: Mobile Banking App
     owners:
       - digital-banking-apps
     platforms:
-      - ref: kubernetes
-        purpose: API backend
       - ref: okta
         purpose: Customer login
     stakeholders:
@@ -96,13 +132,20 @@ items:
     depends-on:
       - payments-gateway
       - identity-gateway
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
   - id: storefront-web
     name: Storefront Web
     owners:
       - storefront
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: cloudflare
         purpose: CDN and WAF
       - ref: redis
@@ -115,6 +158,23 @@ items:
     depends-on:
       - checkout
       - pricing-engine
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
+      - ref: cloudflare
+        environments:
+          - production
+        regions:
+          - global
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: checkout
     name: Checkout
     owners:
@@ -123,8 +183,6 @@ items:
       - ref: order-management
         scope: Order APIs
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: kafka
         purpose: Order events
     stakeholders:
@@ -135,6 +193,18 @@ items:
     depends-on:
       - payments-gateway
       - order-service
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: order-service
     name: Order Service
     owners:
@@ -149,6 +219,17 @@ items:
     description: Order lifecycle, fulfilment and returns.
     criticality: T0
     logo: octicon:package
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: pricing-engine
     name: Pricing Engine
     owners:
@@ -163,6 +244,13 @@ items:
     description: Prices, discounts and promotions.
     criticality: T1
     logo: octicon:tag
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
   - id: supplier-gateway
     name: Supplier Gateway
     owners:
@@ -177,13 +265,18 @@ items:
     description: Integrations with suppliers and logistics partners.
     criticality: T1
     logo: octicon:arrow-both
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
   - id: claims-engine
     name: Claims Engine
     owners:
       - claims-processing
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: postgresql
         purpose: Claims
       - ref: meridian-rules
@@ -193,13 +286,22 @@ items:
     description: Claims intake, adjudication and payment.
     criticality: T0
     logo: octicon:law
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: member-portal-app
     name: Member Portal
     owners:
       - member-portal
     platforms:
-      - ref: kubernetes
-        purpose: Runtime
       - ref: okta
         purpose: Member login
     stakeholders:
@@ -210,6 +312,15 @@ items:
     depends-on:
       - claims-engine
       - identity-gateway
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
   - id: clinical-data-exchange
     name: Clinical Data Exchange
     owners:
@@ -226,6 +337,13 @@ items:
     description: Exchanges clinical records with providers.
     criticality: T1
     logo: octicon:arrow-both
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
   - id: developer-portal
     name: Developer Portal
     owners:
@@ -233,8 +351,6 @@ items:
     platforms:
       - ref: github-enterprise
         purpose: Repositories and CI
-      - ref: kubernetes
-        purpose: Runtime
       - ref: nexus
         purpose: Artifacts
     stakeholders:
@@ -242,6 +358,14 @@ items:
     description: Internal catalog of services, docs and templates.
     criticality: T2
     logo: octicon:repo
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
   - id: identity-gateway
     name: Identity Gateway
     owners:
@@ -249,13 +373,23 @@ items:
     platforms:
       - ref: okta
         purpose: Identity provider
-      - ref: kubernetes
-        purpose: Runtime
     stakeholders:
       - person:nikhil-kim
     description: Token exchange and session service for customer apps.
     criticality: T0
     logo: octicon:key
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+          - development
+        regions:
+          - us-east
+          - eu-west
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: general-ledger
     name: General Ledger
     owners:
@@ -272,6 +406,16 @@ items:
     description: Financial close and reporting.
     criticality: T0
     logo: octicon:table
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
+    approvers:
+      - ref: change-advisory-board
+        scope: Production changes
   - id: hr-hub
     name: HR Hub
     owners:
@@ -286,6 +430,13 @@ items:
     description: Employee self-service on top of Workday.
     criticality: T2
     logo: octicon:people
+    deployed-to:
+      - ref: workday
+        environments:
+          - production
+          - sandbox
+        regions:
+          - us-east
   - id: contract-vault
     name: Contract Vault
     owners:
@@ -312,3 +463,10 @@ items:
     description: Employee requests for access, hardware and software.
     criticality: T2
     logo: octicon:checklist
+    deployed-to:
+      - ref: servicenow
+        environments:
+          - production
+          - development
+        regions:
+          - us-east

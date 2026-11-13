@@ -15,6 +15,10 @@ const { model, vocab } = atlas();
 const isPlatform = entity.kind === 'platform';
 const section = isPlatform ? { label: 'Platforms', to: 'platforms/' } : { label: 'Products', to: 'products/' };
 
+const deployments = isPlatform ? model.edgesTo(entity, 'deployed-to') : model.edgesFrom(entity, 'deployed-to');
+const list = (v: any) => [].concat(v ?? []).join(', ');
+const allEnvs = [...new Set(deployments.flatMap((d: any) => [].concat(d.environments ?? [])))];
+
 const facts = [
   ['Category', entity.category],
   ['Type', !isPlatform ? (entity.type ?? 'product') : null],
@@ -22,12 +26,14 @@ const facts = [
   ['Hosting', entity.hosting],
   ['Criticality', entity.criticality],
   ['Lifecycle', entity.lifecycle ?? 'active'],
+  ['Environments', !isPlatform && allEnvs.length ? allEnvs.join(', ') : null],
   ['Built in-house', entity.proprietary ? 'Yes (proprietary)' : null],
 ].filter(([, v]) => v);
 
 const accountability = vocab.relTypes
-  .filter((t: any) => t.category === 'accountability')
+  .filter((t: any) => t.category === 'accountability' || t.category === 'governance')
   .flatMap((t: any) => model.edgesTo(entity, t.id));
+
 
 const usage = isPlatform ? model.edgesTo(entity, 'uses') : model.edgesFrom(entity, 'uses');
 const ownersOf = (e: any) => model.edgesTo(e, 'owner').map((x: any) => x.from);
@@ -99,6 +105,54 @@ const links = entity.links ? Object.entries(entity.links) : [];
     </dl>
   </section>
 </div>
+
+<section class="panel block">
+  <h2 class="eyebrow">{isPlatform ? `Products deployed to ${entity.name}` : `Where ${entity.name} is deployed`} <span class="n">{deployments.length}</span></h2>
+  {deployments.length === 0 && <p class="muted">{isPlatform ? 'No products are deployed here.' : 'No deployment recorded.'}</p>}
+  {
+    deployments.length > 0 && (
+      <table>
+        <thead>
+          <tr>
+            <th>{isPlatform ? 'Product' : 'Platform'}</th>
+            <th>Environments</th>
+            <th>Regions</th>
+            {isPlatform && <th>Owned by</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {deployments.map((d: any) => {
+            const other = isPlatform ? d.from : d.to;
+            return (
+              <tr>
+                <td>
+                  <EntityRef entity={other} />
+                </td>
+                <td>
+                  <div class="chips">
+                    {[].concat(d.environments ?? []).map((env: string) => (
+                      <span class:list={['env', `env-${env}`]}>{env}</span>
+                    ))}
+                  </div>
+                </td>
+                <td class="muted">{list(d.regions)}</td>
+                {isPlatform && (
+                  <td>
+                    <div class="refs">
+                      {ownersOf(other).map((o: any) => (
+                        <EntityRef entity={o} />
+                      ))}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    )
+  }
+</section>
 
 <section class="panel block">
   <h2 class="eyebrow">{isPlatform ? `Products using ${entity.name}` : `Platforms ${entity.name} uses`} <span class="n">{usage.length}</span></h2>
@@ -237,6 +291,26 @@ const links = entity.links ? Object.entries(entity.links) : [];
     margin: 0;
     overflow-wrap: anywhere;
     text-transform: none;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .env {
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 3px;
+    padding: 0 7px;
+    background: var(--surface-tint);
+    color: var(--blue);
+    border: 1px solid var(--border);
+  }
+  .env-production,
+  .env-prod {
+    background: var(--navy);
+    color: var(--on-navy);
+    border-color: var(--navy);
   }
   .stamp-sm {
     font-size: 11px;

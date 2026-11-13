@@ -10,6 +10,11 @@ import { ENTITY_KINDS, KIND_ALIASES, loadVocab } from './model.mjs';
 const ALIAS_KINDS = Object.keys(KIND_ALIASES).filter((k) => ENTITY_KINDS.includes(KIND_ALIASES[k]) && /^[a-z-]+$/.test(k));
 
 const ID = { type: 'string', pattern: '^[A-Za-z0-9][A-Za-z0-9._-]*$', description: 'Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. "payments-core".' };
+// Relationship attributes that hold lists; all others are strings.
+const LIST_ATTRS = new Set(['environments', 'regions']);
+const attrSchema = (a) =>
+  LIST_ATTRS.has(a) ? { anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] } : { type: 'string' };
+
 const REF = {
   type: 'string',
   minLength: 1,
@@ -40,7 +45,7 @@ export function buildSchema(vocab = loadVocab()) {
   const inlineFields = (kind) => {
     const fields = {};
     for (const t of vocab.relTypes) {
-      const attrs = Object.fromEntries((t.attributes ?? []).map((a) => [a, { type: 'string' }]));
+      const attrs = Object.fromEntries((t.attributes ?? []).map((a) => [a, attrSchema(a)]));
       const item = {
         anyOf: [
           REF,
@@ -102,6 +107,36 @@ export function buildSchema(vocab = loadVocab()) {
     }),
     platform: strict({ ...tech, ...inlineFields('platform') }, ['id', 'name']),
     product: strict({ ...tech, type: { enum: ['product', 'application', 'solution', 'service', 'data-product', 'ml-model'] }, ...inlineFields('product') }, ['id', 'name']),
+    committee: strict(
+      {
+        type: { enum: enumOf(vocab.committeeTypes) },
+        purpose: { type: 'string', description: 'What the committee decides or advises on.' },
+        cadence: { type: 'string', description: 'How often it meets, e.g. weekly, monthly, quarterly.' },
+        chair: { type: 'string', description: 'Person id of the chair (added to members automatically).' },
+        members: {
+          type: 'array',
+          description: 'Seats on the committee.',
+          items: {
+            anyOf: [
+              { type: 'string', description: 'Person id (role: member).' },
+              {
+                type: 'object',
+                properties: {
+                  person: { type: 'string' },
+                  role: { enum: enumOf(vocab.seatRoles) },
+                  representing: { type: 'string', description: 'Team (or "kind:id") this seat represents.' },
+                  note: { type: 'string' },
+                },
+                required: ['person'],
+                additionalProperties: false,
+              },
+            ],
+          },
+        },
+        ...inlineFields('committee'),
+      },
+      ['id', 'name'],
+    ),
     relationship: {
       type: 'object',
       properties: {
@@ -111,6 +146,8 @@ export function buildSchema(vocab = loadVocab()) {
         to: REF,
         scope: { type: 'string', description: 'Which part this covers, e.g. for shared ownership.' },
         purpose: { type: 'string', description: 'Why a product uses a platform.' },
+        environments: { ...attrSchema('environments'), description: 'Environments for deployed-to, e.g. ["production", "staging"].' },
+        regions: { ...attrSchema('regions'), description: 'Regions for deployed-to, e.g. ["us-east", "eu-west"].' },
         note: { type: 'string' },
       },
       required: ['type', 'from', 'to'],

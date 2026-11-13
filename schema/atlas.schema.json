@@ -1034,6 +1034,100 @@
             }
           ]
         },
+        "approvers": {
+          "description": "Approver (relationship \"approver\"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "built-on": {
           "description": "Built on (relationship \"built-on\"): A platform that is built on top of another platform. Bare ids are platform ids.",
           "anyOf": [
@@ -1860,8 +1954,102 @@
             }
           ]
         },
+        "approvers": {
+          "description": "Approver (relationship \"approver\"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "platforms": {
-          "description": "Uses (relationship \"uses\"): The product runs on, or makes use of, the platform. Bare ids are platform ids.",
+          "description": "Uses (relationship \"uses\"): The product makes use of the platform (a database, a queue, an identity provider). Use deployed-to for where it runs. Bare ids are platform ids.",
           "anyOf": [
             {
               "anyOf": [
@@ -1930,6 +2118,146 @@
                       },
                       "purpose": {
                         "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "deployed-to": {
+          "description": "Deployed to (relationship \"deployed-to\"): Where the product is deployed and runs, with its environments and regions. Bare ids are platform ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "environments": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    },
+                    "regions": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "environments": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "regions": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
                       },
                       "note": {
                         "type": "string"
@@ -2058,6 +2386,398 @@
       },
       "additionalProperties": false
     },
+    "committee": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "type": {
+          "enum": [
+            "review-board",
+            "change-advisory-board",
+            "steering-committee",
+            "governance-board",
+            "council",
+            "advisory-board",
+            "community-of-practice",
+            "working-group"
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "description": "What the committee decides or advises on."
+        },
+        "cadence": {
+          "type": "string",
+          "description": "How often it meets, e.g. weekly, monthly, quarterly."
+        },
+        "chair": {
+          "type": "string",
+          "description": "Person id of the chair (added to members automatically)."
+        },
+        "members": {
+          "type": "array",
+          "description": "Seats on the committee.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Person id (role: member)."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "person": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "enum": [
+                      "chair",
+                      "vice-chair",
+                      "secretary",
+                      "voting-member",
+                      "member",
+                      "advisor",
+                      "observer"
+                    ]
+                  },
+                  "representing": {
+                    "type": "string",
+                    "description": "Team (or \"kind:id\") this seat represents."
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "person"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "governs": {
+          "description": "Governs (relationship \"governs\"): Sets the standards or policy for it and can block changes that break them. Bare ids are platform ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "advises": {
+          "description": "Advises (relationship \"advises\"): Gives advice without decision rights. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "reports-to": {
+          "description": "Reports to (relationship \"reports-to\"): Where a committee sends its decisions and escalations. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
     "relationship": {
       "type": "object",
       "properties": {
@@ -2091,10 +2811,27 @@
             "escalation",
             "escalate",
             "escalation-contact",
+            "governs",
+            "oversees",
+            "governance",
+            "advises",
+            "advisor-to",
+            "consults-for",
+            "approver",
+            "approves",
+            "change-approver",
+            "gatekeeper",
+            "reports-to",
+            "reports",
+            "escalates-to",
             "uses",
-            "runs-on",
             "uses-platform",
+            "integrates-with-platform",
+            "deployed-to",
+            "deployed-on",
+            "runs-on",
             "hosted-on",
+            "deploys-to",
             "depends-on",
             "depends",
             "calls",
@@ -2121,6 +2858,34 @@
           "type": "string",
           "description": "Why a product uses a platform."
         },
+        "environments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Environments for deployed-to, e.g. [\"production\", \"staging\"]."
+        },
+        "regions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Regions for deployed-to, e.g. [\"us-east\", \"eu-west\"]."
+        },
         "note": {
           "type": "string"
         }
@@ -2146,10 +2911,15 @@
             "person",
             "platform",
             "product",
+            "committee",
             "application",
             "app",
             "solution",
-            "bu"
+            "bu",
+            "board",
+            "council",
+            "guild",
+            "forum"
           ]
         }
       },
@@ -2248,6 +3018,21 @@
           "if": {
             "properties": {
               "kind": {
+                "const": "committee"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/committee"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
                 "const": "application"
               }
             },
@@ -2302,6 +3087,66 @@
           },
           "then": {
             "$ref": "#/definitions/business-unit"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "board"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/committee"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "council"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/committee"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "guild"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/committee"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "forum"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/committee"
           }
         }
       ]
@@ -2358,10 +3203,15 @@
               "person",
               "platform",
               "product",
+              "committee",
               "application",
               "app",
               "solution",
               "bu",
+              "board",
+              "council",
+              "guild",
+              "forum",
               "relationship",
               "relationships"
             ]
@@ -2576,6 +3426,40 @@
             "if": {
               "properties": {
                 "kind": {
+                  "const": "committee"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/committee"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/committee"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
                   "const": "application"
                 }
               },
@@ -2705,6 +3589,142 @@
               },
               "else": {
                 "$ref": "#/definitions/business-unit"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "board"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/committee"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/committee"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "council"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/committee"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/committee"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "guild"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/committee"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/committee"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "forum"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/committee"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/committee"
               }
             }
           },

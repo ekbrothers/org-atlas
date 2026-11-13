@@ -2,7 +2,7 @@
 // A link to any entity, with an icon for its kind. People link to their primary team.
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
-import { href } from '../lib/atlas';
+import { atlas, href } from '../lib/atlas';
 import { nameOf } from '../../../engine/lib/model.mjs';
 
 interface Props {
@@ -18,16 +18,21 @@ const url =
       ? href(`platforms/${entity.id}/`)
       : entity.kind === 'product'
         ? href(`products/${entity.id}/`)
+        : entity.kind === 'committee'
+          ? href(`committees/${entity.id}/`)
         : primaryTeam
           ? href(`teams/${primaryTeam.id}/`)
           : null;
-const icon = { team: 'people', person: 'person', 'business-unit': 'organization', organization: 'organization' }[entity.kind as string] ?? 'package';
+const icon =
+  entity.kind === 'committee'
+    ? (atlas().vocab.committeeType[entity.type]?.icon ?? 'law')
+    : ({ team: 'people', person: 'person', 'business-unit': 'organization', organization: 'organization' }[entity.kind as string] ?? 'package');
 const showLogo = logo && (entity.kind === 'platform' || entity.kind === 'product');
 const Tag = url ? 'a' : 'span';
 ---
 
 <Tag class="ref" href={url ?? undefined}>
-  {showLogo ? <Logo entity={entity} size={22} /> : <span class="ref-icon"><Icon name={icon} size={14} /></span>}
+  {showLogo ? <Logo entity={entity} size={22} /> : <span class:list={['ref-icon', { committee: entity.kind === 'committee' }]}><Icon name={icon} size={14} /></span>}
   <span class="ref-name">{nameOf(entity)}</span>
 </Tag>
 
@@ -48,6 +53,11 @@ const Tag = url ? 'a' : 'span';
     background: var(--surface-tint);
     color: var(--blue);
     flex: none;
+  }
+  .ref-icon.committee {
+    border-radius: 4px;
+    background: var(--gold);
+    color: var(--on-gold);
   }
   .ref-name {
     overflow-wrap: anywhere;

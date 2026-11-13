@@ -16,7 +16,12 @@ const categories = [...new Set(list.map((e: any) => (kind === 'platform' ? e.cat
 const ownerTeams = [...new Map(list.flatMap((e: any) => model.edgesTo(e, 'owner').map((x: any) => [x.from.id, x.from]))).values()].sort(
   (a: any, b: any) => a.name.localeCompare(b.name),
 );
-const usageCount = (e: any) => (kind === 'platform' ? model.edgesTo(e, 'uses').length : model.edgesFrom(e, 'uses').length);
+const usageCount = (e: any) =>
+  kind === 'platform'
+    ? new Set([...model.edgesTo(e, 'uses'), ...model.edgesTo(e, 'deployed-to')].map((x: any) => x.from.id)).size
+    : new Set([...model.edgesFrom(e, 'uses'), ...model.edgesFrom(e, 'deployed-to')].map((x: any) => x.to.id)).size;
+const hosts = (e: any) => (kind === 'platform' ? model.edgesTo(e, 'deployed-to').length : 0);
+const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deployed-to').map((x: any) => x.to) : []);
 ---
 
 <form class="toolbar panel" onsubmit="return false">
@@ -84,8 +89,21 @@ const usageCount = (e: any) => (kind === 'platform' ? model.edgesTo(e, 'uses').l
               ))}
             </div>
           )}
+          {deployedTo(e).length > 0 && (
+            <div class="owners">
+              <span class="label">
+                <Icon name="cloud" size={12} /> Deployed to
+              </span>
+              {deployedTo(e).map((p: any) => (
+                <EntityRef entity={p} />
+              ))}
+            </div>
+          )}
           <div class="foot muted small">
-            <Icon name="plug" size={12} /> {kind === 'platform' ? `Used by ${usageCount(e)} product${usageCount(e) === 1 ? '' : 's'}` : `Uses ${usageCount(e)} platform${usageCount(e) === 1 ? '' : 's'}`}
+            <Icon name="plug" size={12} />{' '}
+            {kind === 'platform'
+              ? `Used by ${usageCount(e)} product${usageCount(e) === 1 ? '' : 's'}${hosts(e) ? `, hosts ${hosts(e)}` : ''}`
+              : `Uses ${usageCount(e)} platform${usageCount(e) === 1 ? '' : 's'}`}
           </div>
         </li>
       );

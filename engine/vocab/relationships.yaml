@@ -6,7 +6,7 @@
 #   id           canonical type name, used as `type:` in relationship entries
 #   label        how the relationship reads from the source ("Payments Core is Owner of ...")
 #   inverse      how it reads from the target ("Snowflake is Owned by ...")
-#   category     accountability | technical | structural
+#   category     accountability | governance | technical | structural
 #   from / to    entity kinds allowed at each end
 #   default-from kind assumed when a reference has no "kind:" prefix (inline form)
 #   inline       field name for the inline shorthand on the target entity
@@ -64,7 +64,7 @@ relationship-types:
     inverse: Stakeholders
     category: accountability
     description: Cares about the outcome and is affected by changes.
-    from: [team, person]
+    from: [team, person, committee]
     to: [platform, product]
     default-from: person
     inline: stakeholders
@@ -77,7 +77,7 @@ relationship-types:
     inverse: Sponsored by
     category: accountability
     description: Funds it or champions it at executive level.
-    from: [team, person]
+    from: [team, person, committee]
     to: [platform, product]
     default-from: person
     inline: sponsors
@@ -103,7 +103,7 @@ relationship-types:
     inverse: Escalates to
     category: accountability
     description: Who to escalate to when something is wrong and the owner is not responding.
-    from: [person, team]
+    from: [person, team, committee]
     to: [platform, product]
     default-from: person
     inline: escalation
@@ -111,12 +111,68 @@ relationship-types:
     style: { line: solid, weight: 1, glyph: alert }
     aliases: [escalate, escalation-contact]
 
+  # ---- Governance: committees, boards and approvals ----
+  - id: governs
+    label: Governs
+    inverse: Governed by
+    category: governance
+    description: Sets the standards or policy for it and can block changes that break them.
+    from: [committee]
+    to: [platform, product, team]
+    default-from: committee
+    inline-on-source: governs
+    default-to: platform
+    attributes: [scope, note]
+    style: { line: double, weight: 3, glyph: law }
+    aliases: [oversees, governance]
+
+  - id: advises
+    label: Advises
+    inverse: Advised by
+    category: governance
+    description: Gives advice without decision rights.
+    from: [committee, person, team]
+    to: [platform, product, team, committee]
+    default-from: committee
+    inline-on-source: advises
+    default-to: team
+    attributes: [scope, note]
+    style: { line: dotted, weight: 2, glyph: light-bulb }
+    aliases: [advisor-to, consults-for]
+
+  - id: approver
+    label: Approver
+    inverse: Approved by
+    category: governance
+    description: Must approve changes or releases before they go ahead (e.g. a change advisory board).
+    from: [committee, person, team]
+    to: [platform, product]
+    default-from: committee
+    inline: approvers
+    attributes: [scope, note]
+    style: { line: solid, weight: 2, glyph: check-circle }
+    aliases: [approves, change-approver, gatekeeper]
+
+  - id: reports-to
+    label: Reports to
+    inverse: Receives reports from
+    category: governance
+    description: Where a committee sends its decisions and escalations.
+    from: [committee]
+    to: [committee, person, team, business-unit]
+    default-from: committee
+    inline-on-source: reports-to
+    default-to: person
+    attributes: [note]
+    style: { line: solid, weight: 1, glyph: arrow-up }
+    aliases: [reports, escalates-to]
+
   # ---- Technical: how products and platforms connect ----
   - id: uses
     label: Uses
     inverse: Used by
     category: technical
-    description: The product runs on, or makes use of, the platform.
+    description: The product makes use of the platform (a database, a queue, an identity provider). Use deployed-to for where it runs.
     from: [product]
     to: [platform]
     default-from: product
@@ -124,7 +180,21 @@ relationship-types:
     default-to: platform
     attributes: [purpose, note]
     style: { line: solid, weight: 2, glyph: plug }
-    aliases: [runs-on, uses-platform, hosted-on]
+    aliases: [uses-platform, integrates-with-platform]
+
+  - id: deployed-to
+    label: Deployed to
+    inverse: Hosts
+    category: technical
+    description: Where the product is deployed and runs, with its environments and regions.
+    from: [product]
+    to: [platform]
+    default-from: product
+    inline-on-source: deployed-to
+    default-to: platform
+    attributes: [environments, regions, note]
+    style: { line: solid, weight: 3, glyph: cloud }
+    aliases: [deployed-on, runs-on, hosted-on, deploys-to]
 
   - id: depends-on
     label: Depends on
@@ -174,6 +244,16 @@ relationship-types:
     from: [person]
     to: [organization, business-unit, team]
     style: { line: solid, weight: 2, glyph: star }
+
+  - id: sits-on
+    label: Sits on
+    inverse: Members
+    category: structural
+    structural: true
+    description: A person holds a seat on a committee (committee `members` and `chair`).
+    from: [person]
+    to: [committee]
+    style: { line: dashed, weight: 1, glyph: law }
 
   - id: part-of
     label: Part of

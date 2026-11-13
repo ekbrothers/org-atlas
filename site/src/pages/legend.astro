@@ -100,6 +100,44 @@ const sample = (over: any) => ({ id: 'x', displayName: 'Example', name: 'Example
   </div>
 
   <section class="panel block">
+    <h2>Committees and boards</h2>
+    <p class="muted small intro">
+      Committees are drawn with a gold square badge and a dashed outline, because they cut across the reporting line rather than sitting in it.
+    </p>
+    <div class="grid">
+      <div>
+        <h3 class="sub">Type</h3>
+        <ul class="legend compact">
+          {
+            vocab.committeeTypes.map((t: any) => (
+              <li>
+                <span class="disc-icon committee"><Icon name={t.icon} size={14} /></span>
+                <div>
+                  <strong>{t.label}</strong>
+                  <span class="muted small">{t.description}</span>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub">Seat</h3>
+        <ul class="legend compact">
+          {
+            vocab.seatRoles.map((r: any) => (
+              <li>
+                <span class="disc-icon type"><Icon name={r.icon} size={14} /></span>
+                <strong>{r.label}</strong>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel block">
     <h2>Relationships</h2>
     <p class="muted small intro">
       Line style shows the kind of responsibility: solid for accountability, dashed for hands-on support, dotted for interest. Heavier lines mean
@@ -200,6 +238,16 @@ const sample = (over: any) => ({ id: 'x', displayName: 'Example', name: 'Example
     border-radius: 50%;
     background: var(--navy);
     color: var(--on-navy);
+  }
+  .disc-icon.committee {
+    border-radius: 4px;
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 10px;
   }
   .disc-icon.type {
     border-radius: var(--radius);
