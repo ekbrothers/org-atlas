@@ -253,6 +253,12 @@
             "infrastructure",
             "security",
             "data",
+            "data-engineering",
+            "analytics-engineering",
+            "data-science",
+            "ml-engineering",
+            "mlops",
+            "data-governance",
             "architecture",
             "product",
             "design",
@@ -399,6 +405,48 @@
         "proprietary": {
           "type": "boolean",
           "description": "Built in-house."
+        },
+        "stack": {
+          "type": "array",
+          "description": "Technologies it is built with, one or more, e.g. [\"python\", \"streamlit\"]. Known ids get a logo (see engine/vocab/technologies.yaml); any other value is shown as text.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "tech": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tech"
+                    ]
+                  }
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
         },
         "owners": {
           "description": "Owner (relationship \"owner\"): Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
@@ -1034,6 +1082,100 @@
             }
           ]
         },
+        "users": {
+          "description": "User (relationship \"user\"): Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers. Bare ids are persona ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "approvers": {
           "description": "Approver (relationship \"approver\"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.",
           "anyOf": [
@@ -1309,6 +1451,48 @@
         "proprietary": {
           "type": "boolean",
           "description": "Built in-house."
+        },
+        "stack": {
+          "type": "array",
+          "description": "Technologies it is built with, one or more, e.g. [\"python\", \"streamlit\"]. Known ids get a logo (see engine/vocab/technologies.yaml); any other value is shown as text.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "tech": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tech"
+                    ]
+                  }
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
         },
         "type": {
           "enum": [
@@ -1954,6 +2138,100 @@
             }
           ]
         },
+        "users": {
+          "description": "User (relationship \"user\"): Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers. Bare ids are persona ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "approvers": {
           "description": "Approver (relationship \"approver\"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.",
           "anyOf": [
@@ -2375,6 +2653,68 @@
               }
             }
           ]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "persona": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "internal": {
+          "type": "boolean",
+          "description": "true for staff (e.g. claims adjusters), false for outside users (e.g. customers, suppliers)."
+        },
+        "size": {
+          "type": "string",
+          "description": "Rough size, e.g. \"4.2M\" or \"350 agents\"."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Octicon name. Defaults to people (internal) or globe (external)."
         }
       },
       "required": [
@@ -2811,6 +3151,12 @@
             "escalation",
             "escalate",
             "escalation-contact",
+            "user",
+            "users",
+            "used-by-persona",
+            "consumer",
+            "audience",
+            "customer-of",
             "governs",
             "oversees",
             "governance",
@@ -2909,6 +3255,7 @@
             "business-unit",
             "team",
             "person",
+            "persona",
             "platform",
             "product",
             "committee",
@@ -2919,7 +3266,9 @@
             "board",
             "council",
             "guild",
-            "forum"
+            "forum",
+            "audience",
+            "user-group"
           ]
         }
       },
@@ -2982,6 +3331,21 @@
           },
           "then": {
             "$ref": "#/definitions/person"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "persona"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/persona"
           }
         },
         {
@@ -3148,6 +3512,36 @@
           "then": {
             "$ref": "#/definitions/committee"
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "audience"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/persona"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "user-group"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/persona"
+          }
         }
       ]
     }
@@ -3201,6 +3595,7 @@
               "business-unit",
               "team",
               "person",
+              "persona",
               "platform",
               "product",
               "committee",
@@ -3212,6 +3607,8 @@
               "council",
               "guild",
               "forum",
+              "audience",
+              "user-group",
               "relationship",
               "relationships"
             ]
@@ -3351,6 +3748,40 @@
               },
               "else": {
                 "$ref": "#/definitions/person"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "persona"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/persona"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/persona"
               }
             }
           },
@@ -3725,6 +4156,74 @@
               },
               "else": {
                 "$ref": "#/definitions/committee"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "audience"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/persona"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/persona"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "user-group"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/persona"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/persona"
               }
             }
           },

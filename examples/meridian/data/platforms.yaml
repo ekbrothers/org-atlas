@@ -18,6 +18,15 @@ items:
       - person:yara-santos
     sponsors:
       - person:nikhil-kim
+    users:
+      - finance-analysts
+      - fraud-analysts
+      - ref: team:fraud-risk-analytics
+    stewards:
+      - ref: person:bruno-reyes
+        scope: Enterprise data model
+      - ref: person:carmen-juarez
+        scope: Clinical data
   - id: github-enterprise
     name: GitHub Enterprise
     logo: si:github
@@ -36,6 +45,8 @@ items:
         scope: Seat requests
     sponsors:
       - person:nikhil-kim
+    users:
+      - engineers
   - id: nexus
     name: Nexus Repository
     logo: si:sonatype
@@ -208,6 +219,8 @@ items:
     description: Work tracking for every team.
     owners:
       - it-service-desk
+    users:
+      - employees
   - id: confluence
     name: Confluence
     logo: si:confluence
@@ -221,6 +234,8 @@ items:
         scope: Licensing and administration
       - ref: enterprise-architecture
         scope: Architecture space and templates
+    users:
+      - employees
   - id: servicenow
     name: ServiceNow
     logo: octicon:checklist
@@ -233,6 +248,8 @@ items:
       - it-service-desk
     escalation:
       - person:amara-gupta
+    users:
+      - employees
   - id: workday
     name: Workday
     logo: octicon:people
@@ -245,6 +262,8 @@ items:
       - hr-technology
     stakeholders:
       - person:tomas-laurent
+    users:
+      - employees
   - id: meridian-ledger
     name: Meridian Ledger
     logo: custom:meridian-ledger
@@ -262,6 +281,9 @@ items:
       - person:tomas-laurent
     built-on:
       - postgresql
+    stack:
+      - java
+      - sql
   - id: meridian-rules
     name: Meridian Rules Engine
     logo: octicon:workflow
@@ -277,6 +299,9 @@ items:
         scope: Claims rule sets
     built-on:
       - kubernetes
+    stack:
+      - kotlin
+      - spring-boot
   - id: legacy-sftp
     name: Legacy SFTP Gateway
     logo: octicon:server

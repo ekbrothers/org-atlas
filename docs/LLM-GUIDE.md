@@ -47,6 +47,7 @@ A complete working example is in [`examples/bundle/data/atlas.json`](../examples
 | `person` | `id`, and `name` unless `employment: vacancy` | `role` (free text), `tier`, `discipline`, `employment`, `memberships` |
 | `platform` | `id`, `name` | `logo`, `category`, `vendor`, `hosting`, `criticality`, `lifecycle`, `proprietary` |
 | `product` | `id`, `name` | as platform, plus `type` (product, application, solution, service, data-product, ml-model). `application` and `solution` are accepted as other names for this kind |
+| `persona` | `id`, `name` | `internal` (false for customers, suppliers and other outside users), `size`, `icon` |
 | `committee` | `id`, `name` | `type`, `purpose`, `cadence`, `chair` (person id), `members` (person ids or `{ person, role, representing }`) |
 
 Every entity also accepts `description`, `tags`, `links` (named URLs), `order` and `meta` (free-form). Unknown fields are rejected so typos are caught; prefix your own fields with `x-` to keep them.
@@ -70,6 +71,7 @@ Each relationship is `{ "from": "kind:id", "type": "...", "to": "kind:id" }`, wi
 | `advises` | committee, person, team | platform, product, team, committee | Advises without decision rights |
 | `approver` | committee, person, team | platform, product | Must approve changes or releases |
 | `reports-to` | committee | committee, person, team, business-unit | Where the committee reports |
+| `user` | persona, team, business-unit, person, committee | product, platform | Uses it day to day |
 | `deployed-to` | product | platform | Where the product is deployed and runs (`environments`, `regions` as lists) |
 | `uses` | product | platform | The product uses the platform, e.g. a database or identity provider (`purpose`) |
 | `depends-on` | product | product | The product needs another product |

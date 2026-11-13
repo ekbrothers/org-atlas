@@ -67,6 +67,13 @@ try {
     cpSync(starterIcons, join(OVERRIDES, 'icons'), { recursive: true, force: false, errorOnExist: false });
   }
 
+  // Starter vocabulary overrides go to overrides/vocab, without overwriting yours.
+  const starterVocab = join(EXAMPLES, starter.name, 'vocab');
+  if (existsSync(starterVocab)) {
+    mkdirSync(join(OVERRIDES, 'vocab'), { recursive: true });
+    cpSync(starterVocab, join(OVERRIDES, 'vocab'), { recursive: true, force: false, errorOnExist: false });
+  }
+
   // Editor autocomplete and validation for data files (VS Code YAML / JSON).
   const vscode = join(ROOT, '.vscode', 'settings.json');
   if (!existsSync(vscode)) {
@@ -92,7 +99,7 @@ try {
     mkdirSync(OVERRIDES, { recursive: true });
     writeFileSync(
       join(OVERRIDES, 'README.md'),
-      '# Overrides\n\nYour customizations live here. This folder is yours; upstream updates never touch it.\n\n- `icons/`: custom SVG logos, used as `logo: custom:<file name without .svg>`\n\nCustom vocabulary, themes and questions arrive in later phases. See docs/PLAN.md.\n',
+      '# Overrides\n\nYour customizations live here. This folder is yours; upstream updates never touch it.\n\n- `icons/`: custom SVG logos, used as `logo: custom:<file name without .svg>`\n- `vocab/`: your own disciplines, tiers, team types, committee types, seat roles, technologies and relationship types, merged on top of the defaults. See docs/CUSTOMIZING.md.\n\nAfter changing `vocab/`, run `npm run generate` so the schema and authoring agent include your changes.\n',
     );
   }
 
@@ -162,5 +169,9 @@ data:
 icons:
   # Custom SVG logos for proprietary platforms: logo: custom:<name> loads <dir>/<name>.svg
   dir: overrides/icons
+
+vocab:
+  # Your own disciplines, team types, relationship types and more (docs/CUSTOMIZING.md)
+  dir: overrides/vocab
 `;
 }

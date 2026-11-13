@@ -39,6 +39,12 @@ disciplines:
   - { id: infrastructure, label: Infrastructure / cloud, icon: server }
   - { id: security, label: Security, icon: shield-lock }
   - { id: data, label: Data / analytics, icon: database }
+  - { id: data-engineering, label: Data engineering, icon: workflow }
+  - { id: analytics-engineering, label: Analytics engineering, icon: graph }
+  - { id: data-science, label: Data science, icon: beaker }
+  - { id: ml-engineering, label: ML engineering, icon: cpu }
+  - { id: mlops, label: MLOps, icon: sync }
+  - { id: data-governance, label: Data governance, icon: shield }
   - { id: architecture, label: Architecture, icon: workflow }
   - { id: product, label: Product management, icon: briefcase }
   - { id: design, label: Design / UX, icon: paintbrush }

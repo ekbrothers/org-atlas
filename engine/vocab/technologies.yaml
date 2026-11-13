@@ -1,0 +1,88 @@
+# Technologies a product or platform is built with (the `stack` field).
+# Engine-owned defaults. Known technologies get a label, category and logo;
+# any other value is still accepted and shown as plain text.
+#
+# logo: si:<simple-icons slug> or octicon:<name> (same syntax as entity logos)
+
+categories:
+  - { id: language, label: Language }
+  - { id: app-framework, label: App framework }
+  - { id: web-framework, label: Web and API framework }
+  - { id: frontend, label: Frontend }
+  - { id: mobile, label: Mobile }
+  - { id: data, label: Data and analytics }
+  - { id: ml, label: Machine learning and AI }
+  - { id: runtime, label: Runtime and infrastructure }
+
+technologies:
+  # Languages
+  - { id: python, label: Python, category: language, logo: si:python }
+  - { id: r, label: R, category: language, logo: si:r, aliases: [rlang] }
+  - { id: sql, label: SQL, category: language, logo: octicon:database }
+  - { id: java, label: Java, category: language, logo: si:openjdk }
+  - { id: kotlin, label: Kotlin, category: language, logo: si:kotlin }
+  - { id: scala, label: Scala, category: language, logo: si:scala }
+  - { id: go, label: Go, category: language, logo: si:go, aliases: [golang] }
+  - { id: rust, label: Rust, category: language, logo: si:rust }
+  - { id: typescript, label: TypeScript, category: language, logo: si:typescript, aliases: [ts] }
+  - { id: javascript, label: JavaScript, category: language, logo: si:javascript, aliases: [js] }
+  - { id: dotnet, label: .NET / C#, category: language, logo: si:dotnet, aliases: [csharp, c#] }
+  - { id: swift, label: Swift, category: language, logo: si:swift }
+  - { id: julia, label: Julia, category: language, logo: si:julia }
+  - { id: ruby, label: Ruby, category: language, logo: si:ruby }
+  - { id: sas, label: SAS, category: language, logo: octicon:graph }
+
+  # Data and ML app frameworks
+  - { id: streamlit, label: Streamlit, category: app-framework, logo: si:streamlit }
+  - { id: shiny, label: Shiny (R), category: app-framework, logo: octicon:graph, aliases: [rshiny, r-shiny] }
+  - { id: plotly-dash, label: Plotly Dash, category: app-framework, logo: si:plotly, aliases: [dash] }
+  - { id: gradio, label: Gradio, category: app-framework, logo: si:gradio }
+  - { id: quarto, label: Quarto, category: app-framework, logo: si:quarto }
+  - { id: jupyter, label: Jupyter, category: app-framework, logo: si:jupyter, aliases: [notebook, notebooks] }
+
+  # Web and API frameworks
+  - { id: fastapi, label: FastAPI, category: web-framework, logo: si:fastapi }
+  - { id: flask, label: Flask, category: web-framework, logo: si:flask }
+  - { id: django, label: Django, category: web-framework, logo: si:django }
+  - { id: plumber, label: Plumber (R API), category: web-framework, logo: octicon:plug }
+  - { id: spring-boot, label: Spring Boot, category: web-framework, logo: si:springboot, aliases: [springboot, spring] }
+  - { id: nodejs, label: Node.js, category: web-framework, logo: si:nodedotjs, aliases: [node] }
+  - { id: express, label: Express, category: web-framework, logo: si:express }
+  - { id: nestjs, label: NestJS, category: web-framework, logo: si:nestjs }
+  - { id: rails, label: Ruby on Rails, category: web-framework, logo: si:rubyonrails }
+  - { id: graphql, label: GraphQL, category: web-framework, logo: si:graphql }
+
+  # Frontend and mobile
+  - { id: react, label: React, category: frontend, logo: si:react }
+  - { id: nextjs, label: Next.js, category: frontend, logo: si:nextdotjs, aliases: [next] }
+  - { id: angular, label: Angular, category: frontend, logo: si:angular }
+  - { id: vue, label: Vue, category: frontend, logo: si:vuedotjs, aliases: [vuejs] }
+  - { id: svelte, label: Svelte, category: frontend, logo: si:svelte }
+  - { id: flutter, label: Flutter, category: mobile, logo: si:flutter }
+  - { id: ios, label: iOS (Swift), category: mobile, logo: si:swift }
+  - { id: android, label: Android (Kotlin), category: mobile, logo: si:kotlin }
+
+  # Data and analytics
+  - { id: pandas, label: pandas, category: data, logo: si:pandas }
+  - { id: polars, label: Polars, category: data, logo: si:polars }
+  - { id: numpy, label: NumPy, category: data, logo: si:numpy }
+  - { id: spark, label: Apache Spark, category: data, logo: si:apachespark, aliases: [pyspark, apache-spark] }
+  - { id: dbt, label: dbt, category: data, logo: octicon:workflow }
+  - { id: airflow, label: Apache Airflow, category: data, logo: si:apacheairflow }
+  - { id: duckdb, label: DuckDB, category: data, logo: si:duckdb }
+
+  # Machine learning and AI
+  - { id: scikit-learn, label: scikit-learn, category: ml, logo: si:scikitlearn, aliases: [sklearn, scikitlearn] }
+  - { id: pytorch, label: PyTorch, category: ml, logo: si:pytorch, aliases: [torch] }
+  - { id: tensorflow, label: TensorFlow, category: ml, logo: si:tensorflow }
+  - { id: keras, label: Keras, category: ml, logo: si:keras }
+  - { id: xgboost, label: XGBoost, category: ml, logo: octicon:graph }
+  - { id: mlflow, label: MLflow, category: ml, logo: si:mlflow }
+  - { id: hugging-face, label: Hugging Face, category: ml, logo: si:huggingface, aliases: [huggingface, transformers] }
+  - { id: langchain, label: LangChain, category: ml, logo: si:langchain }
+
+  # Runtime and infrastructure
+  - { id: docker, label: Docker, category: runtime, logo: si:docker }
+  - { id: kubernetes, label: Kubernetes, category: runtime, logo: si:kubernetes, aliases: [k8s] }
+  - { id: terraform, label: Terraform, category: runtime, logo: si:terraform }
+  - { id: kafka-streams, label: Kafka Streams, category: runtime, logo: si:apachekafka }

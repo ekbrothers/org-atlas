@@ -49,6 +49,7 @@ export function loadConfig() {
     },
     dataDir: resolve(configDir, raw.data?.dir ?? 'data'),
     iconsDir: resolve(configDir, raw.icons?.dir ?? 'overrides/icons'),
+    vocabDir: resolve(configDir, raw.vocab?.dir ?? 'overrides/vocab'),
   };
 }
 

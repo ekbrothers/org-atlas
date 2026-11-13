@@ -5,6 +5,8 @@ import { atlas, href } from '../lib/atlas';
 
 const { model, config } = atlas();
 const open = model.people.filter((p: any) => p.employment === 'vacancy').length;
+// The product with the most relationships makes the best sample diagram.
+const sample = [...model.products].sort((a: any, b: any) => model.edgesTo(b).length - model.edgesTo(a).length)[0];
 const stats = [
   { n: model.units.length, label: 'Business units', icon: 'organization' },
   { n: model.teams.length, label: 'Teams', icon: 'people' },
@@ -39,7 +41,16 @@ const phases = [
     <span class="eyebrow">Org Atlas</span>
     <h1>{config.organization.name}</h1>
     <p class="lead">An interactive map of the organization: business units, teams, people, and the solutions and platforms they run.</p>
-    <a class="btn" href={href('org/')}><Icon name="organization" size={16} /> Open the org chart</a>
+    <div class="actions">
+      <a class="btn" href={href('org/')}><Icon name="organization" size={16} /> Open the org chart</a>
+      {
+        sample && (
+          <a class="btn btn-ghost" href={href(`products/${sample.id}/`)}>
+            <Icon name="workflow" size={16} /> Sample context diagram: {sample.name}
+          </a>
+        )
+      }
+    </div>
   </section>
 
   <section class="stats">
@@ -101,6 +112,11 @@ const phases = [
     color: var(--muted);
     max-width: 60ch;
     margin: 0 0 20px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .stats {
     display: grid;

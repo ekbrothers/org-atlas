@@ -26,13 +26,15 @@ const url =
 const icon =
   entity.kind === 'committee'
     ? (atlas().vocab.committeeType[entity.type]?.icon ?? 'law')
+    : entity.kind === 'persona'
+      ? entity.icon
     : ({ team: 'people', person: 'person', 'business-unit': 'organization', organization: 'organization' }[entity.kind as string] ?? 'package');
 const showLogo = logo && (entity.kind === 'platform' || entity.kind === 'product');
 const Tag = url ? 'a' : 'span';
 ---
 
-<Tag class="ref" href={url ?? undefined}>
-  {showLogo ? <Logo entity={entity} size={22} /> : <span class:list={['ref-icon', { committee: entity.kind === 'committee' }]}><Icon name={icon} size={14} /></span>}
+<Tag class="ref" href={url ?? undefined} title={entity.kind === 'persona' ? [entity.description, entity.size].filter(Boolean).join(' | ') : undefined}>
+  {showLogo ? <Logo entity={entity} size={22} /> : <span class:list={['ref-icon', { committee: entity.kind === 'committee', external: entity.kind === 'persona' && entity.internal === false }]}><Icon name={icon} size={14} /></span>}
   <span class="ref-name">{nameOf(entity)}</span>
 </Tag>
 
@@ -53,6 +55,10 @@ const Tag = url ? 'a' : 'span';
     background: var(--surface-tint);
     color: var(--blue);
     flex: none;
+  }
+  .ref-icon.external {
+    background: transparent;
+    border: 1px dashed var(--muted);
   }
   .ref-icon.committee {
     border-radius: 4px;

@@ -1,0 +1,83 @@
+---
+// Technologies a product or platform is built with, as logo chips.
+interface Props {
+  entity: any;
+  size?: 'sm' | 'md';
+}
+const { entity, size = 'md' } = Astro.props;
+const items = entity.stackItems ?? [];
+---
+
+{
+  items.length > 0 && (
+    <ul class:list={['stack', size]}>
+      {items.map((t: any) => (
+        <li class:list={['tech', { unknown: !t.known }]} title={[t.label, t.version && `version ${t.version}`, t.note].filter(Boolean).join(', ')}>
+          <span class="tech-logo" set:html={t.logo?.svg ?? ''} />
+          <span>{t.label}</span>
+          {t.version && <span class="ver">{t.version}</span>}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tech {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px 2px 4px;
+  }
+  .sm .tech {
+    font-size: 12px;
+    padding: 1px 8px 1px 3px;
+  }
+  .tech-logo {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #ccd4dc;
+    padding: 3px;
+  }
+  .sm .tech-logo {
+    width: 17px;
+    height: 17px;
+  }
+  .tech-logo :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .unknown .tech-logo,
+  .tech-logo:has(.octicon) {
+    color: var(--blue);
+    background: var(--surface-tint);
+    border-color: var(--border);
+  }
+  .tech-logo :global(.octicon),
+  .tech-logo :global(svg:not([fill])) {
+    fill: currentColor;
+  }
+  .ver {
+    font-weight: 500;
+    color: var(--muted);
+  }
+</style>

@@ -8,8 +8,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from '../lib/config.mjs';
 import { buildAgent } from '../lib/agent.mjs';
+import { loadConfig } from '../lib/config.mjs';
+import { loadVocab } from '../lib/model.mjs';
 
-const { body, tool, claudeAgent, agentsMd } = buildAgent();
+// Your overrides are included; the bundled demo's are not (upstream files describe the defaults).
+const config = loadConfig();
+
+const { body, tool, claudeAgent, agentsMd } = buildAgent(loadVocab({ overridesDir: config.demo ? null : config.vocabDir }));
 mkdirSync(join(ROOT, 'agent'), { recursive: true });
 mkdirSync(join(ROOT, '.claude', 'agents'), { recursive: true });
 writeFileSync(join(ROOT, 'agent', 'org-atlas-agent.md'), body);

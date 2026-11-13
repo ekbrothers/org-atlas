@@ -409,6 +409,104 @@ const products = [
   app('service-catalog', 'Service Catalog', 'it-service-desk', [use('servicenow', 'Requests and approvals')],
     { description: 'Employee requests for access, hardware and software.', criticality: 'T2', logo: 'octicon:checklist' }),
 ];
+// Two data apps, to show R / Shiny and Python / Streamlit products.
+products.push(
+  app('claims-insights', 'Claims Insights Dashboard', 'clinical-data', [use('snowflake', 'Claims and clinical data')], {
+    description: 'Interactive dashboard of claim trends, denials and provider performance.', criticality: 'T2', logo: 'octicon:graph', type: 'data-product',
+  }),
+  app('promo-planner', 'Promotion Planner', 'pricing-promotions', [use('snowflake', 'Sales history'), use('databricks', 'Uplift models')], {
+    description: 'Lets merchandisers simulate promotions and see forecast uplift before launch.', criticality: 'T2', logo: 'octicon:tag', type: 'data-product',
+  }),
+);
+
+// Tech stacks (one or more technologies per product).
+const STACKS = {
+  'payments-gateway': ['java', 'spring-boot', 'kafka-streams'],
+  'card-authorization': ['go'],
+  'loan-origination': ['kotlin', 'spring-boot', 'react'],
+  'fraud-scoring': ['python', 'pytorch', 'mlflow', 'fastapi'],
+  'mobile-banking': ['ios', 'android', 'graphql'],
+  'storefront-web': ['typescript', 'nextjs', 'react'],
+  checkout: ['typescript', 'nodejs', 'react'],
+  'order-service': ['java', 'spring-boot'],
+  'pricing-engine': ['python', 'fastapi'],
+  'supplier-gateway': ['python', 'airflow'],
+  'claims-engine': ['java', 'spring-boot'],
+  'member-portal-app': ['typescript', 'angular'],
+  'clinical-data-exchange': ['python', 'fastapi'],
+  'developer-portal': ['typescript', 'react', 'nodejs'],
+  'identity-gateway': ['go'],
+  'general-ledger': ['java', { id: 'sql', note: 'Stored procedures' }],
+  'hr-hub': ['typescript', 'react'],
+  'contract-vault': ['python', 'django'],
+  'service-catalog': ['javascript'],
+  'claims-insights': [{ id: 'r', version: '4.4' }, 'shiny', 'plumber'],
+  'promo-planner': [{ id: 'python', version: '3.12' }, 'streamlit', 'pandas', 'scikit-learn'],
+};
+for (const a of products) if (STACKS[a.id]) a.stack = STACKS[a.id];
+const P = (id) => platforms.find((x) => x.id === id);
+P('meridian-ledger').stack = ['java', 'sql'];
+P('meridian-rules').stack = ['kotlin', 'spring-boot'];
+
+// Personas: the people who use products, inside and outside the company.
+const personas = [
+  { id: 'retail-customers', name: 'Online shoppers', internal: false, size: '4.2M monthly', description: 'Customers buying through the storefront.' },
+  { id: 'cardholders', name: 'Cardholders', internal: false, size: '1.8M', description: 'Customers using Meridian cards.' },
+  { id: 'banking-customers', name: 'Banking customers', internal: false, size: '900K', description: 'Retail banking app users.' },
+  { id: 'health-plan-members', name: 'Health plan members', internal: false, size: '650K', description: 'Members of Meridian health plans.' },
+  { id: 'providers', name: 'Healthcare providers', internal: false, size: '12K practices', description: 'Clinics and hospitals submitting claims and records.' },
+  { id: 'suppliers', name: 'Suppliers', internal: false, size: '1,400', description: 'Vendors and logistics partners.' },
+  { id: 'claims-adjusters', name: 'Claims adjusters', internal: true, size: '320', description: 'Staff who review and decide claims.' },
+  { id: 'fraud-analysts', name: 'Fraud analysts', internal: true, size: '45', description: 'Investigate flagged transactions.' },
+  { id: 'merchandisers', name: 'Merchandisers', internal: true, size: '60', description: 'Plan pricing and promotions.' },
+  { id: 'finance-analysts', name: 'Finance analysts', internal: true, size: '80', description: 'Close the books and report results.' },
+  { id: 'loan-officers', name: 'Loan officers', internal: true, size: '150', description: 'Review loan applications.' },
+  { id: 'employees', name: 'All employees', internal: true, size: '2,500', description: 'Everyone at Meridian.' },
+  { id: 'engineers', name: 'Engineers', internal: true, size: '600', description: 'Everyone who builds software at Meridian.' },
+];
+const USERS = {
+  'payments-gateway': ['cardholders', 'retail-customers'],
+  'card-authorization': ['cardholders', { ref: 'fraud-analysts', note: 'Review declined transactions' }],
+  'loan-origination': ['banking-customers', 'loan-officers'],
+  'fraud-scoring': ['fraud-analysts'],
+  'mobile-banking': ['banking-customers', 'cardholders'],
+  'storefront-web': ['retail-customers'],
+  checkout: ['retail-customers'],
+  'order-service': [{ ref: 'team:order-management', note: 'Operations console' }],
+  'pricing-engine': ['merchandisers'],
+  'supplier-gateway': ['suppliers'],
+  'claims-engine': ['claims-adjusters', 'providers'],
+  'member-portal-app': ['health-plan-members'],
+  'clinical-data-exchange': ['providers'],
+  'developer-portal': ['engineers'],
+  'general-ledger': ['finance-analysts', 'business-unit:corp'],
+  'hr-hub': ['employees'],
+  'contract-vault': [{ ref: 'team:legal-compliance-tech', note: 'Legal team' }],
+  'service-catalog': ['employees'],
+  'claims-insights': ['claims-adjusters', { ref: 'business-unit:hc', note: 'Healthcare leadership reviews monthly' }],
+  'promo-planner': ['merchandisers', { ref: 'team:pricing-promotions' }],
+};
+for (const a of products) if (USERS[a.id]) a.users = USERS[a.id];
+P('github-enterprise').users = ['engineers'];
+P('jira').users = ['employees'];
+P('confluence').users = ['employees'];
+P('servicenow').users = ['employees'];
+P('workday').users = ['employees'];
+P('snowflake').users = ['finance-analysts', 'fraud-analysts', { ref: 'team:fraud-risk-analytics' }];
+
+// More stakeholders and SMEs on the richest examples.
+products.find((a) => a.id === 'payments-gateway').stakeholders.push('team:fraud-risk-analytics', 'committee:model-risk-committee');
+products.find((a) => a.id === 'payments-gateway').smes = compact([pers(expert('payments-core', 'software-engineering')), pers(expert('site-reliability-engineering'))]);
+products.find((a) => a.id === 'payments-gateway').escalation = compact([pers(leadOf('payments-core'))]);
+products.find((a) => a.id === 'claims-insights').sponsors = compact([pers(unitLeadOf('clinical-data'))]);
+products.find((a) => a.id === 'promo-planner').supporting = [{ ref: 'data-platform', scope: 'Databricks workspace' }];
+
+// Uses Meridian's own vocabulary (examples/meridian/vocab/meridian.yaml):
+// the data-domain team type, the data-steward relationship and the Posit Connect technology.
+for (const t of teams) if (t.type === 'complicated-subsystem') t.type = 'data-domain';
+P('snowflake').stewards = compact([{ ref: pers(leadOf('data-platform')), scope: 'Enterprise data model' }, { ref: pers(leadOf('clinical-data')), scope: 'Clinical data' }]);
+products.find((a) => a.id === 'claims-insights').stack.push('posit-connect');
+
 // Deployments: products that ran "on" Kubernetes are deployed to it, with environments and regions.
 const customerFacing = new Set(['payments-gateway', 'card-authorization', 'mobile-banking', 'storefront-web', 'checkout', 'member-portal-app', 'identity-gateway']);
 const deploy = (ref, environments, regions) => ({ ref, environments, regions });
@@ -429,6 +527,8 @@ const extraDeploys = {
   'general-ledger': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
   'hr-hub': [deploy('workday', ['production', 'sandbox'], ['us-east'])],
   'service-catalog': [deploy('servicenow', ['production', 'development'], ['us-east'])],
+  'claims-insights': [deploy('kubernetes', ['production', 'staging'], ['us-east'])],
+  'promo-planner': [deploy('databricks', ['production'], ['us-east'])],
 };
 for (const [id, list] of Object.entries(extraDeploys)) {
   const a = products.find((x) => x.id === id);
@@ -560,6 +660,7 @@ for (const [teamId, list] of people) {
 write('platforms.yaml', { kind: 'platform', items: platforms });
 write('products.yaml', { kind: 'product', items: products });
 write('committees.yaml', { kind: 'committee', items: committees });
+write('personas.yaml', { kind: 'persona', items: personas });
 
 const total = [...people.values()].flat().length;
-console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${products.length} products, ${committees.length} committees -> ${OUT}`);
+console.log(`Meridian Dynamics: ${units.length} business units, ${teams.length} teams, ${total} people, ${platforms.length} platforms, ${products.length} products, ${committees.length} committees, ${personas.length} personas -> ${OUT}`);

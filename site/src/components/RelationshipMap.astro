@@ -23,7 +23,7 @@ const lineCss = (t: any) => {
 };
 
 const left = vocab.relTypes
-  .filter((t: any) => t.category === 'accountability' || t.category === 'governance')
+  .filter((t: any) => ['accountability', 'audience', 'governance'].includes(t.category))
   .map((t: any) => ({ t, label: t.inverse, items: model.edgesTo(entity, t.id).map((e: any) => ({ other: e.from, e })) }))
   .filter((g: any) => g.items.length);
 

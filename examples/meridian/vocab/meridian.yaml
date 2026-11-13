@@ -1,0 +1,36 @@
+# Meridian's own vocabulary, merged on top of the Org Atlas defaults.
+# This file shows every kind of customization; see docs/CUSTOMIZING.md.
+
+# Add a team type
+team-types:
+  - id: data-domain
+    label: Data domain
+    icon: database
+
+# Add a discipline, and rename a default one
+disciplines:
+  - { id: actuarial, label: Actuarial, icon: graph }
+  - { id: support, label: Service desk and support }
+
+# Add a technology
+technologies:
+  - { id: posit-connect, label: Posit Connect, category: runtime, logo: si:posit }
+
+# Add a relationship type, with an inline field so platforms can say `stewards: [...]`
+relationship-types:
+  - id: data-steward
+    label: Data steward
+    inverse: Data stewards
+    category: accountability
+    description: Looks after data quality, definitions and access approvals for the data in it.
+    from: [person, team]
+    to: [platform, product]
+    default-from: person
+    inline: stewards
+    attributes: [scope, note]
+    style: { line: dotted, weight: 2, glyph: shield }
+    aliases: [steward]
+
+# Remove defaults Meridian does not use
+remove:
+  team-types: [complicated-subsystem]

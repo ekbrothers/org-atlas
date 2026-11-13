@@ -16,6 +16,8 @@ items:
         purpose: Monitoring
     stakeholders:
       - person:rafael-fischer
+      - team:fraud-risk-analytics
+      - committee:model-risk-committee
     description: Routes card and real-time payments to processors.
     criticality: T0
     logo: octicon:credit-card
@@ -23,6 +25,18 @@ items:
       - site-reliability-engineering
     sponsors:
       - person:tomas-laurent
+    stack:
+      - java
+      - spring-boot
+      - kafka-streams
+    users:
+      - cardholders
+      - retail-customers
+    smes:
+      - person:zain-kowalski
+      - person:sofia-tanaka
+    escalation:
+      - person:felix-abara
     deployed-to:
       - ref: kubernetes
         environments:
@@ -50,6 +64,12 @@ items:
     depends-on:
       - payments-gateway
       - fraud-scoring
+    stack:
+      - go
+    users:
+      - cardholders
+      - ref: fraud-analysts
+        note: Review declined transactions
     deployed-to:
       - ref: kubernetes
         environments:
@@ -76,6 +96,13 @@ items:
     description: Loa products, decisions and document collection.
     criticality: T1
     logo: octicon:file-badge
+    stack:
+      - kotlin
+      - spring-boot
+      - react
+    users:
+      - banking-customers
+      - loan-officers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -105,6 +132,13 @@ items:
     supporting:
       - ref: data-platform
         scope: Pipelines
+    stack:
+      - python
+      - pytorch
+      - mlflow
+      - fastapi
+    users:
+      - fraud-analysts
     deployed-to:
       - ref: databricks
         environments:
@@ -132,6 +166,13 @@ items:
     depends-on:
       - payments-gateway
       - identity-gateway
+    stack:
+      - ios
+      - android
+      - graphql
+    users:
+      - banking-customers
+      - cardholders
     deployed-to:
       - ref: kubernetes
         environments:
@@ -158,6 +199,12 @@ items:
     depends-on:
       - checkout
       - pricing-engine
+    stack:
+      - typescript
+      - nextjs
+      - react
+    users:
+      - retail-customers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -193,6 +240,12 @@ items:
     depends-on:
       - payments-gateway
       - order-service
+    stack:
+      - typescript
+      - nodejs
+      - react
+    users:
+      - retail-customers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -219,6 +272,12 @@ items:
     description: Order lifecycle, fulfilment and returns.
     criticality: T0
     logo: octicon:package
+    stack:
+      - java
+      - spring-boot
+    users:
+      - ref: team:order-management
+        note: Operations console
     deployed-to:
       - ref: kubernetes
         environments:
@@ -244,6 +303,11 @@ items:
     description: Prices, discounts and promotions.
     criticality: T1
     logo: octicon:tag
+    stack:
+      - python
+      - fastapi
+    users:
+      - merchandisers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -265,6 +329,11 @@ items:
     description: Integrations with suppliers and logistics partners.
     criticality: T1
     logo: octicon:arrow-both
+    stack:
+      - python
+      - airflow
+    users:
+      - suppliers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -286,6 +355,12 @@ items:
     description: Claims intake, adjudication and payment.
     criticality: T0
     logo: octicon:law
+    stack:
+      - java
+      - spring-boot
+    users:
+      - claims-adjusters
+      - providers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -312,6 +387,11 @@ items:
     depends-on:
       - claims-engine
       - identity-gateway
+    stack:
+      - typescript
+      - angular
+    users:
+      - health-plan-members
     deployed-to:
       - ref: kubernetes
         environments:
@@ -337,6 +417,11 @@ items:
     description: Exchanges clinical records with providers.
     criticality: T1
     logo: octicon:arrow-both
+    stack:
+      - python
+      - fastapi
+    users:
+      - providers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -358,6 +443,12 @@ items:
     description: Internal catalog of services, docs and templates.
     criticality: T2
     logo: octicon:repo
+    stack:
+      - typescript
+      - react
+      - nodejs
+    users:
+      - engineers
     deployed-to:
       - ref: kubernetes
         environments:
@@ -378,6 +469,8 @@ items:
     description: Token exchange and session service for customer apps.
     criticality: T0
     logo: octicon:key
+    stack:
+      - go
     deployed-to:
       - ref: kubernetes
         environments:
@@ -406,6 +499,13 @@ items:
     description: Financial close and reporting.
     criticality: T0
     logo: octicon:table
+    stack:
+      - java
+      - id: sql
+        note: Stored procedures
+    users:
+      - finance-analysts
+      - business-unit:corp
     deployed-to:
       - ref: kubernetes
         environments:
@@ -430,6 +530,11 @@ items:
     description: Employee self-service on top of Workday.
     criticality: T2
     logo: octicon:people
+    stack:
+      - typescript
+      - react
+    users:
+      - employees
     deployed-to:
       - ref: workday
         environments:
@@ -451,6 +556,12 @@ items:
     description: Contract storage, search and renewal reminders.
     criticality: T2
     logo: octicon:law
+    stack:
+      - python
+      - django
+    users:
+      - ref: team:legal-compliance-tech
+        note: Legal team
   - id: service-catalog
     name: Service Catalog
     owners:
@@ -463,10 +574,79 @@ items:
     description: Employee requests for access, hardware and software.
     criticality: T2
     logo: octicon:checklist
+    stack:
+      - javascript
+    users:
+      - employees
     deployed-to:
       - ref: servicenow
         environments:
           - production
           - development
+        regions:
+          - us-east
+  - id: claims-insights
+    name: Claims Insights Dashboard
+    owners:
+      - clinical-data
+    platforms:
+      - ref: snowflake
+        purpose: Claims and clinical data
+    stakeholders:
+      - person:diego-nakamura
+    description: Interactive dashboard of claim trends, denials and provider performance.
+    criticality: T2
+    logo: octicon:graph
+    type: data-product
+    stack:
+      - id: r
+        version: "4.4"
+      - shiny
+      - plumber
+      - posit-connect
+    users:
+      - claims-adjusters
+      - ref: business-unit:hc
+        note: Healthcare leadership reviews monthly
+    sponsors:
+      - person:diego-nakamura
+    deployed-to:
+      - ref: kubernetes
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
+  - id: promo-planner
+    name: Promotion Planner
+    owners:
+      - pricing-promotions
+    platforms:
+      - ref: snowflake
+        purpose: Sales history
+      - ref: databricks
+        purpose: Uplift models
+    stakeholders:
+      - person:felix-whitfield
+    description: Lets merchandisers simulate promotions and see forecast uplift before launch.
+    criticality: T2
+    logo: octicon:tag
+    type: data-product
+    stack:
+      - id: python
+        version: "3.12"
+      - streamlit
+      - pandas
+      - scikit-learn
+    users:
+      - merchandisers
+      - ref: team:pricing-promotions
+    supporting:
+      - ref: data-platform
+        scope: Databricks workspace
+    deployed-to:
+      - ref: databricks
+        environments:
+          - production
         regions:
           - us-east

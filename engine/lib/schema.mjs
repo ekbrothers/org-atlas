@@ -69,6 +69,22 @@ export function buildSchema(vocab = loadVocab()) {
     criticality: { enum: ['T0', 'T1', 'T2', 'T3'], description: 'T0 is most critical.' },
     lifecycle: { enum: ['planned', 'pilot', 'active', 'contained', 'deprecated', 'sunset'] },
     proprietary: { type: 'boolean', description: 'Built in-house.' },
+    stack: {
+      type: 'array',
+      description:
+        'Technologies it is built with, one or more, e.g. ["python", "streamlit"]. Known ids get a logo (see engine/vocab/technologies.yaml); any other value is shown as text.',
+      items: {
+        anyOf: [
+          { type: 'string', minLength: 1 },
+          {
+            type: 'object',
+            properties: { id: { type: 'string' }, tech: { type: 'string' }, version: { type: 'string' }, note: { type: 'string' } },
+            anyOf: [{ required: ['id'] }, { required: ['tech'] }],
+            additionalProperties: false,
+          },
+        ],
+      },
+    },
   };
 
   const defs = {
@@ -107,6 +123,14 @@ export function buildSchema(vocab = loadVocab()) {
     }),
     platform: strict({ ...tech, ...inlineFields('platform') }, ['id', 'name']),
     product: strict({ ...tech, type: { enum: ['product', 'application', 'solution', 'service', 'data-product', 'ml-model'] }, ...inlineFields('product') }, ['id', 'name']),
+    persona: strict(
+      {
+        internal: { type: 'boolean', description: 'true for staff (e.g. claims adjusters), false for outside users (e.g. customers, suppliers).' },
+        size: { type: 'string', description: 'Rough size, e.g. "4.2M" or "350 agents".' },
+        icon: { type: 'string', description: 'Octicon name. Defaults to people (internal) or globe (external).' },
+      },
+      ['id', 'name'],
+    ),
     committee: strict(
       {
         type: { enum: enumOf(vocab.committeeTypes) },

@@ -37,8 +37,7 @@ function kindFields(schema, kind) {
     });
 }
 
-export function buildAgent() {
-  const vocab = loadVocab();
+export function buildAgent(vocab = loadVocab()) {
   const schema = buildSchema(vocab);
   const example = readFileSync(join(ROOT, 'examples/bundle/data/atlas.json'), 'utf8').trim();
   const aliases = Object.entries(KIND_ALIASES)
@@ -68,6 +67,8 @@ export function buildAgent() {
 You are the **Org Atlas authoring agent**. You turn descriptions of an organization (business units, teams, people, platforms, products, committees and how they relate) into data that Org Atlas renders as org charts, team pages, platform and product ownership maps, committee pages and relationship maps.
 
 You can create a whole new chart, add to an existing one, or change relationships. You only ever produce data; the site draws the diagrams.
+
+The kinds, fields, allowed values and relationship types below are exactly what this repository accepts, including any custom vocabulary in \`overrides/vocab/\`. Use only these. If the request needs a type that does not exist (a new discipline, team type or relationship), say so and propose the \`overrides/vocab/\` entry instead of inventing a value.
 
 ## How you work
 
@@ -117,6 +118,7 @@ ${structural.map((t) => `- **${t.label}** (\`${t.id}\`): ${t.description}`).join
 - Platform and product \`hosting\`: ${schema.definitions.platform.properties.hosting.enum.map((x) => `\`${x}\``).join(', ')}
 - \`criticality\`: ${schema.definitions.platform.properties.criticality.enum.map((x) => `\`${x}\``).join(', ')} (T0 is most critical)
 - \`lifecycle\`: ${schema.definitions.platform.properties.lifecycle.enum.map((x) => `\`${x}\``).join(', ')}
+- Known technologies for \`stack\` (other values are allowed): ${vocab.technologies.map((t) => `\`${t.id}\``).join(', ')}
 - Product \`type\`: ${schema.definitions.product.properties.type.enum.map((x) => `\`${x}\``).join(', ')}
 
 ## Modeling rules
@@ -126,6 +128,8 @@ ${structural.map((t) => `- **${t.label}** (\`${t.id}\`): ${t.description}`).join
 - **Where a product runs** is \`deployed-to\` (with \`environments\` and \`regions\` lists). **What it uses** (a database, a queue, an identity provider) is \`uses\` with a \`purpose\`.
 - People belong to teams through \`memberships\`. Someone on several teams has one \`{ "team": "...", "primary": true }\` and may have a per-team \`role\`.
 - \`role\` on a person is free text in their own words; \`tier\` and \`discipline\` are the structured categories.
+- **Users** of a product are \`user\` relationships, usually from a \`persona\` (a group such as customers, claims adjusters or suppliers; set \`internal: false\` for outside users) or a team or business unit.
+- **Tech stack:** list one or more technologies in \`stack\`, e.g. \`["python", "streamlit"]\`, or \`{ "id": "r", "version": "4.4" }\`. Prefer the known ids listed below; other values are allowed and shown as text.
 - Committees are not teams: give them a \`type\`, a \`chair\` and \`members\` with seat roles, and connect them with \`governs\`, \`advises\`, \`approver\` and \`reports-to\`.
 - Team \`parent\` is a business unit id. Team and business unit \`lead\` is a person id.
 

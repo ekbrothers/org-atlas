@@ -6,6 +6,7 @@ import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import EntityRef from './EntityRef.astro';
 import RelLine from './RelLine.astro';
+import StackChips from './StackChips.astro';
 import { atlas, href } from '../lib/atlas';
 
 interface Props {
@@ -54,6 +55,9 @@ const governedBy = vocab.relTypes
 const seats = team.members
   .filter((m: any) => m.primary)
   .flatMap((m: any) => m.person.seats.map((s: any) => ({ person: m.person, ...s })));
+const techMap = new Map<string, any>();
+for (const a of ownedApps) for (const t of a.stackItems ?? []) if (!techMap.has(t.id)) techMap.set(t.id, { ...t, version: null });
+const teamStack = { stackItems: [...techMap.values()] };
 const nothing = !owned.length && !other.length;
 ---
 
@@ -135,6 +139,17 @@ const nothing = !owned.length && !other.length;
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+{
+  teamStack.stackItems.length > 0 && (
+    <section class="group">
+      <h2 class="eyebrow">
+        <Icon name="code" size={14} /> Technologies in our products
+      </h2>
+      <StackChips entity={teamStack} />
     </section>
   )
 }

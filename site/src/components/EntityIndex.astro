@@ -3,6 +3,7 @@
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import EntityRef from './EntityRef.astro';
+import StackChips from './StackChips.astro';
 import { atlas, href } from '../lib/atlas';
 
 interface Props {
@@ -13,6 +14,7 @@ const { model } = atlas();
 const list = kind === 'platform' ? model.platforms : model.products;
 const path = kind === 'platform' ? 'platforms' : 'products';
 const categories = [...new Set(list.map((e: any) => (kind === 'platform' ? e.category : e.criticality)).filter(Boolean))].sort();
+const techs = [...new Map(list.flatMap((e: any) => (e.stackItems ?? []).map((t: any) => [t.id, t.label]))).entries()].sort((a: any, b: any) => a[1].localeCompare(b[1]));
 const ownerTeams = [...new Map(list.flatMap((e: any) => model.edgesTo(e, 'owner').map((x: any) => [x.from.id, x.from]))).values()].sort(
   (a: any, b: any) => a.name.localeCompare(b.name),
 );
@@ -43,6 +45,17 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
       {ownerTeams.map((t: any) => <option value={`${t.kind}:${t.id}`}>{t.name ?? t.displayName}</option>)}
     </select>
   </label>
+  {
+    techs.length > 0 && (
+      <label class="field">
+        <span class="field-label">Built with</span>
+        <select id="x-tech">
+          <option value="">Any</option>
+          {techs.map(([id, label]: any) => <option value={id}>{label}</option>)}
+        </select>
+      </label>
+    )
+  }
   <label class="check"><input id="x-shared" type="checkbox" /> Shared ownership</label>
   <label class="check"><input id="x-unowned" type="checkbox" /> Unowned</label>
   <p id="x-count" class="count muted" aria-live="polite"></p>
@@ -58,6 +71,7 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
           class="card panel"
           data-cat={kind === 'platform' ? (e.category ?? '') : (e.criticality ?? '')}
           data-owners={owners.map((o: any) => `${o.from.kind}:${o.from.id}`).join(' ')}
+          data-tech={(e.stackItems ?? []).map((t: any) => t.id).join(' ')}
           data-text={[e.name, e.description, e.vendor, ...owners.map((o: any) => o.from.name ?? o.from.displayName)].join(' ').toLowerCase()}
         >
           <div class="card-head">
@@ -70,6 +84,7 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
             </div>
           </div>
           {e.description && <p class="desc">{e.description}</p>}
+          <StackChips entity={e} size="sm" />
           <div class="owners">
             <span class="label">
               <Icon name="shield-check" size={12} /> {owners.length > 1 ? 'Shared ownership' : 'Owner'}
@@ -117,6 +132,7 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
   const owner = document.querySelector('#x-owner') as HTMLSelectElement;
   const shared = document.querySelector('#x-shared') as HTMLInputElement;
   const unowned = document.querySelector('#x-unowned') as HTMLInputElement;
+  const tech = document.querySelector('#x-tech') as HTMLSelectElement | null;
   const count = document.querySelector('#x-count') as HTMLParagraphElement;
   const cards = [...document.querySelectorAll<HTMLElement>('.card')];
   const params = new URLSearchParams(location.search);
@@ -132,13 +148,15 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
         (!cat.value || c.dataset.cat === cat.value) &&
         (!owner.value || owners.includes(owner.value)) &&
         (!shared.checked || owners.length > 1) &&
-        (!unowned.checked || owners.length === 0);
+        (!unowned.checked || owners.length === 0) &&
+        (!tech?.value || (c.dataset.tech ?? '').split(' ').includes(tech.value));
       c.hidden = !ok;
       if (ok) shown++;
     }
     count.textContent = `Showing ${shown} of ${cards.length}`;
   }
-  [q, cat, owner, shared, unowned].forEach((el) => el.addEventListener('input', apply));
+  [q, cat, owner, shared, unowned, tech].forEach((el) => el?.addEventListener('input', apply));
+  if (tech) tech.value = params.get('tech') ?? '';
   apply();
 </script>
 
@@ -192,7 +210,6 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
     border-radius: var(--radius);
     padding: 7px 10px;
     min-width: 150px;
-    text-transform: capitalize;
   }
   .check {
     display: flex;

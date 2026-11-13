@@ -16,7 +16,7 @@ counts['member-of'] = model.people.reduce((n: number, p: any) => n + p.teamRefs.
 counts['leads'] = model.teams.filter((t: any) => t.leadPerson).length + model.units.filter((u: any) => u.leadPerson).length + (model.organization.leadPerson ? 1 : 0);
 counts['part-of'] = model.teams.filter((t: any) => t.unit).length;
 counts['sits-on'] = model.committees.reduce((n: number, c: any) => n + c.seats.length, 0);
-const categories = ['accountability', 'governance', 'technical', 'structural'];
+const categories = ['accountability', 'audience', 'governance', 'technical', 'structural'];
 const kindLabel = (k: string) => k.replace('-', ' ');
 ---
 

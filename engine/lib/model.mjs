@@ -22,44 +22,145 @@
 // `owners: [data-platform]` or a product's `platforms: [snowflake]`.
 // See engine/vocab/relationships.yaml for every type and its inline field.
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 import { parse } from 'yaml';
-import { ROOT } from './config.mjs';
+import { loadConfig, ROOT } from './config.mjs';
 import { resolveLogo } from './logos.mjs';
 
-export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'platform', 'product', 'committee'];
+export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'persona', 'platform', 'product', 'committee'];
 // Other names accepted for a kind. `application` was the original name for `product`.
 export const KIND_ALIASES = {
   application: 'product', app: 'product', solution: 'product',
   bu: 'business-unit', business_unit: 'business-unit',
   board: 'committee', council: 'committee', guild: 'committee', forum: 'committee',
+  audience: 'persona', 'user-group': 'persona',
 };
 
-export function loadVocab() {
-  const people = parse(readFileSync(resolve(ROOT, 'engine/vocab/people.yaml'), 'utf8'));
-  const rels = parse(readFileSync(resolve(ROOT, 'engine/vocab/relationships.yaml'), 'utf8'));
-  const gov = parse(readFileSync(resolve(ROOT, 'engine/vocab/governance.yaml'), 'utf8'));
-  const index = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
-  const relTypes = rels['relationship-types'];
-  const relAlias = {};
-  for (const t of relTypes) {
-    relAlias[t.id] = t.id;
-    for (const a of t.aliases ?? []) relAlias[a.toLowerCase()] = t.id;
+// Vocabulary sections that can be extended or changed from overrides/vocab/*.yaml.
+export const VOCAB_SECTIONS = [
+  'tiers',
+  'disciplines',
+  'employment',
+  'team-types',
+  'committee-types',
+  'seat-roles',
+  'technologies',
+  'technology-categories',
+  'relationship-types',
+];
+const REL_CATEGORIES = ['accountability', 'audience', 'governance', 'technical', 'structural'];
+
+function readYaml(path) {
+  return parse(readFileSync(path, 'utf8')) ?? {};
+}
+
+// Merge override items into a base list by id: same id = change fields, new id = add.
+function mergeList(base, overrides, section, file) {
+  const out = base.map((x) => ({ ...x }));
+  for (const item of overrides ?? []) {
+    if (!item?.id) throw new Error(`${file}: every item in "${section}" needs an id.`);
+    const i = out.findIndex((x) => x.id === item.id);
+    if (i >= 0) {
+      const merged = { ...out[i], ...item };
+      // Lists of aliases are added to, not replaced.
+      if (out[i].aliases || item.aliases) merged.aliases = [...new Set([...(out[i].aliases ?? []), ...(item.aliases ?? [])])];
+      if (out[i].style && item.style) merged.style = { ...out[i].style, ...item.style };
+      out[i] = merged;
+    } else out.push({ ...item });
   }
-  return {
+  return out;
+}
+
+/**
+ * Loads the vocabulary: engine defaults (engine/vocab/*.yaml) with any
+ * overrides from `overridesDir` merged on top. Each override file may contain
+ * any of VOCAB_SECTIONS as lists (same id changes an item, a new id adds one),
+ * plus `remove: { <section>: [ids] }` to drop defaults.
+ * By default the overrides folder comes from the active atlas.config.yaml.
+ */
+export function loadVocab({ overridesDir } = {}) {
+  if (overridesDir === undefined) {
+    try {
+      overridesDir = loadConfig().vocabDir;
+    } catch {
+      overridesDir = null;
+    }
+  }
+  const people = readYaml(resolve(ROOT, 'engine/vocab/people.yaml'));
+  const rels = readYaml(resolve(ROOT, 'engine/vocab/relationships.yaml'));
+  const gov = readYaml(resolve(ROOT, 'engine/vocab/governance.yaml'));
+  const tech = readYaml(resolve(ROOT, 'engine/vocab/technologies.yaml'));
+  const v = {
     tiers: people.tiers,
     disciplines: people.disciplines,
     employment: people.employment,
-    teamTypes: people['team-types'],
-    tier: index(people.tiers),
-    discipline: index(people.disciplines),
-    employmentById: index(people.employment),
-    teamType: index(people['team-types']),
-    committeeTypes: gov['committee-types'],
-    seatRoles: gov['seat-roles'],
-    committeeType: index(gov['committee-types']),
-    seatRole: index(gov['seat-roles']),
+    'team-types': people['team-types'],
+    'committee-types': gov['committee-types'],
+    'seat-roles': gov['seat-roles'],
+    technologies: tech.technologies,
+    'technology-categories': tech.categories,
+    'relationship-types': rels['relationship-types'],
+  };
+
+  const overrideFiles = [];
+  if (overridesDir && existsSync(overridesDir)) {
+    for (const name of readdirSync(overridesDir).sort()) {
+      if (!/\.ya?ml$/i.test(name)) continue;
+      const file = join(overridesDir, name);
+      const doc = readYaml(file);
+      const rel = relative(ROOT, file);
+      for (const key of Object.keys(doc)) {
+        if (key !== 'remove' && !VOCAB_SECTIONS.includes(key))
+          throw new Error(`${rel}: unknown section "${key}". Allowed: ${VOCAB_SECTIONS.join(', ')}, remove.`);
+      }
+      for (const section of VOCAB_SECTIONS) if (doc[section]) v[section] = mergeList(v[section], doc[section], section, rel);
+      for (const [section, ids] of Object.entries(doc.remove ?? {})) {
+        if (!VOCAB_SECTIONS.includes(section)) throw new Error(`${rel}: cannot remove from unknown section "${section}".`);
+        v[section] = v[section].filter((x) => !ids.includes(x.id));
+      }
+      overrideFiles.push(rel);
+    }
+  }
+
+  for (const t of v['relationship-types']) {
+    if (!REL_CATEGORIES.includes(t.category))
+      throw new Error(`Relationship type "${t.id}": category must be one of ${REL_CATEGORIES.join(', ')}.`);
+    if (!t.label || !t.inverse || !t.from?.length || !t.to?.length)
+      throw new Error(`Relationship type "${t.id}" needs label, inverse, from and to.`);
+    t.style ??= { line: 'solid', weight: 2, glyph: 'link' };
+  }
+
+  const techAlias = {};
+  for (const t of v.technologies) {
+    techAlias[t.id.toLowerCase()] = t;
+    for (const a of t.aliases ?? []) techAlias[String(a).toLowerCase()] = t;
+  }
+  const index = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
+  const relTypes = v['relationship-types'];
+  const relAlias = {};
+  for (const t of relTypes) {
+    relAlias[t.id] = t.id;
+    for (const a of t.aliases ?? []) relAlias[String(a).toLowerCase()] = t.id;
+  }
+  return {
+    overrideFiles,
+    tiers: v.tiers,
+    disciplines: v.disciplines,
+    employment: v.employment,
+    teamTypes: v['team-types'],
+    tier: index(v.tiers),
+    discipline: index(v.disciplines),
+    employmentById: index(v.employment),
+    teamType: index(v['team-types']),
+    techCategories: v['technology-categories'],
+    technologies: v.technologies,
+    techCategory: index(v['technology-categories']),
+    techAlias,
+    committeeTypes: v['committee-types'],
+    seatRoles: v['seat-roles'],
+    committeeType: index(v['committee-types']),
+    seatRole: index(v['seat-roles']),
     relTypes,
     relType: index(relTypes),
     relAlias,
@@ -227,6 +328,30 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     }
   }
 
+  // Personas (groups of users): icon defaults by internal / external
+  for (const e of byKind.persona.values()) {
+    e.icon ??= e.internal === false ? 'globe' : 'people';
+  }
+
+  // Tech stack: known technologies get a label, category and logo
+  for (const kind of ['platform', 'product']) {
+    for (const e of byKind[kind].values()) {
+      e.stackItems = [].concat(e.stack ?? []).map((item) => {
+        const raw = typeof item === 'string' ? { id: item } : { ...item, id: item.id ?? item.tech };
+        const known = vocab.techAlias[String(raw.id ?? '').toLowerCase()];
+        return {
+          id: known?.id ?? String(raw.id),
+          label: known?.label ?? String(raw.id),
+          category: known?.category ?? null,
+          version: raw.version ?? null,
+          note: raw.note ?? null,
+          known: !!known,
+          logo: known ? resolveLogo(known.logo, { fallback: 'code' }) : resolveLogo('octicon:code'),
+        };
+      });
+    }
+  }
+
   // 4. Inline relationships -> entries
   const inlineTarget = vocab.relTypes.filter((t) => t.inline);
   const inlineSource = vocab.relTypes.filter((t) => t['inline-on-source']);
@@ -363,6 +488,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     platforms: [...platforms.values()].sort(byName),
     products: [...products.values()].sort(byName),
     committees: [...committees.values()].sort(byOrder),
+    personas: [...byKind.persona.values()].sort(byOrder),
     edges,
     team: (id) => teams.get(id),
     get,

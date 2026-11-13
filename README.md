@@ -12,6 +12,8 @@
 - **Products:** who owns, supports and operates each product, its stakeholders, the platforms it runs on and the products it depends on.
 - **Relationship maps:** each platform and product page draws who is accountable on one side and technical links on the other, with line styles from the relationship registry.
 - **Committees and boards:** review boards, change advisory boards, councils, steering committees and guilds, with a chair, seats by role, and what each governs, advises, approves and reports to. Shown on the org chart outside the reporting line.
+- **Context diagrams:** every product and platform page draws it in the middle of its owners, support and operations, governance, users and stakeholders. Download any diagram as SVG for slides.
+- **Tech stack:** products and platforms list what they are built with (Python, R, Streamlit, FastAPI, Shiny...), shown with logos and filterable.
 - **Deployments:** where each product is deployed (platform, environments, regions), and what each platform hosts.
 - **Relationships:** every relationship type (owner, supporting, operator, stakeholder, sponsor, SME, escalation, governs, advises, approver, reports to, deployed to, uses, depends on, built on, plus structural ones) and every relationship in your data, searchable.
 - **Legend:** what every badge, ring, line and icon means, generated from the same vocabulary files the site renders with.
@@ -103,6 +105,18 @@ items:
       - { ref: kafka, purpose: Order events }
     approvers: [change-advisory-board]
     depends-on: [payments-gateway]
+    stack: [typescript, nodejs, react]   # one or more technologies
+    users: [retail-customers]            # personas, teams or business units
+```
+
+Personas describe groups of users:
+
+```yaml
+# data/personas.yaml
+kind: persona
+items:
+  - { id: retail-customers, name: Online shoppers, internal: false, size: 4.2M monthly }
+  - { id: claims-adjusters, name: Claims adjusters, internal: true, size: '320' }
 ```
 
 Committees are their own kind:
@@ -123,6 +137,10 @@ items:
 ```
 
 The same relationship as an explicit entry: `{ from: team:storefront, type: owner, to: product:checkout }`. Every type is defined in [`engine/vocab/relationships.yaml`](engine/vocab/relationships.yaml).
+
+## Customizing
+
+Your data is entirely yours. The vocabulary (disciplines, tiers, team types, committee types, seat roles, technologies and relationship types) can be extended, renamed or trimmed with files in `overrides/vocab/`, merged on top of the defaults. See [docs/CUSTOMIZING.md](docs/CUSTOMIZING.md).
 
 ## Building charts with an LLM
 
@@ -214,10 +232,10 @@ examples/bundle/     a whole organization in one JSON bundle (the LLM format)
 examples/meridian/   demo enterprise (regenerate with `node examples/meridian/generate.mjs`)
 schema/              JSON Schema for data files (generated)
 agent/               authoring agent prompt and tool definition (generated)
-docs/                the plan and the LLM guide
+docs/                the plan, the LLM guide and the customizing guide
 data/                YOURS, created by `npm run init`
 atlas.config.yaml    YOURS, created by `npm run init`
-overrides/           YOURS, custom icons now; vocabulary and themes later
+overrides/           YOURS: icons/ (custom logos) and vocab/ (your own types)
 .vscode/             YOURS, editor schema settings written by `npm run init`
 ```
 

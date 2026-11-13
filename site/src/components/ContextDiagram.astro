@@ -1,0 +1,345 @@
+---
+// Context diagram: one product (or platform) in the middle, surrounded by the
+// people and groups around it.
+//   top     owners
+//   left    support and operations (supporting, operator, SME, escalation)
+//   right   governance (approver, governs, advises)
+//   bottom  users and stakeholders (user, stakeholder, sponsor)
+// Drawn as SVG at build time. Line styles come from the relationship registry.
+// The "Download SVG" button exports it with colors inlined, for slides and docs.
+import octicons from '@primer/octicons';
+import { atlas } from '../lib/atlas';
+import { nameOf } from '../../../engine/lib/model.mjs';
+
+interface Props {
+  entity: any;
+}
+const { entity } = Astro.props;
+const { model, vocab } = atlas();
+
+// One box per person, team or group: several relationships to the same one are merged
+// ("Stakeholder + Sponsor"), drawn with the heaviest line among them.
+const edgesOf = (types: string[]) => {
+  const byOther = new Map<string, any>();
+  for (const e of types.flatMap((t) => model.edgesTo(entity, t))) {
+    const k = `${e.from.kind}:${e.from.id}`;
+    const cur = byOther.get(k);
+    if (!cur) byOther.set(k, { e, other: e.from, labels: [e.rel.label] });
+    else {
+      cur.labels.push(e.rel.label);
+      if ((e.rel.style?.weight ?? 0) > (cur.e.rel.style?.weight ?? 0)) cur.e = { ...e, scope: e.scope ?? cur.e.scope, note: e.note ?? cur.e.note };
+    }
+  }
+  return [...byOther.values()];
+};
+const groups = {
+  top: { title: 'Owners', items: edgesOf(['owner']) },
+  left: { title: 'Support and operations', items: edgesOf(['supporting', 'operator', 'sme', 'escalation']) },
+  right: { title: 'Governance', items: edgesOf(['approver', 'governs', 'advises']) },
+  bottom: { title: 'Users and stakeholders', items: edgesOf(['user', 'stakeholder', 'sponsor']) },
+};
+const total = Object.values(groups).reduce((n, g) => n + g.items.length, 0);
+
+// Geometry
+const NW = 200, NH = 54, GAP = 16, MARGIN = 24, CAPTION = 26, BAND = 104;
+const CW = 260, CH = 124;
+const PER_ROW = 6; // one row up to six; the SVG scales to fit its container
+const rowsOf = (n: number) => Math.ceil(n / PER_ROW);
+const rowWidth = (n: number) => Math.min(n, PER_ROW) * NW + (Math.min(n, PER_ROW) - 1) * GAP;
+const sideH = (n: number) => (n ? n * NH + (n - 1) * GAP : 0);
+
+const W = Math.max(980, rowWidth(groups.top.items.length) + 2 * MARGIN, rowWidth(groups.bottom.items.length) + 2 * MARGIN);
+const topH = groups.top.items.length ? CAPTION + rowsOf(groups.top.items.length) * (NH + GAP) - GAP : 0;
+const midH = Math.max(CH, sideH(groups.left.items.length) + CAPTION, sideH(groups.right.items.length) + CAPTION);
+const bottomH = groups.bottom.items.length ? CAPTION + rowsOf(groups.bottom.items.length) * (NH + GAP) - GAP : 0;
+const midY = MARGIN + topH + (topH ? BAND : 0);
+const bottomY = midY + midH + (bottomH ? BAND : 0);
+const H = bottomY + bottomH + MARGIN + (bottomH ? 8 : 0);
+const cx = (W - CW) / 2;
+const cy = midY + (midH - CH) / 2;
+
+type Placed = { e: any; other: any; x: number; y: number; ax: number; ay: number; tx: number; ty: number };
+function placeRow(items: any[], y0: number, side: 'top' | 'bottom'): Placed[] {
+  return items.map((it, i) => {
+    const row = Math.floor(i / PER_ROW);
+    const inRow = Math.min(PER_ROW, items.length - row * PER_ROW);
+    const col = i % PER_ROW;
+    const x = (W - rowWidth(inRow)) / 2 + col * (NW + GAP);
+    const y = y0 + (side === 'top' ? CAPTION : 0) + row * (NH + GAP);
+    const tx = cx + (CW * (i + 1)) / (items.length + 1);
+    return side === 'top'
+      ? { ...it, x, y, ax: x + NW / 2, ay: y + NH, tx, ty: cy }
+      : { ...it, x, y, ax: x + NW / 2, ay: y, tx, ty: cy + CH };
+  });
+}
+function placeCol(items: any[], side: 'left' | 'right'): Placed[] {
+  const x = side === 'left' ? MARGIN : W - MARGIN - NW;
+  const y0 = midY + CAPTION + (midH - CAPTION - sideH(items.length)) / 2;
+  return items.map((it, i) => {
+    const y = y0 + i * (NH + GAP);
+    const ty = cy + (CH * (i + 1)) / (items.length + 1);
+    return side === 'left'
+      ? { ...it, x, y, ax: x + NW, ay: y + NH / 2, tx: cx, ty }
+      : { ...it, x, y, ax: x, ay: y + NH / 2, tx: cx + CW, ty };
+  });
+}
+const placed = [
+  ...placeRow(groups.top.items, MARGIN, 'top'),
+  ...placeCol(groups.left.items, 'left'),
+  ...placeCol(groups.right.items, 'right'),
+  ...placeRow(groups.bottom.items, bottomY, 'bottom'),
+];
+const captions = [
+  groups.top.items.length && { text: groups.top.title, x: W / 2, y: MARGIN + 14, anchor: 'middle' },
+  groups.left.items.length && { text: groups.left.title, x: MARGIN, y: midY + 14, anchor: 'start' },
+  groups.right.items.length && { text: groups.right.title, x: W - MARGIN, y: midY + 14, anchor: 'end' },
+  // Below the bottom row, so it does not collide with the lines coming down.
+  groups.bottom.items.length && { text: groups.bottom.title, x: W / 2, y: bottomY + bottomH + 8, anchor: 'middle' },
+].filter(Boolean) as any[];
+
+// Styles and icons
+const dash = (t: any) => {
+  const s = t.style ?? {};
+  const w = s.weight ?? 2;
+  return s.line === 'dashed' ? `${w * 3} ${w * 2}` : s.line === 'dotted' ? `1 ${w * 2}` : '';
+};
+const iconSvg = (name: string, size = 16) => (octicons as any)[name]?.toSVG({ width: size, height: size }) ?? '';
+const iconFor = (o: any) =>
+  o.kind === 'persona'
+    ? o.icon
+    : o.kind === 'committee'
+      ? (vocab.committeeType[o.type]?.icon ?? 'law')
+      : ({ team: 'people', person: 'person', 'business-unit': 'organization', organization: 'organization' } as any)[o.kind] ?? 'package';
+const kindLabel = (o: any) =>
+  o.kind === 'persona' ? (o.internal === false ? 'External users' : 'Internal users') + (o.size ? `, ${o.size}` : '') : o.kind === 'business-unit' ? 'Business unit' : o.kind === 'person' ? (o.role ?? 'Person') : o.kind[0].toUpperCase() + o.kind.slice(1);
+const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+const stack = (entity.stackItems ?? []).map((t: any) => t.label);
+const centerKind = entity.kind === 'platform' ? 'Platform' : entity.type && entity.type !== 'product' ? entity.type.replace('-', ' ') : 'Product';
+const svgId = `cd-${entity.kind}-${entity.id}`;
+---
+
+<figure class="context">
+  {
+    total === 0 ? (
+      <p class="muted empty">Nothing is recorded around this {entity.kind} yet: add owners, users or stakeholders to draw its context.</p>
+    ) : (
+      <div class="scroll">
+        <svg id={svgId} class="cd" viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label={`Context diagram for ${entity.name}`} xmlns="http://www.w3.org/2000/svg">
+          <title>{`${entity.name}: owners, support, governance, users and stakeholders`}</title>
+          <rect class="cd-bg" x="0" y="0" width={W} height={H} rx="6" />
+
+          {captions.map((c) => (
+            <text class="cd-caption" x={c.x} y={c.y} text-anchor={c.anchor}>
+              {c.text.toUpperCase()}
+            </text>
+          ))}
+
+          {placed.map((p) => {
+            const s = p.e.rel.style ?? {};
+            // Labels sit nearer the outer node, so labels on lines converging at the center don't pile up.
+            const f = 0.3;
+            const mx = p.ax + (p.tx - p.ax) * f;
+            const my = p.ay + (p.ty - p.ay) * f;
+            const label = (p as any).labels.join(' + ');
+            return (
+              <g class="cd-edge">
+                <line x1={p.ax} y1={p.ay} x2={p.tx} y2={p.ty} stroke-width={s.line === 'double' ? 5 : (s.weight ?? 2)} stroke-dasharray={dash(p.e.rel) || undefined} stroke-linecap={s.line === 'dotted' ? 'round' : 'butt'} />
+                {s.line === 'double' && <line class="cd-gap" x1={p.ax} y1={p.ay} x2={p.tx} y2={p.ty} stroke-width="1.6" />}
+                <rect class="cd-label-bg" x={mx - label.length * 3.1 - 6} y={my - 9} width={label.length * 6.2 + 12} height="17" rx="8" />
+                <text class="cd-label" x={mx} y={my + 3.5} text-anchor="middle">
+                  {label}
+                </text>
+              </g>
+            );
+          })}
+
+          {placed.map((p) => {
+            const detail = p.e.scope ?? p.e.note ?? p.e.purpose ?? kindLabel(p.other);
+            return (
+              <g class:list={['cd-node', `cd-${p.other.kind}`, { 'cd-external': p.other.kind === 'persona' && p.other.internal === false }]}>
+                <rect x={p.x} y={p.y} width={NW} height={NH} rx="5" />
+                <rect class="cd-icon-bg" x={p.x + 10} y={p.y + 13} width="28" height="28" rx={p.other.kind === 'committee' ? 4 : 14} />
+                <g class="cd-icon" transform={`translate(${p.x + 16}, ${p.y + 19})`} set:html={iconSvg(iconFor(p.other))} />
+                <text class="cd-name" x={p.x + 48} y={p.y + 23}>
+                  {clip(nameOf(p.other), 22)}
+                </text>
+                <text class="cd-detail" x={p.x + 48} y={p.y + 40}>
+                  {clip(detail, 28)}
+                </text>
+              </g>
+            );
+          })}
+
+          <g class="cd-center">
+            <rect x={cx} y={cy} width={CW} height={CH} rx="6" />
+            <rect class="cd-center-top" x={cx} y={cy} width={CW} height="5" rx="2" />
+            <g transform={`translate(${cx + CW / 2 - 18}, ${cy + 16})`}>
+              <rect class="cd-logo-bg" x="-4" y="-4" width="44" height="44" rx="6" />
+              <svg x="4" y="4" width="28" height="28" viewBox="0 0 24 24" set:html={(entity.logoSvg?.svg ?? '').replace(/^<svg[^>]*>|<\/svg>$/g, '')} />
+            </g>
+            <text class="cd-center-name" x={cx + CW / 2} y={cy + 80} text-anchor="middle">
+              {clip(entity.name, 28)}
+            </text>
+            <text class="cd-center-kind" x={cx + CW / 2} y={cy + 99} text-anchor="middle">
+              {[centerKind, entity.criticality].filter(Boolean).join(' | ')}
+            </text>
+            {stack.length > 0 && (
+              <text class="cd-center-stack" x={cx + CW / 2} y={cy + 115} text-anchor="middle">
+                {clip(stack.join(', '), 40)}
+              </text>
+            )}
+          </g>
+        </svg>
+      </div>
+    )
+  }
+  {
+    total > 0 && (
+      <figcaption>
+        <span class="muted">Solid lines are accountability, dashed is hands-on support, dotted is interest. See the Legend.</span>
+        <button type="button" class="btn btn-ghost cd-download" data-svg={svgId} data-name={`${entity.id}-context.svg`}>
+          Download SVG
+        </button>
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  // Export with computed colors inlined, so the file looks the same outside the site.
+  const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'opacity', 'font-family', 'font-size', 'font-weight', 'letter-spacing'];
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.cd-download')) {
+    btn.addEventListener('click', () => {
+      const src = document.getElementById(btn.dataset.svg!) as unknown as SVGSVGElement;
+      const copy = src.cloneNode(true) as SVGSVGElement;
+      const a = [src, ...src.querySelectorAll('*')];
+      const b = [copy, ...copy.querySelectorAll('*')];
+      a.forEach((el, i) => {
+        const cs = getComputedStyle(el as Element);
+        const style = PROPS.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(';');
+        (b[i] as Element).setAttribute('style', style);
+        (b[i] as Element).removeAttribute('class');
+      });
+      const blob = new Blob([new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const link = Object.assign(document.createElement('a'), { href: url, download: btn.dataset.name });
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+</script>
+
+<style>
+  .context {
+    margin: 0;
+  }
+  .scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .cd {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-width: 720px;
+    font-family: var(--font);
+  }
+  .cd-bg {
+    fill: var(--warm);
+  }
+  .cd-caption {
+    fill: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .cd-edge line {
+    stroke: var(--navy);
+    opacity: 0.6;
+  }
+  .cd-edge line.cd-gap {
+    stroke: var(--warm);
+    opacity: 1;
+  }
+  .cd-label-bg {
+    fill: var(--warm);
+    stroke: var(--border);
+  }
+  .cd-label {
+    fill: var(--navy);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .cd-node > rect:first-child {
+    fill: var(--surface);
+    stroke: var(--border);
+  }
+  .cd-node.cd-external > rect:first-child {
+    stroke-dasharray: 5 3;
+    stroke: var(--muted);
+  }
+  .cd-icon-bg {
+    fill: var(--surface-tint);
+  }
+  .cd-committee .cd-icon-bg {
+    fill: var(--gold);
+  }
+  .cd-icon :global(svg) {
+    fill: var(--blue);
+  }
+  .cd-committee .cd-icon :global(svg) {
+    fill: var(--on-gold);
+  }
+  .cd-name {
+    fill: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cd-detail {
+    fill: var(--muted);
+    font-size: 11px;
+  }
+  .cd-center > rect:first-child {
+    fill: var(--surface);
+    stroke: var(--navy);
+    stroke-width: 1.5;
+  }
+  .cd-center-top {
+    fill: var(--navy);
+  }
+  .cd-logo-bg {
+    fill: #ffffff;
+    stroke: #ccd4dc;
+  }
+  .cd-center-name {
+    fill: var(--navy);
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .cd-center-kind {
+    fill: var(--muted);
+    font-size: 11px;
+    text-transform: capitalize;
+  }
+  .cd-center-stack {
+    fill: var(--blue);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .empty {
+    margin: 0;
+    padding: 16px;
+    background: var(--warm);
+    border-radius: var(--radius);
+  }
+</style>

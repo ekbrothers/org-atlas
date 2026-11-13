@@ -18,7 +18,7 @@ items:
   - id: fraud-risk-analytics
     name: Fraud & Risk Analytics
     parent: fs
-    type: complicated-subsystem
+    type: data-domain
     lead: emeka-weiss
     order: 2
     description: Fraud scoring models and risk analytics.

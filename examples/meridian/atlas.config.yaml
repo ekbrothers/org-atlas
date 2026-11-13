@@ -15,3 +15,7 @@ data:
 icons:
   # Custom SVG logos (custom:<name>), relative to this file.
   dir: icons
+
+vocab:
+  # Meridian customizations, relative to this file.
+  dir: vocab

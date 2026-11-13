@@ -5,6 +5,8 @@ import Logo from './Logo.astro';
 import EntityRef from './EntityRef.astro';
 import RelLine from './RelLine.astro';
 import RelationshipMap from './RelationshipMap.astro';
+import ContextDiagram from './ContextDiagram.astro';
+import StackChips from './StackChips.astro';
 import { atlas, href } from '../lib/atlas';
 
 interface Props {
@@ -21,7 +23,7 @@ const allEnvs = [...new Set(deployments.flatMap((d: any) => [].concat(d.environm
 
 const facts = [
   ['Category', entity.category],
-  ['Type', !isPlatform ? (entity.type ?? 'product') : null],
+  ['Type', !isPlatform ? (entity.type ?? 'product').replace('-', ' ') : null],
   ['Vendor', entity.vendor],
   ['Hosting', entity.hosting],
   ['Criticality', entity.criticality],
@@ -31,7 +33,7 @@ const facts = [
 ].filter(([, v]) => v);
 
 const accountability = vocab.relTypes
-  .filter((t: any) => t.category === 'accountability' || t.category === 'governance')
+  .filter((t: any) => ['accountability', 'audience', 'governance'].includes(t.category))
   .flatMap((t: any) => model.edgesTo(entity, t.id));
 
 
@@ -52,8 +54,19 @@ const links = entity.links ? Object.entries(entity.links) : [];
     <span class="eyebrow">{isPlatform ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Product'}</span>
     <h1>{entity.name}</h1>
     {entity.description && <p class="muted">{entity.description}</p>}
+    {entity.stackItems?.length > 0 && (
+      <div class="built-with">
+        <span class="eyebrow">Built with</span>
+        <StackChips entity={entity} />
+      </div>
+    )}
   </div>
 </header>
+
+<h2 class="section-title">Context diagram</h2>
+<p class="muted intro">Who owns, supports, governs and uses {entity.name}.</p>
+<ContextDiagram entity={entity} />
+<div class="spacer"></div>
 
 <h2 class="section-title">Relationship map</h2>
 <RelationshipMap entity={entity} />
@@ -220,7 +233,21 @@ const links = entity.links ? Object.entries(entity.links) : [];
   }
   .section-title {
     font-size: 1.1rem;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
+  }
+  .intro {
+    margin: 0 0 12px;
+    font-size: 14px;
+  }
+  .spacer {
+    height: 28px;
+  }
+  .built-with {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 10px;
   }
   .cols {
     display: grid;

@@ -6,7 +6,7 @@
 #   id           canonical type name, used as `type:` in relationship entries
 #   label        how the relationship reads from the source ("Payments Core is Owner of ...")
 #   inverse      how it reads from the target ("Snowflake is Owned by ...")
-#   category     accountability | governance | technical | structural
+#   category     accountability | audience | governance | technical | structural
 #   from / to    entity kinds allowed at each end
 #   default-from kind assumed when a reference has no "kind:" prefix (inline form)
 #   inline       field name for the inline shorthand on the target entity
@@ -110,6 +110,20 @@ relationship-types:
     attributes: [note]
     style: { line: solid, weight: 1, glyph: alert }
     aliases: [escalate, escalation-contact]
+
+  # ---- Audience: who uses it ----
+  - id: user
+    label: User
+    inverse: Users
+    category: audience
+    description: Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers.
+    from: [persona, team, business-unit, person, committee]
+    to: [product, platform]
+    default-from: persona
+    inline: users
+    attributes: [note, scope]
+    style: { line: dotted, weight: 3, glyph: person }
+    aliases: [users, used-by-persona, consumer, audience, customer-of]
 
   # ---- Governance: committees, boards and approvals ----
   - id: governs

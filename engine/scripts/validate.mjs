@@ -46,8 +46,14 @@ const { files, errors: parseErrors } = statSync(dataPath).isDirectory()
   : loadData(dirname(dataPath), { only: dataPath });
 if (parseErrors.length) finish({ errors: parseErrors });
 
-// 2. Schema
-const vocab = loadVocab();
+// 2. Schema (built from the vocabulary, including your overrides/vocab files)
+let vocab;
+try {
+  vocab = loadVocab({ overridesDir: config.vocabDir });
+} catch (err) {
+  finish({ errors: [{ rel: 'vocabulary', message: err.message }] });
+}
+if (vocab.overrideFiles.length) log(`Vocab:    defaults + ${vocab.overrideFiles.join(', ')}`);
 const ajv = new Ajv({ allErrors: true, strict: false });
 const check = ajv.compile(buildSchema(vocab));
 const schemaErrors = [];
