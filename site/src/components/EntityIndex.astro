@@ -14,6 +14,7 @@ const { model } = atlas();
 const list = kind === 'platform' ? model.platforms : model.products;
 const path = kind === 'platform' ? 'platforms' : 'products';
 const categories = [...new Set(list.map((e: any) => (kind === 'platform' ? e.category : e.criticality)).filter(Boolean))].sort();
+const types = kind === 'product' ? [...new Set(list.map((e: any) => e.type ?? 'product'))].sort() : [];
 const techs = [...new Map(list.flatMap((e: any) => (e.stackItems ?? []).map((t: any) => [t.id, t.label]))).entries()].sort((a: any, b: any) => a[1].localeCompare(b[1]));
 const ownerTeams = [...new Map(list.flatMap((e: any) => model.edgesTo(e, 'owner').map((x: any) => [x.from.id, x.from]))).values()].sort(
   (a: any, b: any) => a.name.localeCompare(b.name),
@@ -46,6 +47,17 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
     </select>
   </label>
   {
+    types.length > 1 && (
+      <label class="field">
+        <span class="field-label">Type</span>
+        <select id="x-type">
+          <option value="">All</option>
+          {types.map((t: any) => <option value={t}>{t.replace('-', ' ')}</option>)}
+        </select>
+      </label>
+    )
+  }
+  {
     techs.length > 0 && (
       <label class="field">
         <span class="field-label">Built with</span>
@@ -72,6 +84,7 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
           data-cat={kind === 'platform' ? (e.category ?? '') : (e.criticality ?? '')}
           data-owners={owners.map((o: any) => `${o.from.kind}:${o.from.id}`).join(' ')}
           data-tech={(e.stackItems ?? []).map((t: any) => t.id).join(' ')}
+          data-type={e.type ?? 'product'}
           data-text={[e.name, e.description, e.vendor, ...owners.map((o: any) => o.from.name ?? o.from.displayName)].join(' ').toLowerCase()}
         >
           <div class="card-head">
@@ -80,7 +93,14 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
               <a class="card-name" href={href(`${path}/${e.id}/`)}>
                 {e.name}
               </a>
-              <span class="muted small">{[e.category, e.vendor ?? (e.proprietary ? 'In-house' : null), e.criticality].filter(Boolean).join(' | ')}</span>
+              <span class="muted small">
+                {[e.category, kind === 'product' && e.type && e.type !== 'product' ? e.type.replace('-', ' ') : null, e.version && `v${e.version}`, e.vendor ?? (e.proprietary ? 'In-house' : null), e.criticality].filter(Boolean).join(' | ')}
+              </span>
+              {e.parentProduct && (
+                <span class="muted small">
+                  <Icon name="stack" size={12} /> Part of <a href={href(`${path}/${e.parentProduct.id}/`)}>{e.parentProduct.name}</a>
+                </span>
+              )}
             </div>
           </div>
           {e.description && <p class="desc">{e.description}</p>}
@@ -92,7 +112,8 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
             {owners.map((o: any) => (
               <EntityRef entity={o.from} />
             ))}
-            {owners.length === 0 && <span class="stamp">Unowned</span>}
+            {owners.length === 0 && e.inheritsOwnershipFrom && <span class="muted small">Through {e.inheritsOwnershipFrom.name}</span>}
+            {owners.length === 0 && !e.inheritsOwnershipFrom && <span class="stamp">Unowned</span>}
           </div>
           {supporting.length > 0 && (
             <div class="owners">
@@ -133,6 +154,7 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
   const shared = document.querySelector('#x-shared') as HTMLInputElement;
   const unowned = document.querySelector('#x-unowned') as HTMLInputElement;
   const tech = document.querySelector('#x-tech') as HTMLSelectElement | null;
+  const ptype = document.querySelector('#x-type') as HTMLSelectElement | null;
   const count = document.querySelector('#x-count') as HTMLParagraphElement;
   const cards = [...document.querySelectorAll<HTMLElement>('.card')];
   const params = new URLSearchParams(location.search);
@@ -149,13 +171,15 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
         (!owner.value || owners.includes(owner.value)) &&
         (!shared.checked || owners.length > 1) &&
         (!unowned.checked || owners.length === 0) &&
-        (!tech?.value || (c.dataset.tech ?? '').split(' ').includes(tech.value));
+        (!tech?.value || (c.dataset.tech ?? '').split(' ').includes(tech.value)) &&
+        (!ptype?.value || c.dataset.type === ptype.value);
       c.hidden = !ok;
       if (ok) shown++;
     }
     count.textContent = `Showing ${shown} of ${cards.length}`;
   }
-  [q, cat, owner, shared, unowned, tech].forEach((el) => el?.addEventListener('input', apply));
+  [q, cat, owner, shared, unowned, tech, ptype].forEach((el) => el?.addEventListener('input', apply));
+  if (ptype) ptype.value = params.get('type') ?? '';
   if (tech) tech.value = params.get('tech') ?? '';
   apply();
 </script>
@@ -258,7 +282,6 @@ const deployedTo = (e: any) => (kind === 'product' ? model.edgesFrom(e, 'deploye
   }
   .small {
     font-size: 12px;
-    text-transform: capitalize;
   }
   .desc {
     margin: 0;

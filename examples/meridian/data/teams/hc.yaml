@@ -8,6 +8,9 @@ items:
     lead: rafael-kim
     order: 0
     description: Claims intake, adjudication and payment.
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: member-portal
     name: Member Portal
     parent: hc
@@ -15,6 +18,9 @@ items:
     lead: aisha-brennan
     order: 1
     description: Member self-service portal and apps.
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: clinical-data
     name: Clinical Data
     parent: hc
@@ -22,3 +28,6 @@ items:
     lead: carmen-juarez
     order: 2
     description: Clinical data exchange and analytics.
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio

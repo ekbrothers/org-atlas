@@ -216,3 +216,29 @@ code {
     padding: 0 16px;
   }
 }
+
+/* Zoomable diagrams (site/src/scripts/zoom.ts) */
+[data-zoom].is-zoomed svg,
+[data-zoom].is-zoomed [data-zoom-viewport] {
+  cursor: grab;
+}
+[data-zoom] .is-panning {
+  cursor: grabbing !important;
+  user-select: none;
+}
+[data-zoom]:fullscreen {
+  background: var(--bg);
+  padding: 16px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+[data-zoom]:fullscreen [data-zoom-viewport] {
+  flex: 1;
+  max-height: none;
+}
+[data-zoom]:fullscreen svg {
+  flex: 1;
+  height: 100%;
+  max-height: calc(100vh - 80px);
+}

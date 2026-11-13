@@ -46,7 +46,7 @@ A complete working example is in [`examples/bundle/data/atlas.json`](../examples
 | `team` | `id`, `name` | `parent` (business unit id), `type`, `lead` (person id) |
 | `person` | `id`, and `name` unless `employment: vacancy` | `role` (free text), `tier`, `discipline`, `employment`, `memberships` |
 | `platform` | `id`, `name` | `logo`, `category`, `vendor`, `hosting`, `criticality`, `lifecycle`, `proprietary` |
-| `product` | `id`, `name` | as platform, plus `type` (product, application, solution, service, data-product, ml-model). `application` and `solution` are accepted as other names for this kind |
+| `product` | `id`, `name` | as platform, plus `type` (product, application, solution, service, data-product, model), `parent` (another product id, for nesting such as a model inside a product), `version`, `stack`. `application` and `solution` are accepted as other names for this kind |
 | `persona` | `id`, `name` | `internal` (false for customers, suppliers and other outside users), `size`, `icon` |
 | `committee` | `id`, `name` | `type`, `purpose`, `cadence`, `chair` (person id), `members` (person ids or `{ person, role, representing }`) |
 
@@ -70,6 +70,7 @@ Each relationship is `{ "from": "kind:id", "type": "...", "to": "kind:id" }`, wi
 | `governs` | committee | platform, product, team | Sets standards or policy for it |
 | `advises` | committee, person, team | platform, product, team, committee | Advises without decision rights |
 | `approver` | committee, person, team | platform, product | Must approve changes or releases |
+| `itlt-alignment` | person, committee | product, platform, team | The IT Leadership Team member it is aligned to (inline: `itlt`) |
 | `reports-to` | committee | committee, person, team, business-unit | Where the committee reports |
 | `user` | persona, team, business-unit, person, committee | product, platform | Uses it day to day |
 | `deployed-to` | product | platform | Where the product is deployed and runs (`environments`, `regions` as lists) |
@@ -81,7 +82,7 @@ Team membership, leads, business units and committee seats are **not** relations
 
 ### Committees and boards
 
-Committee types: review-board, change-advisory-board, steering-committee, governance-board, council, advisory-board, community-of-practice, working-group. Seat roles: chair, vice-chair, secretary, voting-member, member, advisor, observer.
+Committee types: review-board, change-advisory-board, steering-committee, governance-board, council, advisory-board, community-of-practice, center-of-excellence, working-group. Seat roles: chair, vice-chair, secretary, voting-member, member, advisor, observer.
 
 ```json
 { "kind": "committee", "id": "architecture-review-board", "name": "Architecture Review Board",

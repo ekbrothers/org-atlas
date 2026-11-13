@@ -181,6 +181,194 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "advises": {
+          "description": "Advises (relationship \"advises\"): Gives advice without decision rights. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "itlt": {
+          "description": "ITLT alignment (relationship \"itlt-alignment\"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
         }
       },
       "required": [
@@ -1270,6 +1458,100 @@
             }
           ]
         },
+        "itlt": {
+          "description": "ITLT alignment (relationship \"itlt-alignment\"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "built-on": {
           "description": "Built on (relationship \"built-on\"): A platform that is built on top of another platform. Bare ids are platform ids.",
           "anyOf": [
@@ -1501,8 +1783,17 @@
             "solution",
             "service",
             "data-product",
+            "model",
             "ml-model"
           ]
+        },
+        "parent": {
+          "type": "string",
+          "description": "Product id this product sits inside, e.g. a model inside the product that uses it."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version, e.g. a model version \"3.2\"."
         },
         "owners": {
           "description": "Owner (relationship \"owner\"): Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
@@ -2326,6 +2617,100 @@
             }
           ]
         },
+        "itlt": {
+          "description": "ITLT alignment (relationship \"itlt-alignment\"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "platforms": {
           "description": "Uses (relationship \"uses\"): The product makes use of the platform (a database, a queue, an identity provider). Use deployed-to for where it runs. Bare ids are platform ids.",
           "anyOf": [
@@ -2775,6 +3160,7 @@
             "council",
             "advisory-board",
             "community-of-practice",
+            "center-of-excellence",
             "working-group"
           ]
         },
@@ -3167,6 +3553,11 @@
             "approves",
             "change-approver",
             "gatekeeper",
+            "itlt-alignment",
+            "itlt",
+            "it-leadership-alignment",
+            "leadership-alignment",
+            "aligned-leader",
             "reports-to",
             "reports",
             "escalates-to",
@@ -3262,6 +3653,8 @@
             "application",
             "app",
             "solution",
+            "model",
+            "ml-model",
             "bu",
             "board",
             "council",
@@ -3442,6 +3835,36 @@
           "if": {
             "properties": {
               "kind": {
+                "const": "model"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/product"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "ml-model"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/product"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
                 "const": "bu"
               }
             },
@@ -3602,6 +4025,8 @@
               "application",
               "app",
               "solution",
+              "model",
+              "ml-model",
               "bu",
               "board",
               "council",
@@ -3960,6 +4385,74 @@
               "properties": {
                 "kind": {
                   "const": "solution"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/product"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/product"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "model"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/product"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/product"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "ml-model"
                 }
               },
               "required": [

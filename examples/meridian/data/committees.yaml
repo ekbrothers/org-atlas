@@ -118,6 +118,12 @@ items:
     governs:
       - ref: product:fraud-scoring
         scope: Model validation and approval
+      - ref: product:fraud-txn-model
+        scope: Model validation
+      - ref: product:account-takeover-model
+        scope: Model validation
+      - ref: product:claims-triage-model
+        scope: Model validation
     reports-to:
       - team:executive-leadership
   - id: security-steering-committee
@@ -149,6 +155,55 @@ items:
         scope: Secrets policy
     reports-to:
       - team:executive-leadership
+  - id: itlt
+    name: IT Leadership Team (ITLT)
+    type: steering-committee
+    cadence: Weekly
+    purpose: The senior IT leaders. Each product, platform and team is aligned to one ITLT member for priorities, funding and escalation.
+    chair: nikhil-kim
+    members:
+      - person: maya-zhang
+        role: voting-member
+      - person: rhea-thorne
+        role: voting-member
+      - person: bruno-reyes
+        role: voting-member
+      - person: amara-gupta
+        role: voting-member
+      - person: femi-esposito
+        role: voting-member
+    reports-to:
+      - team:executive-leadership
+  - id: data-ai-coe
+    name: Data & AI Center of Excellence
+    type: center-of-excellence
+    cadence: Every two weeks
+    purpose: Sets machine learning and analytics standards, maintains reusable templates and helps teams adopt them.
+    chair: bruno-reyes
+    members:
+      - person: yara-santos
+        role: secretary
+        representing: data-platform
+      - person: dev-park
+        role: member
+        representing: fraud-risk-analytics
+      - person: lena-juarez
+        role: member
+        representing: clinical-data
+      - person: liam-holm
+        role: member
+        representing: pricing-promotions
+      - person: bruno-thorne
+        role: advisor
+        representing: enterprise-architecture
+    advises:
+      - fraud-risk-analytics
+      - clinical-data
+      - pricing-promotions
+      - product:promo-planner
+      - product:claims-insights
+    reports-to:
+      - committee:itlt
   - id: platform-engineering-guild
     name: Platform Engineering Guild
     type: community-of-practice

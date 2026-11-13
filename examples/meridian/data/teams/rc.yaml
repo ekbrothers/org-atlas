@@ -8,6 +8,9 @@ items:
     lead: ximena-cohen
     order: 0
     description: Customer-facing commerce sites.
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: order-management
     name: Order Management
     parent: rc
@@ -15,6 +18,9 @@ items:
     lead: tess-weiss
     order: 1
     description: Orders, fulfilment and returns.
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: pricing-promotions
     name: Pricing & Promotions
     parent: rc
@@ -22,6 +28,9 @@ items:
     lead: bianca-chowdhury
     order: 2
     description: Pricing engine and promotional campaigns.
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: supply-chain-integration
     name: Supply Chain Integration
     parent: rc
@@ -29,3 +38,6 @@ items:
     lead: zoe-castillo
     order: 3
     description: Supplier and logistics integrations.
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio

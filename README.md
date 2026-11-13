@@ -11,8 +11,11 @@
 - **Platforms:** every shared platform (Snowflake, GitHub Enterprise, Nexus, Kafka, in-house platforms...) with its logo, owners, shared ownership with a scope per owner, supporting teams, and the products that use it.
 - **Products:** who owns, supports and operates each product, its stakeholders, the platforms it runs on and the products it depends on.
 - **Relationship maps:** each platform and product page draws who is accountable on one side and technical links on the other, with line styles from the relationship registry.
-- **Committees and boards:** review boards, change advisory boards, councils, steering committees and guilds, with a chair, seats by role, and what each governs, advises, approves and reports to. Shown on the org chart outside the reporting line.
-- **Context diagrams:** every product and platform page draws it in the middle of its owners, support and operations, governance, users and stakeholders. Download any diagram as SVG for slides.
+- **Committees and boards:** review boards, change advisory boards, councils, steering committees, centers of excellence and guilds, with a chair, seats by role, and what each governs, advises, approves and reports to. Shown on the org chart outside the reporting line.
+- **Context diagrams:** every product and platform page draws it in the middle of its owners, support and operations, governance (including ITLT alignment), users and stakeholders. Download any diagram as SVG for slides.
+- **Zoom and pan:** context diagrams and the org chart have zoom buttons, Fit and Full screen; Ctrl + scroll or pinch zooms at the pointer and dragging pans.
+- **Nested products:** a product can sit inside another (`parent`), e.g. ML models inside the product that uses them. Nested products without their own owner are owned through their parent.
+- **ITLT alignment:** record which IT Leadership Team member (or the ITLT itself) each product, platform or team is aligned to.
 - **Tech stack:** products and platforms list what they are built with (Python, R, Streamlit, FastAPI, Shiny...), shown with logos and filterable.
 - **Deployments:** where each product is deployed (platform, environments, regions), and what each platform hosts.
 - **Relationships:** every relationship type (owner, supporting, operator, stakeholder, sponsor, SME, escalation, governs, advises, approver, reports to, deployed to, uses, depends on, built on, plus structural ones) and every relationship in your data, searchable.
@@ -106,7 +109,19 @@ items:
     approvers: [change-advisory-board]
     depends-on: [payments-gateway]
     stack: [typescript, nodejs, react]   # one or more technologies
+    itlt: [person:nikhil-kim]            # aligned IT Leadership Team member
     users: [retail-customers]            # personas, teams or business units
+```
+
+Models (or any product) can sit inside another product:
+
+```yaml
+  - id: fraud-txn-model
+    name: Transaction Fraud Model
+    type: model
+    parent: fraud-scoring        # shown inside Fraud Scoring; inherits its owners
+    version: "3.2"
+    stack: [python, pytorch, mlflow]
 ```
 
 Personas describe groups of users:

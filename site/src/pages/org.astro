@@ -4,6 +4,7 @@ import Icon from '../components/Icon.astro';
 import PersonChip from '../components/PersonChip.astro';
 import OrgTeamCard from '../components/OrgTeamCard.astro';
 import CommitteeCard from '../components/CommitteeCard.astro';
+import ZoomControls from '../components/ZoomControls.astro';
 import { atlas } from '../lib/atlas';
 
 const { model, vocab } = atlas();
@@ -72,8 +73,10 @@ const peopleIn = (u: any) =>
       <p id="f-count" class="count muted" aria-live="polite"></p>
     </form>
 
-    <div class="chart-scroll">
-      <div class="chart" id="chart">
+    <div class="zoomable" data-zoom="html">
+    <ZoomControls />
+    <div class="chart-scroll" data-zoom-viewport>
+      <div class="chart" id="chart" data-zoom-content>
         <div class="root-wrap">
           <div class="org-root panel">
             <span class="eyebrow">Organization</span>
@@ -108,6 +111,7 @@ const peopleIn = (u: any) =>
         </div>
       </div>
     </div>
+    </div>
 
     {
       model.committees.length > 0 && (
@@ -129,6 +133,9 @@ const peopleIn = (u: any) =>
 </Base>
 
 <script>
+  import { initAllZoom } from '../scripts/zoom';
+  initAllZoom();
+
   const $ = <T extends HTMLElement>(s: string) => document.querySelector(s) as T;
   const q = $<HTMLInputElement>('#f-q');
   const bu = $<HTMLSelectElement>('#f-bu');
@@ -327,6 +334,12 @@ const peopleIn = (u: any) =>
   .chart-scroll {
     overflow-x: auto;
     padding-bottom: 12px;
+  }
+  .zoomable.is-zoomed .chart-scroll {
+    overflow: auto;
+    max-height: 80vh;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
   }
   .chart {
     min-width: max-content;

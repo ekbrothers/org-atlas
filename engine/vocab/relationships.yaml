@@ -167,6 +167,19 @@ relationship-types:
     style: { line: solid, weight: 2, glyph: check-circle }
     aliases: [approves, change-approver, gatekeeper]
 
+  - id: itlt-alignment
+    label: ITLT alignment
+    inverse: Aligned IT leader
+    category: governance
+    description: The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation.
+    from: [person, committee]
+    to: [product, platform, team]
+    default-from: person
+    inline: itlt
+    attributes: [scope, note]
+    style: { line: solid, weight: 2, glyph: star }
+    aliases: [itlt, it-leadership-alignment, leadership-alignment, aligned-leader]
+
   - id: reports-to
     label: Reports to
     inverse: Receives reports from
@@ -274,7 +287,7 @@ relationship-types:
     inverse: Contains
     category: structural
     structural: true
-    description: A team belongs to a business unit (team `parent`).
-    from: [team]
-    to: [business-unit]
+    description: A team belongs to a business unit (team `parent`); a product can sit inside another product, e.g. a model inside the product that uses it (product `parent`).
+    from: [team, product]
+    to: [business-unit, product]
     style: { line: solid, weight: 2, glyph: organization }

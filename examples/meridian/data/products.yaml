@@ -49,6 +49,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: card-authorization
     name: Card Authorization
     owners:
@@ -82,6 +85,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: loan-origination
     name: Loan Origination
     owners:
@@ -111,6 +117,9 @@ items:
           - development
         regions:
           - us-east
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: fraud-scoring
     name: Fraud Scoring
     owners:
@@ -151,6 +160,9 @@ items:
         scope: Production changes
       - ref: model-risk-committee
         scope: Model releases
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: mobile-banking
     name: Mobile Banking App
     owners:
@@ -182,6 +194,9 @@ items:
         regions:
           - us-east
           - eu-west
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: storefront-web
     name: Storefront Web
     owners:
@@ -222,6 +237,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: checkout
     name: Checkout
     owners:
@@ -258,6 +276,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: order-service
     name: Order Service
     owners:
@@ -289,6 +310,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: pricing-engine
     name: Pricing Engine
     owners:
@@ -315,6 +339,9 @@ items:
           - staging
         regions:
           - us-east
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: supplier-gateway
     name: Supplier Gateway
     owners:
@@ -341,6 +368,9 @@ items:
           - staging
         regions:
           - us-east
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
   - id: claims-engine
     name: Claims Engine
     owners:
@@ -372,6 +402,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: member-portal-app
     name: Member Portal
     owners:
@@ -401,6 +434,9 @@ items:
         regions:
           - us-east
           - eu-west
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: clinical-data-exchange
     name: Clinical Data Exchange
     owners:
@@ -429,6 +465,9 @@ items:
           - staging
         regions:
           - us-east
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: developer-portal
     name: Developer Portal
     owners:
@@ -457,6 +496,9 @@ items:
           - development
         regions:
           - us-east
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: identity-gateway
     name: Identity Gateway
     owners:
@@ -483,6 +525,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: general-ledger
     name: General Ledger
     owners:
@@ -516,6 +561,9 @@ items:
     approvers:
       - ref: change-advisory-board
         scope: Production changes
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio
   - id: hr-hub
     name: HR Hub
     owners:
@@ -542,6 +590,9 @@ items:
           - sandbox
         regions:
           - us-east
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio
   - id: contract-vault
     name: Contract Vault
     owners:
@@ -562,6 +613,9 @@ items:
     users:
       - ref: team:legal-compliance-tech
         note: Legal team
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio
   - id: service-catalog
     name: Service Catalog
     owners:
@@ -585,6 +639,9 @@ items:
           - development
         regions:
           - us-east
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: claims-insights
     name: Claims Insights Dashboard
     owners:
@@ -617,6 +674,9 @@ items:
           - staging
         regions:
           - us-east
+    itlt:
+      - ref: person:bruno-reyes
+        scope: Healthcare portfolio
   - id: promo-planner
     name: Promotion Planner
     owners:
@@ -650,3 +710,81 @@ items:
           - production
         regions:
           - us-east
+    itlt:
+      - ref: person:rhea-thorne
+        scope: Retail & Commerce portfolio
+  - id: fraud-txn-model
+    name: Transaction Fraud Model
+    type: model
+    parent: fraud-scoring
+    logo: octicon:cpu
+    stack:
+      - python
+      - pytorch
+      - mlflow
+    version: "3.2"
+    criticality: T0
+    description: Scores every card transaction for fraud risk in real time.
+    deployed-to:
+      - ref: databricks
+        environments:
+          - production
+          - staging
+        regions:
+          - us-east
+    smes:
+      - person:dev-park
+  - id: account-takeover-model
+    name: Account Takeover Model
+    type: model
+    parent: fraud-scoring
+    logo: octicon:cpu
+    stack:
+      - python
+      - xgboost
+    version: "1.4"
+    criticality: T1
+    lifecycle: pilot
+    description: Flags logins and profile changes that look like account takeover.
+  - id: price-elasticity-model
+    name: Price Elasticity Model
+    type: model
+    parent: pricing-engine
+    logo: octicon:cpu
+    stack:
+      - python
+      - scikit-learn
+    version: "2.0"
+    criticality: T2
+    description: Estimates demand response to price changes by category.
+  - id: promo-uplift-model
+    name: Promotion Uplift Model
+    type: model
+    parent: promo-planner
+    logo: octicon:cpu
+    stack:
+      - python
+      - scikit-learn
+      - mlflow
+    version: "0.9"
+    criticality: T2
+    lifecycle: pilot
+    description: Forecasts sales uplift from a planned promotion.
+  - id: claims-triage-model
+    name: Claims Triage Model
+    type: model
+    parent: claims-engine
+    logo: octicon:cpu
+    stack:
+      - id: r
+        version: "4.4"
+      - xgboost
+    version: "1.1"
+    criticality: T1
+    description: Routes incoming claims to fast-track or manual review.
+    owners:
+      - ref: clinical-data
+        scope: Model development
+    supporting:
+      - ref: claims-processing
+        scope: Business rules and labels

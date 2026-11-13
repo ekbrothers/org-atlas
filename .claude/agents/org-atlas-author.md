@@ -31,7 +31,7 @@ Output a single JSON object, and nothing else when the caller asks for raw outpu
 - Every relationship is `{ "from": "kind:id", "type": "<type>", "to": "kind:id" }`, plus optional attributes for that type.
 - Unknown fields are rejected. Put anything extra in a field starting with `x-`, or in `meta`.
 - Exactly one `organization`.
-- Other accepted names for kinds: `application` = `product`, `app` = `product`, `solution` = `product`, `bu` = `business-unit`, `business_unit` = `business-unit`, `board` = `committee`, `council` = `committee`, `guild` = `committee`, `forum` = `committee`, `audience` = `persona`, `user-group` = `persona`. Prefer the canonical names.
+- Other accepted names for kinds: `application` = `product`, `app` = `product`, `solution` = `product`, `model` = `product`, `ml-model` = `product`, `bu` = `business-unit`, `business_unit` = `business-unit`, `board` = `committee`, `council` = `committee`, `guild` = `committee`, `forum` = `committee`, `audience` = `persona`, `user-group` = `persona`. Prefer the canonical names.
 
 ## Entity kinds and fields
 
@@ -58,6 +58,8 @@ All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbo
 - `type`: `stream-aligned`, `platform`, `enabling`, `complicated-subsystem`, `shared-service`, `leadership`
 - `lead`: string. Person id of the team lead.
 - `contacts`: object
+- `advises`: reference(s). Advises (relationship "advises"): Gives advice without decision rights. Bare ids are team ids.
+- `itlt`: reference(s). ITLT alignment (relationship "itlt-alignment"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.
 
 ### `person`
 
@@ -99,6 +101,7 @@ All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbo
 - `escalation`: reference(s). Escalation contact (relationship "escalation"): Who to escalate to when something is wrong and the owner is not responding. Bare ids are person ids.
 - `users`: reference(s). User (relationship "user"): Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers. Bare ids are persona ids.
 - `approvers`: reference(s). Approver (relationship "approver"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.
+- `itlt`: reference(s). ITLT alignment (relationship "itlt-alignment"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.
 - `built-on`: reference(s). Built on (relationship "built-on"): A platform that is built on top of another platform. Bare ids are platform ids.
 
 ### `product`
@@ -113,7 +116,9 @@ All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbo
 - `lifecycle`: `planned`, `pilot`, `active`, `contained`, `deprecated`, `sunset`
 - `proprietary`: boolean. Built in-house.
 - `stack`: array. Technologies it is built with, one or more, e.g. ["python", "streamlit"]. Known ids get a logo (see engine/vocab/technologies.yaml); any other value is shown as text.
-- `type`: `product`, `application`, `solution`, `service`, `data-product`, `ml-model`
+- `type`: `product`, `application`, `solution`, `service`, `data-product`, `model`, `ml-model`
+- `parent`: string. Product id this product sits inside, e.g. a model inside the product that uses it.
+- `version`: string. Version, e.g. a model version "3.2".
 - `owners`: reference(s). Owner (relationship "owner"): Accountable for the platform or product. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.
 - `supporting`: reference(s). Supporting (relationship "supporting"): Does real work on it (engineering, support, operations) without being accountable. Bare ids are team ids.
 - `operators`: reference(s). Operator (relationship "operator"): Runs it day to day or carries the on-call pager. Bare ids are team ids.
@@ -123,6 +128,7 @@ All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbo
 - `escalation`: reference(s). Escalation contact (relationship "escalation"): Who to escalate to when something is wrong and the owner is not responding. Bare ids are person ids.
 - `users`: reference(s). User (relationship "user"): Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers. Bare ids are persona ids.
 - `approvers`: reference(s). Approver (relationship "approver"): Must approve changes or releases before they go ahead (e.g. a change advisory board). Bare ids are committee ids.
+- `itlt`: reference(s). ITLT alignment (relationship "itlt-alignment"): The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. Bare ids are person ids.
 - `platforms`: reference(s). Uses (relationship "uses"): The product makes use of the platform (a database, a queue, an identity provider). Use deployed-to for where it runs. Bare ids are platform ids.
 - `deployed-to`: reference(s). Deployed to (relationship "deployed-to"): Where the product is deployed and runs, with its environments and regions. Bare ids are platform ids.
 - `depends-on`: reference(s). Depends on (relationship "depends-on"): The product calls or needs another product to work. Bare ids are product ids.
@@ -131,7 +137,7 @@ All kinds also accept `description`, `tags`, `links` (named URLs, e.g. `{ "runbo
 
 - `id` (required): string. Stable, unique per kind.
 - `name` (required): string. Display name.
-- `type`: `review-board`, `change-advisory-board`, `steering-committee`, `governance-board`, `council`, `advisory-board`, `community-of-practice`, `working-group`
+- `type`: `review-board`, `change-advisory-board`, `steering-committee`, `governance-board`, `council`, `advisory-board`, `community-of-practice`, `center-of-excellence`, `working-group`
 - `purpose`: string. What the committee decides or advises on.
 - `cadence`: string. How often it meets, e.g. weekly, monthly, quarterly.
 - `chair`: string. Person id of the chair (added to members automatically).
@@ -155,8 +161,9 @@ Write relationships in the `relationships` list. The "Inline form" column is an 
 | `escalation` | accountability | person, team, committee | platform, product | Who to escalate to when something is wrong and the owner is not responding. | `escalation:` on the platform/product | note | escalate, escalation-contact |
 | `user` | audience | persona, team, business-unit, person, committee | product, platform | Uses the product or platform day to day. Personas describe groups such as customers, agents or suppliers. | `users:` on the product/platform | note, scope | users, used-by-persona, consumer, audience, customer-of |
 | `governs` | governance | committee | platform, product, team | Sets the standards or policy for it and can block changes that break them. | `governs:` on the committee | scope, note | oversees, governance |
-| `advises` | governance | committee, person, team | platform, product, team, committee | Gives advice without decision rights. | `advises:` on the committee | scope, note | advisor-to, consults-for |
+| `advises` | governance | committee, person, team | platform, product, team, committee | Gives advice without decision rights. | `advises:` on the committee/team | scope, note | advisor-to, consults-for |
 | `approver` | governance | committee, person, team | platform, product | Must approve changes or releases before they go ahead (e.g. a change advisory board). | `approvers:` on the platform/product | scope, note | approves, change-approver, gatekeeper |
+| `itlt-alignment` | governance | person, committee | product, platform, team | The IT Leadership Team (ITLT) member or group a product, platform or team is aligned to, for priorities, funding and escalation. | `itlt:` on the product/platform/team | scope, note | itlt, it-leadership-alignment, leadership-alignment, aligned-leader |
 | `reports-to` | governance | committee | committee, person, team, business-unit | Where a committee sends its decisions and escalations. | `reports-to:` on the committee | note | reports, escalates-to |
 | `uses` | technical | product | platform | The product makes use of the platform (a database, a queue, an identity provider). Use deployed-to for where it runs. | `platforms:` on the product | purpose, note | uses-platform, integrates-with-platform |
 | `deployed-to` | technical | product | platform | Where the product is deployed and runs, with its environments and regions. | `deployed-to:` on the product | environments, regions, note | deployed-on, runs-on, hosted-on, deploys-to |
@@ -168,7 +175,7 @@ These are **not** relationship entries; set them with entity fields:
 - **Member of** (`member-of`): A person belongs to a team (person `memberships`). One membership is primary.
 - **Leads** (`leads`): A person leads the organization, a business unit or a team (`lead` field).
 - **Sits on** (`sits-on`): A person holds a seat on a committee (committee `members` and `chair`).
-- **Part of** (`part-of`): A team belongs to a business unit (team `parent`).
+- **Part of** (`part-of`): A team belongs to a business unit (team `parent`); a product can sit inside another product, e.g. a model inside the product that uses it (product `parent`).
 
 ## Allowed values
 
@@ -176,13 +183,13 @@ These are **not** relationship entries; set them with entity fields:
 - Person `discipline`: `software-engineering`, `sre`, `infrastructure`, `security`, `data`, `data-engineering`, `analytics-engineering`, `data-science`, `ml-engineering`, `mlops`, `data-governance`, `architecture`, `product`, `design`, `quality`, `program`, `business-analysis`, `support`, `business`
 - Person `employment`: `fte`, `contractor`, `vendor`, `intern`, `vacancy`, `interim` (`vacancy` = open position, no `name`)
 - Team `type`: `stream-aligned`, `platform`, `enabling`, `complicated-subsystem`, `shared-service`, `leadership`
-- Committee `type`: `review-board`, `change-advisory-board`, `steering-committee`, `governance-board`, `council`, `advisory-board`, `community-of-practice`, `working-group`
+- Committee `type`: `review-board`, `change-advisory-board`, `steering-committee`, `governance-board`, `council`, `advisory-board`, `community-of-practice`, `center-of-excellence`, `working-group`
 - Committee seat `role`: `chair`, `vice-chair`, `secretary`, `voting-member`, `member`, `advisor`, `observer`
 - Platform and product `hosting`: `saas`, `cloud`, `self-hosted`, `on-prem`, `hybrid`
 - `criticality`: `T0`, `T1`, `T2`, `T3` (T0 is most critical)
 - `lifecycle`: `planned`, `pilot`, `active`, `contained`, `deprecated`, `sunset`
 - Known technologies for `stack` (other values are allowed): `python`, `r`, `sql`, `java`, `kotlin`, `scala`, `go`, `rust`, `typescript`, `javascript`, `dotnet`, `swift`, `julia`, `ruby`, `sas`, `streamlit`, `shiny`, `plotly-dash`, `gradio`, `quarto`, `jupyter`, `fastapi`, `flask`, `django`, `plumber`, `spring-boot`, `nodejs`, `express`, `nestjs`, `rails`, `graphql`, `react`, `nextjs`, `angular`, `vue`, `svelte`, `flutter`, `ios`, `android`, `pandas`, `polars`, `numpy`, `spark`, `dbt`, `airflow`, `duckdb`, `scikit-learn`, `pytorch`, `tensorflow`, `keras`, `xgboost`, `mlflow`, `hugging-face`, `langchain`, `docker`, `kubernetes`, `terraform`, `kafka-streams`
-- Product `type`: `product`, `application`, `solution`, `service`, `data-product`, `ml-model`
+- Product `type`: `product`, `application`, `solution`, `service`, `data-product`, `model`, `ml-model`
 
 ## Modeling rules
 
@@ -193,6 +200,8 @@ These are **not** relationship entries; set them with entity fields:
 - `role` on a person is free text in their own words; `tier` and `discipline` are the structured categories.
 - **Users** of a product are `user` relationships, usually from a `persona` (a group such as customers, claims adjusters or suppliers; set `internal: false` for outside users) or a team or business unit.
 - **Tech stack:** list one or more technologies in `stack`, e.g. `["python", "streamlit"]`, or `{ "id": "r", "version": "4.4" }`. Prefer the known ids listed below; other values are allowed and shown as text.
+- **Nested products:** a model (or any product) inside another product sets `"parent": "<product id>"` and usually `"type": "model"` and a `version`. Give it its own `owner` only if it differs from the parent's; otherwise it is owned through the parent.
+- **ITLT alignment:** the IT Leadership Team member a product, platform or team is aligned to is an `itlt-alignment` relationship from that person (or from an ITLT committee).
 - Committees are not teams: give them a `type`, a `chair` and `members` with seat roles, and connect them with `governs`, `advises`, `approver` and `reports-to`.
 - Team `parent` is a business unit id. Team and business unit `lead` is a person id.
 

@@ -8,6 +8,9 @@ items:
     lead: rhea-thorne
     order: 0
     description: Landing zones, Kubernetes and developer platform.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: site-reliability-engineering
     name: Site Reliability Engineering
     parent: tss
@@ -15,6 +18,9 @@ items:
     lead: kavya-whitfield
     order: 1
     description: Observability, incident response and on-call.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: data-platform
     name: Data Platform
     parent: tss
@@ -22,6 +28,9 @@ items:
     lead: bruno-reyes
     order: 2
     description: Warehouse, streaming and data tooling.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: identity-access
     name: Identity & Access
     parent: tss
@@ -29,6 +38,9 @@ items:
     lead: bruno-park
     order: 3
     description: Workforce and customer identity.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: security-engineering
     name: Security Engineering
     parent: tss
@@ -36,6 +48,9 @@ items:
     lead: femi-esposito
     order: 4
     description: Secure engineering practices and tooling.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: enterprise-architecture
     name: Enterprise Architecture
     parent: tss
@@ -43,6 +58,9 @@ items:
     lead: maya-zhang
     order: 5
     description: Architecture standards and review board.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services
   - id: it-service-desk
     name: IT Service Desk
     parent: tss
@@ -50,3 +68,6 @@ items:
     lead: amara-gupta
     order: 6
     description: Level 1 support for all employees.
+    itlt:
+      - ref: person:nikhil-kim
+        scope: Shared services

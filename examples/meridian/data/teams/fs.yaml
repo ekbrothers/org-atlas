@@ -8,6 +8,9 @@ items:
     lead: felix-abara
     order: 0
     description: Card and real-time payment processing.
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: lending-platform
     name: Lending Platform
     parent: fs
@@ -15,6 +18,9 @@ items:
     lead: grace-fischer
     order: 1
     description: Loan origination and servicing.
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: fraud-risk-analytics
     name: Fraud & Risk Analytics
     parent: fs
@@ -22,6 +28,9 @@ items:
     lead: emeka-weiss
     order: 2
     description: Fraud scoring models and risk analytics.
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio
   - id: digital-banking-apps
     name: Digital Banking Apps
     parent: fs
@@ -29,3 +38,6 @@ items:
     lead: grace-brennan
     order: 3
     description: Web and mobile banking experiences.
+    itlt:
+      - ref: person:maya-zhang
+        scope: Financial Services portfolio

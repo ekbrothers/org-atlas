@@ -96,6 +96,7 @@ export function buildSchema(vocab = loadVocab()) {
         type: { enum: enumOf(vocab.teamTypes) },
         lead: { type: 'string', description: 'Person id of the team lead.' },
         contacts: { type: 'object', additionalProperties: { type: 'string' } },
+        ...inlineFields('team'),
       },
       ['id', 'name'],
     ),
@@ -122,7 +123,9 @@ export function buildSchema(vocab = loadVocab()) {
       },
     }),
     platform: strict({ ...tech, ...inlineFields('platform') }, ['id', 'name']),
-    product: strict({ ...tech, type: { enum: ['product', 'application', 'solution', 'service', 'data-product', 'ml-model'] }, ...inlineFields('product') }, ['id', 'name']),
+    product: strict({ ...tech, type: { enum: ['product', 'application', 'solution', 'service', 'data-product', 'model', 'ml-model'] },
+      parent: { type: 'string', description: 'Product id this product sits inside, e.g. a model inside the product that uses it.' },
+      version: { type: 'string', description: 'Version, e.g. a model version "3.2".' }, ...inlineFields('product') }, ['id', 'name']),
     persona: strict(
       {
         internal: { type: 'boolean', description: 'true for staff (e.g. claims adjusters), false for outside users (e.g. customers, suppliers).' },

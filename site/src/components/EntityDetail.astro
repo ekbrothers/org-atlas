@@ -21,9 +21,19 @@ const deployments = isPlatform ? model.edgesTo(entity, 'deployed-to') : model.ed
 const list = (v: any) => [].concat(v ?? []).join(', ');
 const allEnvs = [...new Set(deployments.flatMap((d: any) => [].concat(d.environments ?? [])))];
 
+const ancestors: any[] = [];
+for (let a = entity.parentProduct; a; a = a.parentProduct) ancestors.unshift(a);
+const children = entity.children ?? [];
+const typeLabel = (e: any) => {
+  const t = (e.type ?? 'product').replace('-', ' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 const facts = [
   ['Category', entity.category],
   ['Type', !isPlatform ? (entity.type ?? 'product').replace('-', ' ') : null],
+  ['Part of', entity.parentProduct ? entity.parentProduct.name : null],
+  ['Version', entity.version],
   ['Vendor', entity.vendor],
   ['Hosting', entity.hosting],
   ['Criticality', entity.criticality],
@@ -44,6 +54,14 @@ const links = entity.links ? Object.entries(entity.links) : [];
 
 <nav class="crumbs" aria-label="Breadcrumb">
   <a href={href(section.to)}>{section.label}</a>
+  {
+    ancestors.map((a: any) => (
+      <>
+        <Icon name="chevron-right" size={12} />
+        <a href={href(`products/${a.id}/`)}>{a.name}</a>
+      </>
+    ))
+  }
   <Icon name="chevron-right" size={12} />
   <span aria-current="page">{entity.name}</span>
 </nav>
@@ -54,6 +72,11 @@ const links = entity.links ? Object.entries(entity.links) : [];
     <span class="eyebrow">{isPlatform ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Product'}</span>
     <h1>{entity.name}</h1>
     {entity.description && <p class="muted">{entity.description}</p>}
+    {entity.parentProduct && (
+      <p class="part-of">
+        <Icon name="stack" size={14} /> Part of <a href={href(`products/${entity.parentProduct.id}/`)}>{entity.parentProduct.name}</a>
+      </p>
+    )}
     {entity.stackItems?.length > 0 && (
       <div class="built-with">
         <span class="eyebrow">Built with</span>
@@ -62,6 +85,33 @@ const links = entity.links ? Object.entries(entity.links) : [];
     )}
   </div>
 </header>
+
+{
+  children.length > 0 && (
+    <section class="panel block contains">
+      <h2 class="eyebrow">
+        <Icon name="stack" size={14} /> Contains <span class="n">{children.length}</span>
+      </h2>
+      <ul class="kids">
+        {children.map((c: any) => (
+          <li class="kid">
+            <Logo entity={c} size={36} />
+            <div class="kid-text">
+              <a href={href(`products/${c.id}/`)} class="kid-name">
+                {c.name}
+              </a>
+              <span class="muted small">
+                {[typeLabel(c), c.version && `v${c.version}`, c.criticality, c.lifecycle && c.lifecycle !== 'active' ? c.lifecycle : null].filter(Boolean).join(' | ')}
+              </span>
+              <StackChips entity={c} size="sm" />
+              {c.children?.length > 0 && <span class="small muted">Contains {c.children.length} more</span>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
 
 <h2 class="section-title">Context diagram</h2>
 <p class="muted intro">Who owns, supports, governs and uses {entity.name}.</p>
@@ -74,7 +124,13 @@ const links = entity.links ? Object.entries(entity.links) : [];
 <div class="cols">
   <section class="panel block">
     <h2 class="eyebrow">Accountability</h2>
-    {accountability.length === 0 && <p class="muted">Nobody is recorded as owning or supporting this.</p>}
+    {entity.inheritsOwnershipFrom && (
+      <p class="inherit">
+        <Icon name="shield-check" size={14} /> No owner of its own: owned through <a href={href(`products/${entity.inheritsOwnershipFrom.id}/`)}>{entity.inheritsOwnershipFrom.name}</a>
+        {' '}({model.edgesTo(entity.inheritsOwnershipFrom, 'owner').map((e: any) => e.from.name ?? e.from.displayName).join(', ')}).
+      </p>
+    )}
+    {accountability.length === 0 && !entity.inheritsOwnershipFrom && <p class="muted">Nobody is recorded as owning or supporting this.</p>}
     <table>
       <tbody>
         {
@@ -241,6 +297,60 @@ const links = entity.links ? Object.entries(entity.links) : [];
   }
   .spacer {
     height: 28px;
+  }
+  .part-of {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 0 0;
+    font-size: 14px;
+  }
+  .inherit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: var(--surface-tint);
+    border-radius: var(--radius);
+  }
+  .kids {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .kid {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    background: var(--surface);
+  }
+  .kid-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .kid-name {
+    font-weight: 700;
+  }
+  .small {
+    font-size: 12px;
+  }
+  .cap {
+    text-transform: capitalize;
+  }
+  .contains {
+    margin-bottom: 28px;
   }
   .built-with {
     display: flex;

@@ -10,6 +10,7 @@
 import octicons from '@primer/octicons';
 import { atlas } from '../lib/atlas';
 import { nameOf } from '../../../engine/lib/model.mjs';
+import ZoomControls from './ZoomControls.astro';
 
 interface Props {
   entity: any;
@@ -32,10 +33,15 @@ const edgesOf = (types: string[]) => {
   }
   return [...byOther.values()];
 };
+// A nested product without its own owner shows its parent's owners.
+let ownerItems = edgesOf(['owner']);
+if (!ownerItems.length && entity.inheritsOwnershipFrom) {
+  ownerItems = model.edgesTo(entity.inheritsOwnershipFrom, 'owner').map((e: any) => ({ e, other: e.from, labels: [`Owner via ${entity.inheritsOwnershipFrom.name}`] }));
+}
 const groups = {
-  top: { title: 'Owners', items: edgesOf(['owner']) },
+  top: { title: 'Owners', items: ownerItems },
   left: { title: 'Support and operations', items: edgesOf(['supporting', 'operator', 'sme', 'escalation']) },
-  right: { title: 'Governance', items: edgesOf(['approver', 'governs', 'advises']) },
+  right: { title: 'Governance', items: edgesOf(['itlt-alignment', 'approver', 'governs', 'advises']) },
   bottom: { title: 'Users and stakeholders', items: edgesOf(['user', 'stakeholder', 'sponsor']) },
 };
 const total = Object.values(groups).reduce((n, g) => n + g.items.length, 0);
@@ -114,17 +120,20 @@ const kindLabel = (o: any) =>
   o.kind === 'persona' ? (o.internal === false ? 'External users' : 'Internal users') + (o.size ? `, ${o.size}` : '') : o.kind === 'business-unit' ? 'Business unit' : o.kind === 'person' ? (o.role ?? 'Person') : o.kind[0].toUpperCase() + o.kind.slice(1);
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const stack = (entity.stackItems ?? []).map((t: any) => t.label);
-const centerKind = entity.kind === 'platform' ? 'Platform' : entity.type && entity.type !== 'product' ? entity.type.replace('-', ' ') : 'Product';
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+const centerKind = entity.kind === 'platform' ? 'Platform' : entity.type && entity.type !== 'product' ? cap(entity.type.replace('-', ' ')) : 'Product';
 const svgId = `cd-${entity.kind}-${entity.id}`;
 ---
 
-<figure class="context">
+<figure class="context" data-zoom="svg">
   {
     total === 0 ? (
       <p class="muted empty">Nothing is recorded around this {entity.kind} yet: add owners, users or stakeholders to draw its context.</p>
     ) : (
+      <>
+      <ZoomControls />
       <div class="scroll">
-        <svg id={svgId} class="cd" viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label={`Context diagram for ${entity.name}`} xmlns="http://www.w3.org/2000/svg">
+        <svg id={svgId} class="cd" data-viewbox={`0 0 ${W} ${H}`} viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label={`Context diagram for ${entity.name}`} xmlns="http://www.w3.org/2000/svg">
           <title>{`${entity.name}: owners, support, governance, users and stakeholders`}</title>
           <rect class="cd-bg" x="0" y="0" width={W} height={H} rx="6" />
 
@@ -136,19 +145,10 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
 
           {placed.map((p) => {
             const s = p.e.rel.style ?? {};
-            // Labels sit nearer the outer node, so labels on lines converging at the center don't pile up.
-            const f = 0.3;
-            const mx = p.ax + (p.tx - p.ax) * f;
-            const my = p.ay + (p.ty - p.ay) * f;
-            const label = (p as any).labels.join(' + ');
             return (
               <g class="cd-edge">
                 <line x1={p.ax} y1={p.ay} x2={p.tx} y2={p.ty} stroke-width={s.line === 'double' ? 5 : (s.weight ?? 2)} stroke-dasharray={dash(p.e.rel) || undefined} stroke-linecap={s.line === 'dotted' ? 'round' : 'butt'} />
                 {s.line === 'double' && <line class="cd-gap" x1={p.ax} y1={p.ay} x2={p.tx} y2={p.ty} stroke-width="1.6" />}
-                <rect class="cd-label-bg" x={mx - label.length * 3.1 - 6} y={my - 9} width={label.length * 6.2 + 12} height="17" rx="8" />
-                <text class="cd-label" x={mx} y={my + 3.5} text-anchor="middle">
-                  {label}
-                </text>
               </g>
             );
           })}
@@ -170,6 +170,23 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
             );
           })}
 
+          {placed.map((p) => {
+            // Labels are drawn last so boxes never cover them, and sit nearer the
+            // outer box so labels on lines converging at the center do not pile up.
+            const f = 0.3;
+            const mx = p.ax + (p.tx - p.ax) * f;
+            const my = p.ay + (p.ty - p.ay) * f;
+            const label = (p as any).labels.join(' + ');
+            return (
+              <g class="cd-edge-label">
+                <rect class="cd-label-bg" x={mx - label.length * 3.1 - 6} y={my - 9} width={label.length * 6.2 + 12} height="17" rx="8" />
+                <text class="cd-label" x={mx} y={my + 3.5} text-anchor="middle">
+                  {label}
+                </text>
+              </g>
+            );
+          })}
+
           <g class="cd-center">
             <rect x={cx} y={cy} width={CW} height={CH} rx="6" />
             <rect class="cd-center-top" x={cx} y={cy} width={CW} height="5" rx="2" />
@@ -181,7 +198,7 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
               {clip(entity.name, 28)}
             </text>
             <text class="cd-center-kind" x={cx + CW / 2} y={cy + 99} text-anchor="middle">
-              {[centerKind, entity.criticality].filter(Boolean).join(' | ')}
+              {[centerKind, entity.version && `v${entity.version}`, entity.criticality, entity.parentProduct && `in ${clip(entity.parentProduct.name, 18)}`, entity.children?.length && `${entity.children.length} nested`].filter(Boolean).join(' | ')}
             </text>
             {stack.length > 0 && (
               <text class="cd-center-stack" x={cx + CW / 2} y={cy + 115} text-anchor="middle">
@@ -191,6 +208,7 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
           </g>
         </svg>
       </div>
+      </>
     )
   }
   {
@@ -206,12 +224,17 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
 </figure>
 
 <script>
+  import { initAllZoom } from '../scripts/zoom';
+  initAllZoom();
+
   // Export with computed colors inlined, so the file looks the same outside the site.
   const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'opacity', 'font-family', 'font-size', 'font-weight', 'letter-spacing'];
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.cd-download')) {
     btn.addEventListener('click', () => {
       const src = document.getElementById(btn.dataset.svg!) as unknown as SVGSVGElement;
       const copy = src.cloneNode(true) as SVGSVGElement;
+      // Always export the whole diagram, whatever the current zoom.
+      copy.setAttribute('viewBox', src.dataset.viewbox ?? copy.getAttribute('viewBox')!);
       const a = [src, ...src.querySelectorAll('*')];
       const b = [copy, ...copy.querySelectorAll('*')];
       a.forEach((el, i) => {
@@ -219,6 +242,7 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
         const style = PROPS.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(';');
         (b[i] as Element).setAttribute('style', style);
         (b[i] as Element).removeAttribute('class');
+        (b[i] as Element).removeAttribute('data-viewbox');
       });
       const blob = new Blob([new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
@@ -234,7 +258,7 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
     margin: 0;
   }
   .scroll {
-    overflow-x: auto;
+    overflow: auto;
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -320,7 +344,6 @@ const svgId = `cd-${entity.kind}-${entity.id}`;
   .cd-center-kind {
     fill: var(--muted);
     font-size: 11px;
-    text-transform: capitalize;
   }
   .cd-center-stack {
     fill: var(--blue);

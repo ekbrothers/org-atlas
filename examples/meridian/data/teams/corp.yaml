@@ -8,6 +8,9 @@ items:
     lead: andre-juarez
     order: 0
     description: ERP, general ledger and financial reporting.
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio
   - id: hr-technology
     name: HR Technology
     parent: corp
@@ -15,6 +18,9 @@ items:
     lead: liam-weiss
     order: 1
     description: HR systems and workforce data.
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio
   - id: legal-compliance-tech
     name: Legal & Compliance Tech
     parent: corp
@@ -22,3 +28,6 @@ items:
     lead: rosa-farouk
     order: 2
     description: Contract, policy and compliance tooling.
+    itlt:
+      - ref: person:amara-gupta
+        scope: Corporate Functions portfolio

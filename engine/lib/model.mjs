@@ -31,7 +31,7 @@ import { resolveLogo } from './logos.mjs';
 export const ENTITY_KINDS = ['organization', 'business-unit', 'team', 'person', 'persona', 'platform', 'product', 'committee'];
 // Other names accepted for a kind. `application` was the original name for `product`.
 export const KIND_ALIASES = {
-  application: 'product', app: 'product', solution: 'product',
+  application: 'product', app: 'product', solution: 'product', model: 'product', 'ml-model': 'product',
   bu: 'business-unit', business_unit: 'business-unit',
   board: 'committee', council: 'committee', guild: 'committee', forum: 'committee',
   audience: 'persona', 'user-group': 'persona',
@@ -195,7 +195,8 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
       return;
     }
     entity.id = String(entity.id);
-    if ((written === 'solution' || written === 'application') && entity.type == null) entity.type = written;
+    if (['solution', 'application', 'model'].includes(written) && entity.type == null) entity.type = written;
+    if (written === 'ml-model' && entity.type == null) entity.type = 'model';
     if (byKind[kind].has(entity.id)) {
       errors.push({ rel, message: `Duplicate ${kind} id "${entity.id}" (also in ${byKind[kind].get(entity.id)._file}).` });
       return;
@@ -328,6 +329,30 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     }
   }
 
+  // Nested products (e.g. models inside the product that uses them)
+  for (const p of products.values()) p.children = [];
+  for (const p of products.values()) {
+    if (p.parent == null) continue;
+    const parent = products.get(String(p.parent).replace(/^product:/, ''));
+    if (!parent) {
+      errors.push({ rel: p._file, message: `product "${p.id}": parent "${p.parent}" is not a known product.` });
+      continue;
+    }
+    p.parentProduct = parent;
+    parent.children.push(p);
+  }
+  for (const p of products.values()) {
+    const seenUp = new Set([p.id]);
+    for (let a = p.parentProduct; a; a = a.parentProduct) {
+      if (seenUp.has(a.id)) {
+        errors.push({ rel: p._file, message: `product "${p.id}": parent chain loops back on itself.` });
+        p.parentProduct = null;
+        break;
+      }
+      seenUp.add(a.id);
+    }
+  }
+
   // Personas (groups of users): icon defaults by internal / external
   for (const e of byKind.persona.values()) {
     e.icon ??= e.internal === false ? 'globe' : 'people';
@@ -356,7 +381,7 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
   const inlineTarget = vocab.relTypes.filter((t) => t.inline);
   const inlineSource = vocab.relTypes.filter((t) => t['inline-on-source']);
   for (const kind of ENTITY_KINDS) {
-    if (['person', 'team', 'organization', 'business-unit'].includes(kind)) continue;
+    if (['person', 'organization', 'business-unit'].includes(kind)) continue;
     for (const e of byKind[kind].values()) {
       for (const t of inlineTarget) {
         if (!t.to.includes(kind) || e[t.inline] == null) continue;
@@ -449,6 +474,13 @@ export function buildModel(files, vocab = loadVocab(), { iconsDir } = {}) {
     for (const kind of t.to) {
       for (const e of byKind[kind]?.values() ?? []) {
         if (edgesTo(e, t.id).length < min) {
+          // A nested product without its own owner is owned through its parent.
+          let a = e.parentProduct;
+          while (a && t.id === 'owner' && !edgesTo(a, 'owner').length) a = a.parentProduct;
+          if (t.id === 'owner' && a) {
+            e.inheritsOwnershipFrom = a;
+            continue;
+          }
           e.unowned = t.id === 'owner';
           warnings.push({ rel: e._file, message: `${kind} "${e.id}" has no ${t.label.toLowerCase()}.` });
         }

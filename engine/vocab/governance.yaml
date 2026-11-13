@@ -13,6 +13,7 @@ committee-types:
   - { id: council, label: Council, icon: organization, description: "Cross-business-unit group that sets shared standards, e.g. a Data Governance Council." }
   - { id: advisory-board, label: Advisory board, icon: light-bulb, description: "Gives advice without decision rights; may include external advisors." }
   - { id: community-of-practice, label: Community of practice, icon: people, description: "Guild or chapter that shares practice across teams." }
+  - { id: center-of-excellence, label: Center of excellence, icon: mortar-board, description: "Experts who set best practice, standards and reusable assets for a capability (e.g. a Data and AI CoE) and help teams adopt them." }
   - { id: working-group, label: Working group, icon: tools, description: "Time-boxed group formed for a specific problem." }
 
 seat-roles:

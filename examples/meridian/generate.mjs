@@ -539,6 +539,30 @@ for (const [id, list] of Object.entries(extraDeploys)) {
 for (const a of products) if (a.criticality === 'T0') a.approvers = [{ ref: 'change-advisory-board', scope: 'Production changes' }];
 products.find((a) => a.id === 'fraud-scoring').approvers.push({ ref: 'model-risk-committee', scope: 'Model releases' });
 
+// Models nested inside the products that use them. Without their own owner
+// they inherit ownership from the parent product.
+const model = (id, name, parent, stack, extra = {}) => ({ id, name, type: 'model', parent, logo: 'octicon:cpu', stack, ...extra });
+products.push(
+  model('fraud-txn-model', 'Transaction Fraud Model', 'fraud-scoring', ['python', 'pytorch', 'mlflow'], {
+    version: '3.2', criticality: 'T0', description: 'Scores every card transaction for fraud risk in real time.',
+    'deployed-to': [deploy('databricks', ['production', 'staging'], ['us-east'])],
+    smes: compact([pers(expert('fraud-risk-analytics', 'data'))]),
+  }),
+  model('account-takeover-model', 'Account Takeover Model', 'fraud-scoring', ['python', 'xgboost'], {
+    version: '1.4', criticality: 'T1', lifecycle: 'pilot', description: 'Flags logins and profile changes that look like account takeover.',
+  }),
+  model('price-elasticity-model', 'Price Elasticity Model', 'pricing-engine', ['python', 'scikit-learn'], {
+    version: '2.0', criticality: 'T2', description: 'Estimates demand response to price changes by category.',
+  }),
+  model('promo-uplift-model', 'Promotion Uplift Model', 'promo-planner', ['python', 'scikit-learn', 'mlflow'], {
+    version: '0.9', criticality: 'T2', lifecycle: 'pilot', description: 'Forecasts sales uplift from a planned promotion.',
+  }),
+  model('claims-triage-model', 'Claims Triage Model', 'claims-engine', [{ id: 'r', version: '4.4' }, 'xgboost'], {
+    version: '1.1', criticality: 'T1', description: 'Routes incoming claims to fast-track or manual review.',
+    owners: [{ ref: 'clinical-data', scope: 'Model development' }], supporting: [{ ref: 'claims-processing', scope: 'Business rules and labels' }],
+  }),
+);
+
 // ---------------------------------------------------------------------------
 // Committees and boards
 const unitLead = (unitId) => units.find((u) => u.id === unitId).lead;
@@ -606,7 +630,12 @@ const committees = [
       seat(leadOf('legal-compliance-tech'), 'voting-member', 'legal-compliance-tech'),
       seat(expert('enterprise-architecture', 'architecture'), 'advisor', 'enterprise-architecture'),
     ]),
-    governs: [{ ref: 'product:fraud-scoring', scope: 'Model validation and approval' }],
+    governs: [
+      { ref: 'product:fraud-scoring', scope: 'Model validation and approval' },
+      { ref: 'product:fraud-txn-model', scope: 'Model validation' },
+      { ref: 'product:account-takeover-model', scope: 'Model validation' },
+      { ref: 'product:claims-triage-model', scope: 'Model validation' },
+    ],
     'reports-to': ['team:executive-leadership'],
   },
   {
@@ -624,6 +653,33 @@ const committees = [
     'reports-to': ['team:executive-leadership'],
   },
   {
+    id: 'itlt', name: 'IT Leadership Team (ITLT)', type: 'steering-committee', cadence: 'Weekly',
+    purpose: 'The senior IT leaders. Each product, platform and team is aligned to one ITLT member for priorities, funding and escalation.',
+    chair: cto,
+    members: compact([
+      seat(leadOf('enterprise-architecture'), 'voting-member'),
+      seat(leadOf('cloud-platform'), 'voting-member'),
+      seat(leadOf('data-platform'), 'voting-member'),
+      seat(leadOf('it-service-desk'), 'voting-member'),
+      seat(leadOf('security-engineering'), 'voting-member'),
+    ]),
+    'reports-to': ['team:executive-leadership'],
+  },
+  {
+    id: 'data-ai-coe', name: 'Data & AI Center of Excellence', type: 'center-of-excellence', cadence: 'Every two weeks',
+    purpose: 'Sets machine learning and analytics standards, maintains reusable templates and helps teams adopt them.',
+    chair: leadOf('data-platform'),
+    members: compact([
+      seat(expert('data-platform', 'data'), 'secretary', 'data-platform'),
+      seat(expert('fraud-risk-analytics', 'data'), 'member', 'fraud-risk-analytics'),
+      seat(expert('clinical-data'), 'member', 'clinical-data'),
+      seat(expert('pricing-promotions'), 'member', 'pricing-promotions'),
+      seat(expert('enterprise-architecture', 'architecture'), 'advisor', 'enterprise-architecture'),
+    ]),
+    advises: ['fraud-risk-analytics', 'clinical-data', 'pricing-promotions', 'product:promo-planner', 'product:claims-insights'],
+    'reports-to': ['committee:itlt'],
+  },
+  {
     id: 'platform-engineering-guild', name: 'Platform Engineering Guild', type: 'community-of-practice', cadence: 'Monthly',
     purpose: 'Shares platform practices and feeds requests back to the platform teams.',
     chair: leadOf('cloud-platform'),
@@ -634,6 +690,27 @@ const committees = [
     advises: ['cloud-platform', 'site-reliability-engineering'],
   },
 ];
+
+// ITLT alignment: every team and top-level product is aligned to one ITLT member, by business unit.
+const ITLT_BY_UNIT = {
+  fs: [leadOf('enterprise-architecture'), 'Financial Services portfolio'],
+  rc: [leadOf('cloud-platform'), 'Retail & Commerce portfolio'],
+  hc: [leadOf('data-platform'), 'Healthcare portfolio'],
+  corp: [leadOf('it-service-desk'), 'Corporate Functions portfolio'],
+  tss: [cto, 'Shared services'],
+};
+for (const t of teams) {
+  const a = ITLT_BY_UNIT[t.parent];
+  if (a) t.itlt = [{ ref: pers(a[0]), scope: a[1] }];
+}
+for (const p of products) {
+  if (p.parent) continue;
+  const ownerTeam = [].concat(p.owners ?? [])[0];
+  const teamId = ownerTeam?.ref ?? ownerTeam;
+  const unit = teams.find((t) => t.id === teamId)?.parent;
+  const a = ITLT_BY_UNIT[unit];
+  if (a) p.itlt = [{ ref: pers(a[0]), scope: a[1] }];
+}
 
 // Tidy empty arrays.
 for (const list of [platforms, products]) for (const e of list) for (const k of Object.keys(e)) if (Array.isArray(e[k]) && !e[k].length) delete e[k];
