@@ -6,6 +6,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { buildSchema } from './schema.mjs';
+import { buildAgent } from './agent.mjs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
@@ -20,6 +21,12 @@ export default function pagesIntegration(config) {
         // Publish the JSON Schema so editors and LLMs can fetch it from the site.
         mkdirSync(join(out, 'schema'), { recursive: true });
         writeFileSync(join(out, 'schema', 'atlas.schema.json'), JSON.stringify(buildSchema(), null, 2) + '\n');
+
+        // Publish the authoring agent so any LLM can be pointed at it by URL.
+        const agent = buildAgent();
+        mkdirSync(join(out, 'agent'), { recursive: true });
+        writeFileSync(join(out, 'agent', 'org-atlas-agent.md'), agent.body);
+        writeFileSync(join(out, 'agent', 'tool.json'), JSON.stringify(agent.tool, null, 2) + '\n');
 
         if (config.site.domain) {
           const domain = config.site.domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');

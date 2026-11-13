@@ -15,7 +15,9 @@
     "build": "node engine/scripts/validate.mjs && astro build",
     "preview": "astro preview",
     "schema": "node engine/scripts/schema.mjs",
-    "export": "node engine/scripts/export.mjs"
+    "export": "node engine/scripts/export.mjs",
+    "agent": "node engine/scripts/agent.mjs",
+    "generate": "node engine/scripts/schema.mjs && node engine/scripts/agent.mjs"
   },
   "dependencies": {
     "@primer/octicons": "19.41.0",

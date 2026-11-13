@@ -26,11 +26,11 @@ jobs:
 
       - run: npm run validate
 
-      # The committed schema must match the vocabulary files.
-      - name: Schema is up to date
+      # The committed schema and agent definitions must match the vocabulary files.
+      - name: Schema and agent are up to date
         run: |
-          npm run schema
-          git diff --exit-code schema/ || (echo "::error::schema/atlas.schema.json is out of date. Run npm run schema and commit." && exit 1)
+          npm run generate
+          git diff --exit-code schema/ agent/ .claude/agents/ AGENTS.md || (echo "::error::Generated files are out of date. Run npm run generate and commit." && exit 1)
 
       - run: npx astro build
 

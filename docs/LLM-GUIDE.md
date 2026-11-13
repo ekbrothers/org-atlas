@@ -1,6 +1,8 @@
 # Building charts with an LLM
 
-Org Atlas charts are plain data, so any LLM can write them. The recommended format is a **bundle**: one JSON file holding every entity and relationship. Drop it into `data/`, run `npm run validate`, and the site builds from it.
+Org Atlas charts are plain data, so any LLM can write them. The quickest route is the ready-made **authoring agent** in [`agent/org-atlas-agent.md`](../agent/org-atlas-agent.md): use it as the system prompt, or [`agent/tool.json`](../agent/tool.json) as a tool definition. It is generated from the vocabulary, so it is always complete and current. The rest of this page explains the format by hand.
+
+ The recommended format is a **bundle**: one JSON file holding every entity and relationship. Drop it into `data/`, run `npm run validate`, and the site builds from it.
 
 ## The workflow
 

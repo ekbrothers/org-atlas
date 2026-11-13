@@ -49,6 +49,11 @@ jobs:
       # Invalid data fails here, so the last good site stays live.
       - run: npm run validate
 
+      - name: Schema and agent are up to date
+        run: |
+          npm run generate
+          git diff --exit-code schema/ agent/ .claude/agents/ AGENTS.md || (echo "::error::Generated files are out of date. Run npm run generate and commit." && exit 1)
+
       - uses: actions/configure-pages@v6
 
       - run: npx astro build
