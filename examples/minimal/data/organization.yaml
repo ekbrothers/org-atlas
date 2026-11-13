@@ -1,11 +1,7 @@
-# The root of your organization. Every business unit, team and person
-# will eventually hang off this entity.
-#
-# Phase 0 only checks that this file is valid YAML. The full schema
-# (business units, teams, people, solutions, platforms, relationships)
-# arrives in Phase 1.
+# The root of your organization. `lead` is the person at the top of the org chart.
 kind: organization
 id: acme
 name: Acme Example Co.
+lead: alex-rivera
 description: >
   A fictional company used to demonstrate Org Atlas.

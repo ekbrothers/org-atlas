@@ -1,0 +1,65 @@
+# Staff categories. Engine-owned defaults; rename or extend them in overrides/
+# (supported in a later phase). Icons are Octicon names.
+#
+# A person has: tier (what level), discipline (what they do),
+# employment (how they are engaged) and a free-text role.
+
+tiers:
+  - id: executive
+    label: Executive
+    icon: star-fill
+    rank: 1
+  - id: senior-leader
+    label: Senior leader
+    description: Director, VP
+    icon: star
+    rank: 2
+  - id: manager
+    label: Manager
+    icon: people
+    rank: 3
+  - id: team-lead
+    label: Team lead
+    description: Team lead, tech lead
+    icon: person-fill
+    rank: 4
+  - id: principal
+    label: Principal / architect
+    description: Staff+, principal, architect
+    icon: light-bulb
+    rank: 5
+  - id: ic
+    label: Individual contributor
+    icon: null
+    rank: 6
+
+disciplines:
+  - { id: software-engineering, label: Software engineering, icon: code }
+  - { id: sre, label: SRE / operations, icon: pulse }
+  - { id: infrastructure, label: Infrastructure / cloud, icon: server }
+  - { id: security, label: Security, icon: shield-lock }
+  - { id: data, label: Data / analytics, icon: database }
+  - { id: architecture, label: Architecture, icon: workflow }
+  - { id: product, label: Product management, icon: briefcase }
+  - { id: design, label: Design / UX, icon: paintbrush }
+  - { id: quality, label: Quality / test, icon: checklist }
+  - { id: program, label: Program / project management, icon: project }
+  - { id: business-analysis, label: Business analysis, icon: graph }
+  - { id: support, label: Support / service desk, icon: comment-discussion }
+  - { id: business, label: Business / non-technical, icon: organization }
+
+employment:
+  - { id: fte, label: Full-time, ring: solid }
+  - { id: contractor, label: Contractor, ring: dashed }
+  - { id: vendor, label: Vendor staff, ring: double, icon: link-external }
+  - { id: intern, label: Intern, ring: dotted }
+  - { id: vacancy, label: Open position, ring: vacancy, icon: person-add }
+  - { id: interim, label: Interim, ring: hatched, icon: clock }
+
+team-types:
+  - { id: stream-aligned, label: Stream-aligned, icon: zap }
+  - { id: platform, label: Platform, icon: stack }
+  - { id: enabling, label: Enabling, icon: light-bulb }
+  - { id: complicated-subsystem, label: Complicated subsystem, icon: workflow }
+  - { id: shared-service, label: Shared service, icon: apps }
+  - { id: leadership, label: Leadership, icon: star }

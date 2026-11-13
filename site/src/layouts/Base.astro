@@ -1,25 +1,27 @@
 ---
 import '../styles/global.css';
-import { loadConfig } from '../../../engine/lib/config.mjs';
+import Icon from '../components/Icon.astro';
+import { atlas, base, href } from '../lib/atlas';
 
 interface Props {
   title?: string;
+  wide?: boolean;
 }
 
-const atlas = loadConfig();
-const { title } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
-const pageTitle = title ? `${title} | ${atlas.site.title}` : atlas.site.title;
+const { config } = atlas();
+const { title, wide = false } = Astro.props;
+const pageTitle = title ? `${title} | ${config.site.title}` : config.site.title;
+const path = Astro.url.pathname;
+const demoPath = config.path.replace(/.*\/(examples\/[^/]+)\/.*/, '$1');
 
-// Views that arrive in later phases are shown greyed out so the shape of the
-// site is visible from day one.
 const nav = [
-  { label: 'Home', href: base, ready: true },
-  { label: 'Org chart', ready: false },
-  { label: 'Teams', ready: false },
+  { label: 'Home', to: '', ready: true },
+  { label: 'Org chart', to: 'org/', ready: true },
+  { label: 'Teams', to: 'teams/', ready: true },
+  { label: 'Legend', to: 'legend/', ready: true },
   { label: 'Explorer', ready: false },
-  { label: 'Legend', ready: false },
 ];
+const isActive = (to: string) => (to === '' ? path === base || path === base.replace(/\/$/, '') : path.startsWith(href(to)));
 ---
 
 <!doctype html>
@@ -28,8 +30,11 @@ const nav = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    {atlas.site.noindex && <meta name="robots" content="noindex, nofollow" />}
-    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    {config.site.noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" type="image/svg+xml" href={href('favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script is:inline>
       try {
         const t = localStorage.getItem('atlas-theme');
@@ -41,42 +46,50 @@ const nav = [
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href={base}>
-          <img src={`${base}favicon.svg`} alt="" width="24" height="24" />
-          <span>{atlas.site.title}</span>
+          <img src={href('favicon.svg')} alt="" width="32" height="32" />
+          <span>{config.site.title}</span>
         </a>
         <nav aria-label="Main">
           {
             nav.map((item) =>
               item.ready ? (
-                <a href={item.href}>{item.label}</a>
+                <a href={href(item.to)} class:list={['nav-link', { active: isActive(item.to!) }]}>
+                  {item.label}
+                </a>
               ) : (
-                <span class="soon" title="Coming in a later phase">
+                <span class="nav-link soon" title="Coming in a later phase">
                   {item.label}
                 </span>
               ),
             )
           }
         </nav>
-        <button class="theme-toggle" type="button" aria-label="Toggle color theme">Theme</button>
+        <button class="theme-toggle" type="button" aria-label="Toggle light and dark theme">
+          <span class="when-light"><Icon name="moon" size={16} /></span>
+          <span class="when-dark"><Icon name="sun" size={16} /></span>
+        </button>
       </div>
     </header>
 
     {
-      atlas.demo && (
+      config.demo && (
         <div class="demo-banner">
           <div class="container">
-            Demo mode: showing <code>examples/minimal</code>. Run <code>npm run init</code> to use your own data.
+            <Icon name="info" size={16} /> Demo data: <strong>{config.organization.name}</strong> is fictional, from{' '}
+            <code>{demoPath}</code>. Run <code>npm run init</code> to use your own.
           </div>
         </div>
       )
     }
 
-    <main class="container">
+    <main class:list={['container', { wide }]}>
       <slot />
     </main>
 
-    <footer class="container site-footer">
-      Built with <a href="https://github.com/ekbrothers/org-atlas">Org Atlas</a>
+    <footer class="site-footer">
+      <div class="container">
+        Built with <a href="https://github.com/ekbrothers/org-atlas">Org Atlas</a>
+      </div>
     </footer>
 
     <script is:inline>
@@ -96,46 +109,119 @@ const nav = [
 
 <style>
   .site-header {
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
-    background: var(--bg-subtle);
   }
   .header-inner {
     display: flex;
     align-items: center;
     gap: 24px;
-    min-height: 56px;
-    flex-wrap: wrap;
+    min-height: 64px;
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: var(--fg);
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--navy);
+  }
+  .brand:hover {
     text-decoration: none;
+  }
+  .brand img {
+    border-radius: 5px;
+    box-shadow: 0 0 0 1px var(--border);
   }
   nav {
     display: flex;
-    gap: 16px;
+    align-items: stretch;
+    gap: 4px;
     flex: 1;
-    flex-wrap: wrap;
-    font-size: 14px;
+    align-self: stretch;
   }
-  nav a {
-    color: var(--fg);
+  .nav-link {
+    display: flex;
+    align-items: center;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0 14px;
+    border-bottom: 3px solid transparent;
+    border-top: 3px solid transparent;
+  }
+  .nav-link:hover {
     text-decoration: none;
+    background: var(--warm);
   }
-  nav a:hover {
-    color: var(--accent);
+  .nav-link.active {
+    border-bottom-color: var(--gold);
   }
   .soon {
-    color: var(--fg-muted);
+    color: var(--muted);
     opacity: 0.6;
     cursor: default;
   }
-  @media (max-width: 640px) {
+  .soon:hover {
+    background: none;
+  }
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--navy);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    background: var(--warm);
+  }
+  .when-dark {
+    display: none;
+  }
+  :global(:root[data-theme='dark']) .when-dark {
+    display: contents;
+  }
+  :global(:root[data-theme='dark']) .when-light {
+    display: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .when-dark {
+      display: contents;
+    }
+    :global(:root:not([data-theme='light'])) .when-light {
+      display: none;
+    }
+  }
+  .demo-banner {
+    background: var(--surface-tint);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    padding: 9px 0;
+  }
+  main {
+    padding-top: 32px;
+    padding-bottom: 64px;
+    min-height: 60vh;
+  }
+  main.wide {
+    max-width: none;
+  }
+  .site-footer {
+    background: var(--warm);
+    border-top: 1px solid var(--border);
+    padding: 20px 0 28px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media (max-width: 720px) {
     .header-inner {
-      gap: 8px 16px;
+      flex-wrap: wrap;
+      gap: 0 12px;
       padding-top: 10px;
     }
     .brand {
@@ -144,37 +230,14 @@ const nav = [
     nav {
       order: 3;
       flex-basis: 100%;
-      flex-wrap: nowrap;
       overflow-x: auto;
-      padding-bottom: 10px;
       white-space: nowrap;
+      min-height: 44px;
+      margin: 0 -16px;
+      padding: 0 6px;
     }
-  }
-  .theme-toggle {
-    font: inherit;
-    font-size: 13px;
-    color: var(--fg);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 10px;
-    cursor: pointer;
-  }
-  .demo-banner {
-    background: var(--attention-subtle);
-    border-bottom: 1px solid var(--attention-border);
-    font-size: 14px;
-    padding: 8px 0;
-  }
-  main {
-    padding-top: 32px;
-    padding-bottom: 48px;
-  }
-  .site-footer {
-    border-top: 1px solid var(--border);
-    padding-top: 16px;
-    padding-bottom: 32px;
-    font-size: 13px;
-    color: var(--fg-muted);
+    .nav-link {
+      padding: 0 10px;
+    }
   }
 </style>

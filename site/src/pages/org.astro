@@ -1,0 +1,423 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import PersonChip from '../components/PersonChip.astro';
+import OrgTeamCard from '../components/OrgTeamCard.astro';
+import { atlas } from '../lib/atlas';
+
+const { model, vocab } = atlas();
+const { organization, units } = model;
+const usedTypes = vocab.teamTypes.filter((t: any) => model.teams.some((x: any) => x.type === t.id));
+const usedDisciplines = vocab.disciplines.filter((d: any) => model.people.some((p: any) => p.discipline === d.id));
+const peopleIn = (u: any) =>
+  new Set(u.teams.flatMap((t: any) => t.members.filter((m: any) => m.primary && m.person.employment !== 'vacancy').map((m: any) => m.person.id))).size;
+---
+
+<Base title="Org chart" wide>
+  <div class="org-page">
+    <div class="page-header">
+      <span class="eyebrow">Organization</span>
+      <h1>Org chart</h1>
+      <p>
+        Business units and their teams. Switch to <strong>People</strong> to see everyone on each team, or open a team for its full
+        page.
+      </p>
+    </div>
+
+    <form class="toolbar panel" role="search" onsubmit="return false">
+      <label class="field grow">
+        <span class="sr-only">Search</span>
+        <Icon name="search" size={16} />
+        <input id="f-q" type="search" placeholder="Search teams, people or roles" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span class="field-label">Business unit</span>
+        <select id="f-bu">
+          <option value="">All</option>
+          {units.map((u: any) => <option value={u.id}>{u.name}</option>)}
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Team type</span>
+        <select id="f-type">
+          <option value="">All</option>
+          {usedTypes.map((t: any) => <option value={t.id}>{t.label}</option>)}
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Discipline</span>
+        <select id="f-disc">
+          <option value="">All</option>
+          {usedDisciplines.map((d: any) => <option value={d.id}>{d.label}</option>)}
+        </select>
+      </label>
+      <div class="segmented" role="group" aria-label="Detail level">
+        <button type="button" data-detail="teams" aria-pressed="true">Teams</button>
+        <button type="button" data-detail="people" aria-pressed="false">People</button>
+      </div>
+      <button type="button" id="f-reset" class="btn btn-ghost">Reset</button>
+      <p id="f-count" class="count muted" aria-live="polite"></p>
+    </form>
+
+    <div class="chart-scroll">
+      <div class="chart" id="chart">
+        <div class="root-wrap">
+          <div class="org-root panel">
+            <span class="eyebrow">Organization</span>
+            <strong class="org-name">{organization.name}</strong>
+            {organization.leadPerson && <PersonChip person={organization.leadPerson} size="sm" />}
+            <span class="muted small">{units.length} business units, {model.teams.length} teams, {model.people.length} people</span>
+          </div>
+        </div>
+
+        <div class="bu-row">
+          {
+            units.map((u: any) => (
+              <section class="bu-col" data-bu={u.id}>
+                <div class="bu-card">
+                  <span class="eyebrow">Business unit</span>
+                  <h2>{u.name}</h2>
+                  {u.leadPerson && <PersonChip person={u.leadPerson} size="sm" />}
+                  <span class="muted small">
+                    {u.teams.length} team{u.teams.length === 1 ? '' : 's'}, {peopleIn(u)} people
+                  </span>
+                </div>
+                <div class="team-list">
+                  {u.teams.map((t: any) => (
+                    <div class="team-slot">
+                      <OrgTeamCard team={t} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector(s) as T;
+  const q = $<HTMLInputElement>('#f-q');
+  const bu = $<HTMLSelectElement>('#f-bu');
+  const type = $<HTMLSelectElement>('#f-type');
+  const disc = $<HTMLSelectElement>('#f-disc');
+  const chart = $<HTMLDivElement>('#chart');
+  const count = $<HTMLParagraphElement>('#f-count');
+  const cards = [...document.querySelectorAll<HTMLElement>('.team-card')];
+  const cols = [...document.querySelectorAll<HTMLElement>('.bu-col')];
+  const detailButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-detail]')];
+
+  // Restore state from the URL so filtered views can be shared as links.
+  const params = new URLSearchParams(location.search);
+  q.value = params.get('q') ?? '';
+  bu.value = params.get('bu') ?? '';
+  type.value = params.get('type') ?? '';
+  disc.value = params.get('discipline') ?? '';
+  let detail = params.get('detail') === 'people' ? 'people' : 'teams';
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    const active = !!(term || bu.value || type.value || disc.value);
+    let shown = 0;
+
+    for (const card of cards) {
+      const ok =
+        (!bu.value || card.dataset.bu === bu.value) &&
+        (!type.value || card.dataset.type === type.value) &&
+        (!disc.value || (card.dataset.disc ?? '').split(' ').includes(disc.value)) &&
+        (!term || (card.dataset.text ?? '').includes(term));
+      card.classList.toggle('dim', !ok);
+      card.classList.toggle('match', active && ok);
+      if (ok) shown++;
+
+      // Within a matching team, highlight the people who match.
+      for (const li of card.querySelectorAll<HTMLElement>('.tc-people li')) {
+        const personOk =
+          (!disc.value || li.dataset.disc === disc.value) && (!term || (li.dataset.text ?? '').includes(term) || (card.dataset.text ?? '').startsWith(term));
+        li.classList.toggle('dim', ok && active && !personOk);
+      }
+    }
+    for (const col of cols) {
+      col.classList.toggle('dim-col', !col.querySelector('.team-card:not(.dim)') && active);
+    }
+
+    chart.classList.toggle('detail-people', detail === 'people');
+    for (const b of detailButtons) b.setAttribute('aria-pressed', String(b.dataset.detail === detail));
+    count.textContent = active ? `Showing ${shown} of ${cards.length} teams` : `${cards.length} teams`;
+
+    const next = new URLSearchParams();
+    if (q.value.trim()) next.set('q', q.value.trim());
+    if (bu.value) next.set('bu', bu.value);
+    if (type.value) next.set('type', type.value);
+    if (disc.value) next.set('discipline', disc.value);
+    if (detail === 'people') next.set('detail', 'people');
+    const qs = next.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  }
+
+  [q, bu, type, disc].forEach((el) => el.addEventListener('input', apply));
+  detailButtons.forEach((b) =>
+    b.addEventListener('click', () => {
+      detail = b.dataset.detail!;
+      apply();
+    }),
+  );
+  $('#f-reset').addEventListener('click', () => {
+    q.value = bu.value = type.value = disc.value = '';
+    detail = 'teams';
+    apply();
+  });
+  apply();
+</script>
+
+<style>
+  .org-page {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .small {
+    font-size: 13px;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    background: var(--warm);
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .field.grow {
+    flex: 1 1 260px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 10px;
+    color: var(--muted);
+  }
+  .field-label {
+    font-weight: 600;
+  }
+  .field input,
+  .field select {
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    min-width: 150px;
+  }
+  .field.grow input {
+    border: 0;
+    flex: 1;
+    min-width: 0;
+    padding: 9px 0;
+    outline: none;
+    background: transparent;
+  }
+  .field.grow:focus-within {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+  }
+  .segmented {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .segmented button {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border: 0;
+    background: var(--surface);
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .segmented button + button {
+    border-left: 1px solid var(--border);
+  }
+  .segmented button[aria-pressed='true'] {
+    background: var(--navy);
+    color: var(--on-navy);
+  }
+  .count {
+    margin: 0;
+    font-size: 13px;
+    flex-basis: 100%;
+  }
+
+  /* Tree */
+  .chart-scroll {
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+  .chart {
+    min-width: max-content;
+    --line: var(--border);
+    --gap: 28px;
+  }
+  .root-wrap {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-bottom: var(--gap);
+  }
+  .root-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    height: var(--gap);
+    border-left: 2px solid var(--line);
+  }
+  .org-root {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 16px 20px;
+    border-top: 4px solid var(--navy);
+    min-width: 280px;
+  }
+  .org-name {
+    font-size: 1.25rem;
+    color: var(--navy);
+  }
+  .bu-row {
+    display: flex;
+    justify-content: center;
+  }
+  .bu-col {
+    position: relative;
+    width: 250px;
+    padding: var(--gap) 10px 0;
+    transition: opacity 0.15s;
+  }
+  .bu-col::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-top: 2px solid var(--line);
+  }
+  .bu-col:first-child::before {
+    left: 50%;
+  }
+  .bu-col:last-child::before {
+    right: 50%;
+  }
+  .bu-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: var(--gap);
+    border-left: 2px solid var(--line);
+  }
+  .bu-col.dim-col .bu-card {
+    opacity: 0.35;
+  }
+  .bu-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--navy);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+    transition: opacity 0.15s;
+  }
+  .bu-card h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .team-list {
+    position: relative;
+    margin-left: 14px;
+    padding-left: 16px;
+    border-left: 2px solid var(--line);
+    padding-top: 14px;
+  }
+  .team-slot {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .team-slot::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 26px;
+    width: 16px;
+    border-top: 2px solid var(--line);
+  }
+  .team-list .team-slot:last-child {
+    margin-bottom: 0;
+  }
+  /* Hide the trunk below the last team */
+  .team-slot:last-child::after {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 28px;
+    bottom: 0;
+    border-left: 2px solid var(--bg);
+  }
+
+  @media (max-width: 720px) {
+    .chart {
+      min-width: 0;
+    }
+    .field:not(.grow) {
+      flex: 1 1 100%;
+    }
+    .field select {
+      width: 100%;
+    }
+    .bu-row {
+      flex-direction: column;
+    }
+    .bu-col {
+      width: auto;
+      padding: 0 0 24px;
+    }
+    .bu-col::before,
+    .bu-col::after,
+    .root-wrap::after {
+      display: none;
+    }
+    .root-wrap {
+      padding-bottom: 24px;
+    }
+    .org-root {
+      width: 100%;
+    }
+  }
+</style>

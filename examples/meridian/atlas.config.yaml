@@ -1,0 +1,13 @@
+# Demo config used when no ./atlas.config.yaml exists (the upstream repo and fresh clones).
+# Run `npm run init` to create your own copy at the repo root.
+schemaVersion: 1
+
+organization:
+  name: "Meridian Dynamics"
+
+site:
+  title: "Org Atlas"
+  noindex: false
+
+data:
+  dir: data

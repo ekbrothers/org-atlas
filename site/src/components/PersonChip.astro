@@ -1,0 +1,86 @@
+---
+// Avatar + name + role. `shared` marks someone whose primary team is elsewhere.
+import Avatar from './Avatar.astro';
+import Icon from './Icon.astro';
+import { href } from '../lib/atlas';
+
+interface Props {
+  person: any;
+  role?: string | null;
+  size?: 'sm' | 'md' | 'lg';
+  shared?: any; // primary team when this is a shared membership
+  isLead?: boolean;
+}
+const { person, role, size = 'md', shared, isLead } = Astro.props;
+const shownRole = role ?? person.role;
+---
+
+<div class={`chip chip-${size}`} data-person={person.id}>
+  <Avatar person={person} size={size} />
+  <div class="chip-text">
+    <span class="chip-name">
+      {person.displayName}
+      {isLead && <span class="tag tag-lead">Lead</span>}
+    </span>
+    {shownRole && person.name && <span class="chip-role">{shownRole}</span>}
+    {
+      shared && (
+        <a class="chip-shared" href={href(`teams/${shared.id}/`)} title={`Primary team: ${shared.name}`}>
+          <Icon name="link" size={12} /> Shared from {shared.name}
+        </a>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .chip-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .chip-name {
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip-sm .chip-name {
+    font-size: 13px;
+  }
+  .chip-role {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .chip-sm .chip-role {
+    font-size: 12px;
+  }
+  .chip-shared {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 0 7px;
+    line-height: 1.6;
+  }
+  .tag-lead {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+</style>

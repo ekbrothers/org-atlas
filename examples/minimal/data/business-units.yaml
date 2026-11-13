@@ -1,0 +1,8 @@
+# Business units sit directly under the organization.
+# A file can hold one entity, or several of the same kind under `items`.
+kind: business-unit
+items:
+  - id: engineering
+    name: Engineering
+    lead: alex-rivera
+    description: Builds and runs the product.

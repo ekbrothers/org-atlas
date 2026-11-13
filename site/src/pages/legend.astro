@@ -1,0 +1,210 @@
+---
+// Generated from engine/vocab/people.yaml, so the legend always matches the rendering.
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Avatar from '../components/Avatar.astro';
+import { atlas } from '../lib/atlas';
+
+const { vocab } = atlas();
+const sample = (over: any) => ({ id: 'x', displayName: 'Example', name: 'Example', tier: 'ic', employment: 'fte', ...over });
+---
+
+<Base title="Legend">
+  <div class="page-header">
+    <span class="eyebrow">Diagram language</span>
+    <h1>Legend</h1>
+    <p>
+      Every person uses the same silhouette. Their tier, discipline and employment type are shown with badges and the style of the ring
+      around it, so meaning never depends on color alone.
+    </p>
+  </div>
+
+  <section class="panel block">
+    <h2>Anatomy of a person</h2>
+    <div class="anatomy">
+      <div class="big-avatar"><Avatar person={sample({ tier: 'manager', discipline: 'software-engineering' })} size="lg" /></div>
+      <ul class="plain">
+        <li><span class="key gold"></span> <strong>Top-left (gold):</strong> tier, for leaders and senior staff</li>
+        <li><span class="key navy"></span> <strong>Bottom-right (navy):</strong> discipline</li>
+        <li><span class="key ring"></span> <strong>Ring:</strong> employment type</li>
+        <li><span class="key outline"></span> <strong>Top-right:</strong> status marker for interim and vendor staff</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel block">
+      <h2>Tier</h2>
+      <ul class="legend">
+        {
+          vocab.tiers.map((t: any) => (
+            <li>
+              <Avatar person={sample({ tier: t.id })} size="md" />
+              <div>
+                <strong>{t.label}</strong>
+                {t.description && <span class="muted small">{t.description}</span>}
+                {!t.icon && <span class="muted small">No tier badge</span>}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="panel block">
+      <h2>Employment</h2>
+      <ul class="legend">
+        {
+          vocab.employment.map((e: any) => (
+            <li>
+              <Avatar person={sample({ employment: e.id })} size="md" />
+              <div>
+                <strong>{e.label}</strong>
+                <span class="muted small">{e.ring === 'vacancy' ? 'Outlined, add-person icon' : `${e.ring} ring`}</span>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="panel block">
+      <h2>Discipline</h2>
+      <ul class="legend compact">
+        {
+          vocab.disciplines.map((d: any) => (
+            <li>
+              <span class="disc-icon"><Icon name={d.icon} size={14} /></span>
+              <strong>{d.label}</strong>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="panel block">
+      <h2>Team type</h2>
+      <ul class="legend compact">
+        {
+          vocab.teamTypes.map((t: any) => (
+            <li>
+              <span class="disc-icon type"><Icon name={t.icon} size={14} /></span>
+              <strong>{t.label}</strong>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+
+  <section class="panel block">
+    <h2>Markers</h2>
+    <ul class="plain">
+      <li><span class="tag-lead">Lead</span> The team's lead</li>
+      <li><Icon name="link" size={14} /> A shared member whose primary team is elsewhere</li>
+      <li><span class="pill pill-warn">2 open</span> Open positions on a team</li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .block {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .block h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--navy);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0 20px;
+  }
+  .anatomy {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .big-avatar {
+    transform: scale(1.6);
+    transform-origin: left center;
+    margin-right: 40px;
+    padding: 8px;
+  }
+  .plain,
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+  }
+  .plain li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .legend li div {
+    display: flex;
+    flex-direction: column;
+  }
+  .legend.compact {
+    gap: 8px;
+  }
+  .small {
+    font-size: 13px;
+  }
+  .disc-icon {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--on-navy);
+  }
+  .disc-icon.type {
+    border-radius: var(--radius);
+    background: var(--surface-tint);
+    color: var(--blue);
+  }
+  .key {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex: none;
+  }
+  .key.gold {
+    background: var(--gold);
+  }
+  .key.navy {
+    background: var(--navy);
+  }
+  .key.ring {
+    border: 2px dashed var(--navy);
+  }
+  .key.outline {
+    border: 1px solid var(--navy);
+    background: var(--surface);
+  }
+  .tag-lead {
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--gold);
+    color: var(--on-gold);
+    border-radius: 999px;
+    padding: 0 7px;
+  }
+</style>

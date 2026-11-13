@@ -1,0 +1,184 @@
+---
+// A team on the org chart. Compact by default; the "People" detail level
+// expands it to show every member (toggled by a class on the chart).
+import Icon from './Icon.astro';
+import Avatar from './Avatar.astro';
+import PersonChip from './PersonChip.astro';
+import { atlas, href } from '../lib/atlas';
+import { headcount } from '../../../engine/lib/model.mjs';
+
+interface Props {
+  team: any;
+}
+const { team } = Astro.props;
+const { vocab } = atlas();
+const type = team.type ? vocab.teamType[team.type] : null;
+const hc = headcount(team);
+const disciplines = [...new Set(team.members.map((m: any) => m.person.discipline).filter(Boolean))].join(' ');
+const searchText = [
+  team.name,
+  team.unit?.name,
+  type?.label,
+  ...team.members.map((m: any) => `${m.person.displayName} ${m.role ?? ''}`),
+]
+  .join(' ')
+  .toLowerCase();
+const others = team.members.filter((m: any) => m.person !== team.leadPerson);
+---
+
+<article
+  class="team-card"
+  data-team={team.id}
+  data-bu={team.unit?.id ?? ''}
+  data-type={team.type ?? ''}
+  data-disc={disciplines}
+  data-text={searchText}
+>
+  <header class="tc-head">
+    <a class="tc-name" href={href(`teams/${team.id}/`)}>{team.name}</a>
+    {
+      type && (
+        <span class="tc-type" title={type.label}>
+          <Icon name={type.icon} size={12} /> {type.label}
+        </span>
+      )
+    }
+  </header>
+
+  {team.leadPerson && <PersonChip person={team.leadPerson} size="sm" isLead />}
+
+  <div class="tc-compact">
+    <div class="tc-faces" aria-hidden="true">
+      {others.slice(0, 10).map((m: any) => <Avatar person={m.person} size="sm" />)}
+      {others.length > 10 && <span class="tc-more">+{others.length - 10}</span>}
+    </div>
+  </div>
+
+  <ul class="tc-people">
+    {
+      others.map((m: any) => (
+        <li
+          data-disc={m.person.discipline ?? ''}
+          data-text={`${m.person.displayName} ${m.role ?? ''}`.toLowerCase()}
+        >
+          <PersonChip person={m.person} role={m.role} size="sm" />
+          {!m.primary && (
+            <span class="tc-shared" title="Shared from another team">
+              <Icon name="link" size={12} />
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+
+  <footer class="tc-foot">
+    <span title="People whose primary team this is"><Icon name="people" size={14} /> {hc.filled}</span>
+    <span class="tc-extra">
+      {hc.shared > 0 && <span class="pill" title="Shared from other teams"><Icon name="link" size={12} /> {hc.shared}</span>}
+      {hc.open > 0 && <span class="pill pill-warn">{hc.open} open</span>}
+    </span>
+  </footer>
+</article>
+
+<style>
+  .team-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--blue);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition:
+      box-shadow 0.15s,
+      transform 0.15s,
+      opacity 0.15s;
+  }
+  .team-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+  .tc-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .tc-name {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.98rem;
+  }
+  .tc-type {
+    font-size: 12px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .tc-faces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .tc-more {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .tc-people {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tc-people li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    transition: opacity 0.15s;
+  }
+  .tc-shared {
+    color: var(--muted);
+  }
+  :global(.detail-people) .tc-people {
+    display: flex;
+  }
+  :global(.detail-people) .tc-compact {
+    display: none;
+  }
+  .tc-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .tc-extra {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .tc-foot > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  :global(.team-card.dim) {
+    opacity: 0.25;
+  }
+  :global(.tc-people li.dim) {
+    opacity: 0.3;
+  }
+  :global(.team-card.match) {
+    border-top-color: var(--gold);
+  }
+</style>

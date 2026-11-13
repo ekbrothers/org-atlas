@@ -1,0 +1,59 @@
+# People. Only `name` is required.
+#   role:        free text, in your own words
+#   tier:        executive | senior-leader | manager | team-lead | principal | ic (default)
+#   discipline:  software-engineering | sre | infrastructure | security | data | architecture |
+#                product | design | quality | program | business-analysis | support | business
+#   employment:  fte (default) | contractor | vendor | intern | vacancy | interim
+#   memberships: the teams they belong to; mark one `primary`, add a per-team `role` if it differs
+kind: person
+items:
+  - id: alex-rivera
+    name: Alex Rivera
+    role: VP of Engineering
+    tier: senior-leader
+    discipline: software-engineering
+
+  - id: sam-okafor
+    name: Sam Okafor
+    role: Engineering Manager, Web App
+    tier: manager
+    discipline: software-engineering
+    memberships:
+      - team: web-app
+        primary: true
+
+  - id: priya-nair
+    name: Priya Nair
+    role: Senior Frontend Engineer
+    discipline: software-engineering
+    memberships: [web-app]
+
+  - id: tom-becker
+    name: Tom Becker
+    role: Product Designer
+    discipline: design
+    employment: contractor
+    memberships: [web-app]
+
+  - id: web-app-open-qa
+    role: QA Engineer
+    discipline: quality
+    employment: vacancy
+    memberships: [web-app]
+
+  - id: jo-lindqvist
+    name: Jo Lindqvist
+    role: Platform Lead
+    tier: team-lead
+    discipline: infrastructure
+    memberships:
+      - team: platform
+        primary: true
+      - team: web-app
+        role: Platform liaison
+
+  - id: kai-mensah
+    name: Kai Mensah
+    role: Site Reliability Engineer
+    discipline: sre
+    memberships: [platform]

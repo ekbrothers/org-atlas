@@ -3,7 +3,7 @@
 // Config resolution order:
 //   1. ATLAS_CONFIG env var (path to a config file)
 //   2. ./atlas.config.yaml (created by `npm run init`)
-//   3. examples/minimal/atlas.config.yaml (demo mode, used by the upstream repo
+//   3. examples/meridian/atlas.config.yaml (demo mode, used by the upstream repo
 //      and by fresh clones that have not run `npm run init` yet)
 //
 // Data paths inside a config are resolved relative to that config file.
@@ -17,7 +17,7 @@ import { parse } from 'yaml';
 // from import.meta.url because Astro bundles this module into dist/ at build time.)
 export const ROOT = resolve(process.env.ATLAS_ROOT ?? process.cwd());
 export const USER_CONFIG = resolve(ROOT, 'atlas.config.yaml');
-export const DEMO_CONFIG = resolve(ROOT, 'examples/minimal/atlas.config.yaml');
+export const DEMO_CONFIG = resolve(ROOT, 'examples/meridian/atlas.config.yaml');
 
 export function findConfigPath() {
   if (process.env.ATLAS_CONFIG) return resolve(ROOT, process.env.ATLAS_CONFIG);

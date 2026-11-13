@@ -1,69 +1,73 @@
 ---
 import Base from '../layouts/Base.astro';
-import { loadConfig, resolveSite } from '../../../engine/lib/config.mjs';
-import { loadData, countKinds } from '../../../engine/lib/data.mjs';
+import Icon from '../components/Icon.astro';
+import { atlas, href } from '../lib/atlas';
 
-const atlas = loadConfig();
-const { site } = resolveSite(atlas);
-const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
-const { files } = loadData(atlas.dataDir);
-const kinds = Object.entries(countKinds(files));
+const { model, config } = atlas();
+const open = model.people.filter((p: any) => p.employment === 'vacancy').length;
+const stats = [
+  { n: model.units.length, label: 'Business units', icon: 'organization' },
+  { n: model.teams.length, label: 'Teams', icon: 'people' },
+  { n: model.people.length - open, label: 'People', icon: 'person' },
+  { n: open, label: 'Open positions', icon: 'person-add' },
+];
+
+const views = [
+  { title: 'Org chart', to: 'org/', icon: 'organization', text: 'Business units and teams as a tree. Filter by unit, team type or discipline, and switch to see every person.' },
+  { title: 'Teams', to: 'teams/', icon: 'people', text: 'Every team with its lead and headcount. Open one to see members grouped by tier.' },
+  { title: 'Legend', to: 'legend/', icon: 'book', text: 'What each icon, badge and ring style means.' },
+];
 
 const phases = [
-  { n: 0, name: 'Foundations', detail: 'Scaffold, local preview, GitHub Pages deploy', done: true },
-  { n: 1, name: 'Schema and vocabulary', detail: 'Entities, relationships, person categories, validation, demo enterprise' },
-  { n: 2, name: 'Design language and icons', detail: 'Tokens, Octicons, platform logos, legend' },
-  { n: 3, name: 'First views', detail: 'Org chart, team pages, ownership, search, question catalog' },
-  { n: 4, name: 'Graph explorer', detail: 'Semantic zoom, filters, deep links, impact analysis' },
+  { n: 0, name: 'Foundations', detail: 'Scaffold, local preview, GitHub Pages deploy', status: 'Done' },
+  { n: 1, name: 'Schema and vocabulary', detail: 'Org model and demo enterprise done; solutions, platforms and relationships next', status: 'In progress' },
+  { n: 2, name: 'Design language and icons', detail: 'Tokens, platform logos, full legend', status: 'Planned' },
+  { n: 3, name: 'First views', detail: 'Org chart and team pages started; ownership, search and question catalog next', status: 'In progress' },
+  { n: 4, name: 'Graph explorer', detail: 'Semantic zoom, filters, deep links, impact analysis', status: 'Planned' },
 ];
 ---
 
 <Base>
   <section class="hero">
-    <h1>{atlas.organization.name}</h1>
-    <p class="lead">
-      An interactive map of the organization: business units, teams, people, solutions and the platforms they run on.
-    </p>
+    <span class="eyebrow">Org Atlas</span>
+    <h1>{config.organization.name}</h1>
+    <p class="lead">An interactive map of the organization: business units, teams, people, and the solutions and platforms they run.</p>
+    <a class="btn" href={href('org/')}><Icon name="organization" size={16} /> Open the org chart</a>
   </section>
 
-  <section class="grid">
-    <article class="card">
-      <h2>Data</h2>
-      <p class="big">{files.length}</p>
-      <p class="muted">YAML file{files.length === 1 ? '' : 's'} loaded</p>
-      {
-        kinds.length > 0 && (
-          <ul class="kinds">
-            {kinds.map(([kind, n]) => (
-              <li>
-                <code>{kind}</code> {n}
-              </li>
-            ))}
-          </ul>
-        )
-      }
-    </article>
+  <section class="stats">
+    {
+      stats.map((s) => (
+        <div class="stat panel">
+          <Icon name={s.icon} size={20} />
+          <strong>{s.n}</strong>
+          <span class="muted">{s.label}</span>
+        </div>
+      ))
+    }
+  </section>
 
-    <article class="card">
-      <h2>Deployment</h2>
-      <dl>
-        <dt>Base path</dt>
-        <dd><code>{base}</code></dd>
-        <dt>Public URL</dt>
-        <dd>{site ? <code>{site.replace(/\/$/, '') + base}</code> : <span class="muted">No GitHub remote detected</span>}</dd>
-        <dt>Indexing</dt>
-        <dd>{atlas.site.noindex ? 'Blocked (noindex)' : 'Allowed'}</dd>
-      </dl>
-    </article>
+  <section class="views">
+    {
+      views.map((v) => (
+        <a class="view panel" href={href(v.to)}>
+          <span class="view-icon">
+            <Icon name={v.icon} size={20} />
+          </span>
+          <h2>{v.title}</h2>
+          <p class="muted">{v.text}</p>
+        </a>
+      ))
+    }
   </section>
 
   <section>
-    <h2>Roadmap</h2>
-    <ol class="phases">
+    <h2 class="section-title">Roadmap</h2>
+    <ol class="phases panel">
       {
         phases.map((p) => (
-          <li class={p.done ? 'done' : ''}>
-            <span class="status">{p.done ? 'Done' : 'Planned'}</span>
+          <li>
+            <span class:list={['status', p.status.toLowerCase().replace(' ', '-')]}>{p.status}</span>
             <strong>
               Phase {p.n}: {p.name}
             </strong>
@@ -76,75 +80,87 @@ const phases = [
 </Base>
 
 <style>
+  .hero {
+    padding: 8px 0 28px;
+  }
   .hero h1 {
-    font-size: clamp(28px, 5vw, 40px);
-    margin: 0 0 8px;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    color: var(--navy);
+    margin: 4px 0 8px;
   }
   .lead {
     font-size: 18px;
-    color: var(--fg-muted);
+    color: var(--muted);
     max-width: 60ch;
-    margin: 0 0 32px;
+    margin: 0 0 20px;
   }
-  .grid {
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 20px;
+    border-top: 4px solid var(--navy);
+    color: var(--navy);
+  }
+  .stat strong {
+    font-size: 2rem;
+    line-height: 1.1;
+    margin-top: 6px;
+  }
+  .views {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 16px;
     margin-bottom: 40px;
   }
-  .card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    background: var(--bg-subtle);
-  }
-  .card h2 {
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--fg-muted);
-    margin: 0 0 8px;
-  }
-  .big {
-    font-size: 36px;
-    font-weight: 600;
-    margin: 0;
-  }
-  .muted {
-    color: var(--fg-muted);
-  }
-  .card p.muted {
-    margin: 0;
-  }
-  .kinds {
-    list-style: none;
-    padding: 0;
-    margin: 12px 0 0;
+  .view {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
+    padding: 20px 24px;
+    color: inherit;
+    transition:
+      box-shadow 0.15s,
+      transform 0.15s;
+  }
+  .view:hover {
+    text-decoration: none;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .view h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .view p {
+    margin: 0;
     font-size: 14px;
   }
-  dl {
+  .view-icon {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 12px;
-    margin: 0;
-    font-size: 14px;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: var(--surface-tint);
+    color: var(--blue);
   }
-  dt {
-    color: var(--fg-muted);
-  }
-  dd {
-    margin: 0;
-    overflow-wrap: anywhere;
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
   }
   .phases {
     list-style: none;
     padding: 0;
     margin: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
   }
   .phases li {
     display: flex;
@@ -159,14 +175,21 @@ const phases = [
   }
   .status {
     font-size: 12px;
-    font-weight: 600;
-    border: 1px solid var(--border);
+    font-weight: 700;
     border-radius: 999px;
-    padding: 0 8px;
-    color: var(--fg-muted);
+    padding: 0 9px;
+    background: var(--warm);
+    color: var(--muted);
+    border: 1px solid var(--border);
   }
-  .done .status {
+  .status.done {
+    background: var(--success-soft);
     color: var(--success);
-    border-color: var(--success);
+    border-color: transparent;
+  }
+  .status.in-progress {
+    background: var(--gold);
+    color: var(--on-gold);
+    border-color: transparent;
   }
 </style>

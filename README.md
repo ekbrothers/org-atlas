@@ -2,7 +2,14 @@
 
 **Diagrams as data for technical enterprises.** Describe your business units, teams, people, solutions and platforms in YAML, and Org Atlas turns them into an interactive, filterable site you can deploy to GitHub Pages.
 
-> **Status: Phase 0 (foundations).** The scaffold, local preview and Pages deployment work today. Schemas, views and the graph explorer arrive in the phases listed in [docs/PLAN.md](docs/PLAN.md).
+> **Status: early.** Working today: org chart (with filters and a people view), team pages, a legend, a fictional demo enterprise, local preview and GitHub Pages deployment. Solutions, platforms, relationships and the graph explorer are next. See [docs/PLAN.md](docs/PLAN.md).
+
+## What you get
+
+- **Org chart:** organization, business units and teams as a tree. Filter by business unit, team type or discipline, search for people or roles, and switch between a Teams view and a People view. Filters are kept in the URL, so you can share a filtered view as a link.
+- **Team pages:** each team's lead and members grouped by tier, shared members, open positions and discipline mix.
+- **Legend:** what every badge, ring and icon means, generated from the same vocabulary file the site renders with.
+- **Demo data:** *Meridian Dynamics*, a fictional enterprise with 6 business units, 22 teams and about 150 people.
 
 ## Quickstart
 
@@ -24,7 +31,41 @@ npm run init
 npm run dev
 ```
 
-`npm run init` asks a few questions and creates your own `atlas.config.yaml`, `data/` and `overrides/`. Until you run it, the site shows the demo data from `examples/minimal`.
+`npm run init` asks a few questions and creates your own `atlas.config.yaml`, `data/` and `overrides/` from a starter (`minimal` or `meridian`). Until you run it, the site shows the Meridian Dynamics demo.
+
+## Describing your organization
+
+Everything lives in YAML under `data/`. A file holds one entity, or several of one kind under `items`. The `minimal` starter has comments explaining every field.
+
+```yaml
+# data/teams/engineering.yaml
+kind: team
+items:
+  - id: web-app
+    name: Web App
+    parent: engineering        # business unit id
+    type: stream-aligned
+    lead: sam-okafor           # person id
+```
+
+```yaml
+# data/people/engineering.yaml
+kind: person
+items:
+  - id: jo-lindqvist
+    name: Jo Lindqvist
+    role: Platform Lead        # free text, in your own words
+    tier: team-lead            # executive | senior-leader | manager | team-lead | principal | ic
+    discipline: infrastructure
+    employment: fte            # fte | contractor | vendor | intern | vacancy | interim
+    memberships:
+      - team: platform
+        primary: true
+      - team: web-app
+        role: Platform liaison # per-team role
+```
+
+People can belong to several teams. They appear on every team, marked as shared on all but their primary one. An open position is a person with `employment: vacancy` and no name.
 
 ## Commands
 
@@ -79,9 +120,10 @@ git pull upstream main
 
 ```
 .github/workflows/   deploy.yml (Pages) and validate.yml (pull requests)
-engine/              config loading, data loading, CLI scripts
+engine/              config and data loading, model, vocabulary, CLI scripts
 site/                the Astro site (pages, layouts, styles)
-examples/minimal/    demo data and starter
+examples/minimal/    small starter
+examples/meridian/   demo enterprise (regenerate with `node examples/meridian/generate.mjs`)
 docs/                the plan and, later, authoring guides
 data/                YOURS, created by `npm run init`
 atlas.config.yaml    YOURS, created by `npm run init`
@@ -90,4 +132,4 @@ overrides/           YOURS, custom vocabulary, themes, icons (Phase 1+)
 
 ## License
 
-[MIT](LICENSE). Icon sets added in later phases keep their own licenses.
+[MIT](LICENSE). Uses [Primer Octicons](https://primer.style/octicons/) (MIT). Icon sets added later keep their own licenses.

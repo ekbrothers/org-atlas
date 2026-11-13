@@ -1,0 +1,23 @@
+---
+// Renders a Primer Octicon as inline SVG. Decorative unless `label` is given.
+import octicons from '@primer/octicons';
+
+interface Props {
+  name: string;
+  size?: number;
+  label?: string;
+  class?: string;
+}
+const { name, size = 16, label, class: cls } = Astro.props;
+const icon = (octicons as any)[name];
+if (!icon) throw new Error(`Unknown octicon "${name}"`);
+const svg = icon.toSVG({
+  width: size,
+  height: size,
+  class: `octicon ${cls ?? ''}`.trim(),
+  'aria-hidden': label ? 'false' : 'true',
+  ...(label ? { 'aria-label': label, role: 'img' } : {}),
+});
+---
+
+<Fragment set:html={svg} />

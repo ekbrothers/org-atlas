@@ -1,0 +1,280 @@
+---
+// The zoomed-in team view: who leads it, everyone on it grouped by tier,
+// shared members, open positions and the discipline mix.
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import PersonChip from '../../components/PersonChip.astro';
+import { atlas, href } from '../../lib/atlas';
+import { headcount } from '../../../../engine/lib/model.mjs';
+
+export function getStaticPaths() {
+  const { model } = atlas();
+  return model.teams.map((team: any) => ({ params: { id: team.id }, props: { teamId: team.id } }));
+}
+
+const { teamId } = Astro.props;
+const { model, vocab } = atlas();
+const team = model.team(teamId);
+const type = team.type ? vocab.teamType[team.type] : null;
+const hc = headcount(team);
+
+const primaryOf = (p: any) => p.teamRefs.find((r: any) => r.primary)?.team;
+const groups = [
+  { title: 'Leadership', test: (m: any) => ['executive', 'senior-leader', 'manager', 'team-lead'].includes(m.person.tier) && m.person.employment !== 'vacancy' },
+  { title: 'Principals and architects', test: (m: any) => m.person.tier === 'principal' && m.person.employment !== 'vacancy' },
+  { title: 'Team members', test: (m: any) => m.person.tier === 'ic' && ['fte', 'intern', 'interim'].includes(m.person.employment) },
+  { title: 'Contractors and vendor staff', test: (m: any) => ['contractor', 'vendor'].includes(m.person.employment) && m.person.tier === 'ic' },
+  { title: 'Open positions', test: (m: any) => m.person.employment === 'vacancy' },
+];
+const grouped = groups
+  .map((g) => ({ ...g, members: team.members.filter(g.test) }))
+  .filter((g) => g.members.length);
+
+const disciplineCounts = vocab.disciplines
+  .map((d: any) => ({ ...d, n: team.members.filter((m: any) => m.person.discipline === d.id && m.person.employment !== 'vacancy').length }))
+  .filter((d: any) => d.n);
+
+// Members of this team who also belong to other teams.
+const sharedOut = team.members
+  .filter((m: any) => m.primary && m.person.teamRefs.length > 1)
+  .map((m: any) => ({ person: m.person, others: m.person.teamRefs.filter((r: any) => r.team !== team) }));
+const siblings = team.unit?.teams.filter((t: any) => t !== team) ?? [];
+---
+
+<Base title={team.name}>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href={href('org/')}>Org chart</a>
+    <Icon name="chevron-right" size={12} />
+    {team.unit ? <a href={href(`org/?bu=${team.unit.id}`)}>{team.unit.name}</a> : <span>No business unit</span>}
+    <Icon name="chevron-right" size={12} />
+    <span aria-current="page">{team.name}</span>
+  </nav>
+
+  <header class="team-header panel">
+    <div>
+      <span class="eyebrow">Team</span>
+      <h1>{team.name}</h1>
+      {team.description && <p class="muted">{team.description}</p>}
+    </div>
+    <div class="facts">
+      {
+        type && (
+          <span class="pill">
+            <Icon name={type.icon} size={12} /> {type.label}
+          </span>
+        )
+      }
+      <span class="pill"><Icon name="people" size={12} /> {hc.filled} people</span>
+      {hc.shared > 0 && <span class="pill"><Icon name="link" size={12} /> {hc.shared} shared</span>}
+      {hc.open > 0 && <span class="pill pill-warn"><Icon name="person-add" size={12} /> {hc.open} open</span>}
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main-col">
+      {
+        grouped.map((g) => (
+          <section class="group">
+            <h2 class="eyebrow">
+              {g.title} <span class="n">{g.members.length}</span>
+            </h2>
+            <ul class="people-grid">
+              {g.members.map((m: any) => (
+                <li class:list={['person-card', { vacancy: m.person.employment === 'vacancy' }]}>
+                  <PersonChip
+                    person={m.person}
+                    role={m.role}
+                    size="lg"
+                    isLead={m.person === team.leadPerson}
+                    shared={m.primary ? null : primaryOf(m.person)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      <section class="group">
+        <h2 class="eyebrow">Owns, supports and runs on</h2>
+        <p class="panel note muted">
+          Solutions, platforms and typed relationships (owner, supporting, stakeholder) are added in the next part of Phase 1. They
+          will appear here, with stakeholders shown outside the team boundary.
+        </p>
+      </section>
+    </div>
+
+    <aside class="side-col">
+      <section class="panel side">
+        <h2 class="eyebrow">Discipline mix</h2>
+        <ul class="disc-list">
+          {
+            disciplineCounts.map((d: any) => (
+              <li>
+                <span>
+                  <Icon name={d.icon} size={14} /> {d.label}
+                </span>
+                <strong>{d.n}</strong>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {
+        sharedOut.length > 0 && (
+          <section class="panel side">
+            <h2 class="eyebrow">Also on other teams</h2>
+            <ul class="plain">
+              {sharedOut.map((s: any) => (
+                <li>
+                  <strong>{s.person.displayName}</strong>
+                  {s.others.map((o: any) => (
+                    <div class="small">
+                      <a href={href(`teams/${o.team.id}/`)}>{o.team.name}</a>
+                      {o.role && <span class="muted"> as {o.role}</span>}
+                    </div>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        siblings.length > 0 && (
+          <section class="panel side">
+            <h2 class="eyebrow">Other teams in {team.unit.name}</h2>
+            <ul class="plain">
+              {siblings.map((t: any) => (
+                <li>
+                  <a href={href(`teams/${t.id}/`)}>{t.name}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px 24px;
+    border-top: 4px solid var(--navy);
+    margin-bottom: 28px;
+  }
+  .team-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 2px 0 6px;
+  }
+  .team-header p {
+    margin: 0;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+  }
+  .group {
+    margin-bottom: 28px;
+  }
+  .group h2 {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .n {
+    background: var(--surface-tint);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .people-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .person-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .person-card.vacancy {
+    border-style: dashed;
+    background: transparent;
+    box-shadow: none;
+  }
+  .note {
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 14px;
+    background: var(--warm);
+  }
+  .side {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .side h2 {
+    margin-bottom: 10px;
+  }
+  .disc-list,
+  .plain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .disc-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .disc-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .small {
+    font-size: 13px;
+  }
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

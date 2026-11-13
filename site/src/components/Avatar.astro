@@ -1,0 +1,138 @@
+---
+// The person avatar: always the same silhouette. Tier, discipline and
+// employment are shown as badges and ring style around it (see Legend).
+import Icon from './Icon.astro';
+import { atlas } from '../lib/atlas';
+
+interface Props {
+  person: any;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { person, size = 'md' } = Astro.props;
+const { vocab } = atlas();
+const tier = vocab.tier[person.tier];
+const discipline = person.discipline ? vocab.discipline[person.discipline] : null;
+const employment = vocab.employmentById[person.employment];
+const px = { sm: 28, md: 40, lg: 56 }[size];
+const iconPx = { sm: 14, md: 20, lg: 28 }[size];
+const vacancy = person.employment === 'vacancy';
+const title = [
+  person.displayName,
+  tier?.label,
+  discipline?.label,
+  employment?.label,
+].filter(Boolean).join(' | ');
+---
+
+<span class={`avatar avatar-${size} ring-${employment?.ring ?? 'solid'}`} style={`--av:${px}px`} title={title}>
+  <span class="avatar-core">
+    <Icon name={vacancy ? 'person-add' : 'person'} size={iconPx} />
+  </span>
+  {
+    tier?.icon && !vacancy && (
+      <span class="badge-tier" aria-hidden="true">
+        <Icon name={tier.icon} size={size === 'sm' ? 8 : 10} />
+      </span>
+    )
+  }
+  {
+    discipline && (
+      <span class="badge-discipline" aria-hidden="true">
+        <Icon name={discipline.icon} size={size === 'sm' ? 8 : 10} />
+      </span>
+    )
+  }
+  {
+    person.employment === 'interim' && (
+      <span class="badge-status" aria-hidden="true">
+        <Icon name="clock" size={size === 'sm' ? 8 : 10} />
+      </span>
+    )
+  }
+  {
+    person.employment === 'vendor' && (
+      <span class="badge-status" aria-hidden="true">
+        <Icon name="link-external" size={size === 'sm' ? 8 : 10} />
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .avatar {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: var(--av);
+    height: var(--av);
+    flex: none;
+    border-radius: 50%;
+  }
+  .avatar-core {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--surface-tint);
+    color: var(--navy);
+    border: 2px solid var(--navy);
+  }
+  .ring-dashed .avatar-core {
+    border-style: dashed;
+  }
+  .ring-dotted .avatar-core {
+    border-style: dotted;
+  }
+  .ring-double .avatar-core {
+    border: 4px double var(--navy);
+  }
+  .ring-vacancy .avatar-core {
+    border: 2px dashed var(--muted);
+    background: transparent;
+    color: var(--muted);
+  }
+  .ring-hatched {
+    padding: 3px;
+    background: repeating-linear-gradient(45deg, var(--navy) 0 2px, transparent 2px 5px);
+  }
+  .ring-hatched .avatar-core {
+    border-width: 0;
+  }
+  .badge-tier,
+  .badge-discipline,
+  .badge-status {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--bg);
+  }
+  .avatar-sm .badge-tier,
+  .avatar-sm .badge-discipline,
+  .avatar-sm .badge-status {
+    width: 13px;
+    height: 13px;
+  }
+  .badge-tier {
+    top: -3px;
+    left: -3px;
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  .badge-discipline {
+    bottom: -3px;
+    right: -3px;
+    background: var(--navy);
+    color: var(--on-navy);
+  }
+  .badge-status {
+    top: -3px;
+    right: -3px;
+    background: var(--surface);
+    color: var(--navy);
+    border-color: var(--navy);
+  }
+</style>

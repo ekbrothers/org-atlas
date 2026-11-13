@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // `npm run validate`
-// Phase 0: checks that the config loads and every data file is valid YAML.
-// Phase 1 adds JSON Schema validation, reference checks and business rules.
+// Checks that the config loads, every data file is valid YAML, and that
+// business units, teams and people reference each other correctly.
+// Full JSON Schema validation and business rules arrive with the rest of Phase 1.
 
 import { relative } from 'node:path';
 import { loadConfig, resolveSite, ROOT } from '../lib/config.mjs';
-import { loadData, countKinds } from '../lib/data.mjs';
+import { loadData } from '../lib/data.mjs';
+import { buildModel } from '../lib/model.mjs';
 
 let config;
 try {
@@ -28,7 +30,18 @@ if (errors.length) {
   process.exit(1);
 }
 
-const kinds = Object.entries(countKinds(files))
-  .map(([k, n]) => `${k}: ${n}`)
-  .join(', ');
-console.log(`\n✔ ${files.length} data file(s) OK${kinds ? `  (${kinds})` : ''}`);
+const model = buildModel(files);
+
+for (const w of model.warnings) console.warn(`  warning  ${w.rel}  ${w.message}`);
+
+if (model.errors.length) {
+  console.error(`\n\u2716 ${model.errors.length} problem(s) found:`);
+  for (const e of model.errors) console.error(`  ${e.rel}  ${e.message}`);
+  process.exit(1);
+}
+
+console.log(
+  `\n\u2714 ${files.length} data file(s) OK: ${model.units.length} business unit(s), ` +
+    `${model.teams.length} team(s), ${model.people.length} people` +
+    (model.warnings.length ? `, ${model.warnings.length} warning(s)` : ''),
+);

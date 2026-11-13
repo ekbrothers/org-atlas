@@ -1,0 +1,16 @@
+# Teams belong to a business unit (`parent`) and have a `lead` (a person id).
+# type: stream-aligned | platform | enabling | complicated-subsystem | shared-service | leadership
+kind: team
+items:
+  - id: web-app
+    name: Web App
+    parent: engineering
+    type: stream-aligned
+    lead: sam-okafor
+    description: The customer-facing web application.
+  - id: platform
+    name: Platform
+    parent: engineering
+    type: platform
+    lead: jo-lindqvist
+    description: Cloud infrastructure and developer tooling.

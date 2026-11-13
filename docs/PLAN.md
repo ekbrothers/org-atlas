@@ -25,6 +25,8 @@ All of it is described as YAML and rendered as an interactive, filterable site d
 | People in multiple teams | Shown in every team. Primary team shows them normally, others show a "shared" marker linking to the primary team |
 | First public release | After Phase 4 (graph explorer, filters, semantic zoom) |
 | License | MIT. Icon packs keep their own licenses |
+| Default theme | "Navy & Gold": navy `#00274e`, gold accent `#f5b700`, warm off-white `#f7f6f2`, link blue `#23527c`, Figtree font, 4px corners, cards with a navy top border. Light and dark |
+| Demo default | A fresh clone shows the Meridian Dynamics demo until `npm run init` is run |
 
 ## 3. Data model
 
@@ -180,9 +182,9 @@ Schema validation, referential integrity, and configurable business rules: one o
 | Phase | Deliverable | Size | Status |
 |---|---|---|---|
 | 0. Foundations | Repo scaffold with engine/user split, Astro shell, `init`/`dev`/`validate`/`build`/`preview`, Pages workflow with automatic base path, README, this plan | Small | Done |
-| 1. Schema and vocabulary | Entity schemas including person categories and free-text roles, vocabulary engine, `core` and `itsm` presets, full `validate`, Meridian generator, editor autocomplete | Large | Planned |
+| 1. Schema and vocabulary | Entity schemas including person categories and free-text roles, vocabulary engine, `core` and `itsm` presets, full `validate`, Meridian generator, editor autocomplete | Large | In progress: org model (organization, business units, teams, people), people vocabulary, reference checks and Meridian generator done |
 | 2. Design language and icons | Tokens, person card and badge system, icon pipeline, legend, icon gallery | Medium | Planned |
-| 3. First views | Org chart, static team pages (Z2 layout), profile pages, ownership and "who do I talk to", search, question catalog | Medium | Planned |
+| 3. First views | Org chart, static team pages (Z2 layout), profile pages, ownership and "who do I talk to", search, question catalog | Medium | In progress: org chart with filters and People view, team pages, teams index, legend done |
 | 4. Graph explorer | Semantic zoom Z0 to Z3, filters, breadcrumbs, minimap, deep links, impact analysis. **First public release** | Large | Planned |
 | 5. Enterprise views | Capability map, platform landscape with cloud icon packs, support model, risk dashboard, RACI | Large | Planned |
 | 6. Remaining presets | c4, raci, team-topologies, lifecycle, vendor, data-governance | Medium | Planned |
