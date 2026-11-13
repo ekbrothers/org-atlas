@@ -51,6 +51,18 @@ const peopleIn = (u: any) =>
           {usedDisciplines.map((d: any) => <option value={d.id}>{d.label}</option>)}
         </select>
       </label>
+      <label class="field">
+        <span class="field-label">Platform or application</span>
+        <select id="f-rel">
+          <option value="">Any</option>
+          <optgroup label="Platforms">
+            {model.platforms.map((p: any) => <option value={`platform:${p.id}`}>{p.name}</option>)}
+          </optgroup>
+          <optgroup label="Applications">
+            {model.applications.map((a: any) => <option value={`application:${a.id}`}>{a.name}</option>)}
+          </optgroup>
+        </select>
+      </label>
       <div class="segmented" role="group" aria-label="Detail level">
         <button type="button" data-detail="teams" aria-pressed="true">Teams</button>
         <button type="button" data-detail="people" aria-pressed="false">People</button>
@@ -104,6 +116,7 @@ const peopleIn = (u: any) =>
   const bu = $<HTMLSelectElement>('#f-bu');
   const type = $<HTMLSelectElement>('#f-type');
   const disc = $<HTMLSelectElement>('#f-disc');
+  const rel = $<HTMLSelectElement>('#f-rel');
   const chart = $<HTMLDivElement>('#chart');
   const count = $<HTMLParagraphElement>('#f-count');
   const cards = [...document.querySelectorAll<HTMLElement>('.team-card')];
@@ -116,11 +129,12 @@ const peopleIn = (u: any) =>
   bu.value = params.get('bu') ?? '';
   type.value = params.get('type') ?? '';
   disc.value = params.get('discipline') ?? '';
+  rel.value = params.get('involves') ?? '';
   let detail = params.get('detail') === 'people' ? 'people' : 'teams';
 
   function apply() {
     const term = q.value.trim().toLowerCase();
-    const active = !!(term || bu.value || type.value || disc.value);
+    const active = !!(term || bu.value || type.value || disc.value || rel.value);
     let shown = 0;
 
     for (const card of cards) {
@@ -128,6 +142,7 @@ const peopleIn = (u: any) =>
         (!bu.value || card.dataset.bu === bu.value) &&
         (!type.value || card.dataset.type === type.value) &&
         (!disc.value || (card.dataset.disc ?? '').split(' ').includes(disc.value)) &&
+        (!rel.value || (card.dataset.rel ?? '').split(' ').includes(rel.value)) &&
         (!term || (card.dataset.text ?? '').includes(term));
       card.classList.toggle('dim', !ok);
       card.classList.toggle('match', active && ok);
@@ -153,12 +168,13 @@ const peopleIn = (u: any) =>
     if (bu.value) next.set('bu', bu.value);
     if (type.value) next.set('type', type.value);
     if (disc.value) next.set('discipline', disc.value);
+    if (rel.value) next.set('involves', rel.value);
     if (detail === 'people') next.set('detail', 'people');
     const qs = next.toString();
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
 
-  [q, bu, type, disc].forEach((el) => el.addEventListener('input', apply));
+  [q, bu, type, disc, rel].forEach((el) => el.addEventListener('input', apply));
   detailButtons.forEach((b) =>
     b.addEventListener('click', () => {
       detail = b.dataset.detail!;
@@ -166,7 +182,7 @@ const peopleIn = (u: any) =>
     }),
   );
   $('#f-reset').addEventListener('click', () => {
-    q.value = bu.value = type.value = disc.value = '';
+    q.value = bu.value = type.value = disc.value = rel.value = '';
     detail = 'teams';
     apply();
   });

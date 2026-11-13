@@ -1,0 +1,60 @@
+{
+  "atlas": 1,
+  "entities": [
+    { "kind": "organization", "id": "northwind", "name": "Northwind Labs", "lead": "maria-chen", "description": "A fictional company used as a bundle example." },
+
+    { "kind": "business-unit", "id": "product", "name": "Product & Engineering", "lead": "maria-chen" },
+    { "kind": "business-unit", "id": "data", "name": "Data & Platform", "lead": "omar-haddad" },
+
+    { "kind": "team", "id": "web", "name": "Web Experience", "parent": "product", "type": "stream-aligned", "lead": "lena-fischer" },
+    { "kind": "team", "id": "billing", "name": "Billing", "parent": "product", "type": "stream-aligned", "lead": "kwame-asante" },
+    { "kind": "team", "id": "devex", "name": "Developer Experience", "parent": "data", "type": "platform", "lead": "sara-lind" },
+    { "kind": "team", "id": "data-eng", "name": "Data Engineering", "parent": "data", "type": "platform", "lead": "raj-patel" },
+
+    { "kind": "person", "id": "maria-chen", "name": "Maria Chen", "role": "CTO", "tier": "executive", "discipline": "software-engineering" },
+    { "kind": "person", "id": "omar-haddad", "name": "Omar Haddad", "role": "VP, Data & Platform", "tier": "senior-leader", "discipline": "data" },
+    { "kind": "person", "id": "lena-fischer", "name": "Lena Fischer", "role": "Engineering Manager", "tier": "manager", "discipline": "software-engineering", "memberships": [{ "team": "web", "primary": true }] },
+    { "kind": "person", "id": "tom-reyes", "name": "Tom Reyes", "role": "Frontend Engineer", "discipline": "software-engineering", "memberships": ["web"] },
+    { "kind": "person", "id": "ana-souza", "name": "Ana Souza", "role": "Product Designer", "discipline": "design", "employment": "contractor", "memberships": ["web"] },
+    { "kind": "person", "id": "kwame-asante", "name": "Kwame Asante", "role": "Engineering Manager", "tier": "manager", "discipline": "software-engineering", "memberships": ["billing"] },
+    { "kind": "person", "id": "yuki-mori", "name": "Yuki Mori", "role": "Backend Engineer", "discipline": "software-engineering", "memberships": ["billing"] },
+    { "kind": "person", "id": "billing-open-qa", "role": "QA Engineer", "discipline": "quality", "employment": "vacancy", "memberships": ["billing"] },
+    { "kind": "person", "id": "sara-lind", "name": "Sara Lind", "role": "Platform Lead", "tier": "team-lead", "discipline": "infrastructure", "memberships": ["devex"] },
+    { "kind": "person", "id": "ben-okoro", "name": "Ben Okoro", "role": "DevOps Engineer", "discipline": "sre", "memberships": ["devex", { "team": "billing", "role": "Embedded DevOps" }] },
+    { "kind": "person", "id": "raj-patel", "name": "Raj Patel", "role": "Data Engineering Lead", "tier": "team-lead", "discipline": "data", "memberships": ["data-eng"] },
+    { "kind": "person", "id": "ivy-nguyen", "name": "Ivy Nguyen", "role": "Data Engineer", "discipline": "data", "memberships": ["data-eng"] },
+
+    { "kind": "platform", "id": "github", "name": "GitHub Enterprise", "logo": "si:github", "category": "devops", "vendor": "GitHub", "hosting": "saas", "criticality": "T1" },
+    { "kind": "platform", "id": "nexus", "name": "Nexus Repository", "logo": "si:sonatype", "category": "devops", "vendor": "Sonatype", "hosting": "self-hosted", "criticality": "T1" },
+    { "kind": "platform", "id": "snowflake", "name": "Snowflake", "logo": "si:snowflake", "category": "data", "vendor": "Snowflake", "hosting": "saas", "criticality": "T1" },
+    { "kind": "platform", "id": "informatica", "name": "Informatica", "logo": "octicon:sync", "category": "integration", "vendor": "Informatica", "hosting": "saas", "criticality": "T2" },
+    { "kind": "platform", "id": "feature-flags", "name": "Flagpole", "logo": "custom:flagpole", "category": "devops", "proprietary": true, "criticality": "T2", "description": "In-house feature flag service." },
+
+    { "kind": "application", "id": "storefront", "name": "Storefront", "logo": "octicon:browser", "criticality": "T0", "description": "Customer website." },
+    { "kind": "application", "id": "invoicing", "name": "Invoicing", "logo": "octicon:credit-card", "criticality": "T0", "description": "Invoices and payments." },
+    { "kind": "application", "id": "revenue-reports", "name": "Revenue Reports", "type": "solution", "logo": "octicon:graph", "criticality": "T2" }
+  ],
+  "relationships": [
+    { "from": "team:devex", "type": "owner", "to": "platform:github", "scope": "Administration and runners" },
+    { "from": "team:data-eng", "type": "owner", "to": "platform:github", "scope": "Data repos and Actions secrets" },
+    { "from": "team:devex", "type": "owner", "to": "platform:nexus" },
+    { "from": "team:data-eng", "type": "owner", "to": "platform:snowflake" },
+    { "from": "team:data-eng", "type": "owner", "to": "platform:informatica" },
+    { "from": "team:billing", "type": "supporting", "to": "platform:informatica", "scope": "Billing connectors" },
+    { "from": "team:devex", "type": "owner", "to": "platform:feature-flags" },
+    { "from": "person:raj-patel", "type": "sme", "to": "platform:snowflake" },
+
+    { "from": "team:web", "type": "owner", "to": "application:storefront" },
+    { "from": "team:billing", "type": "owner", "to": "application:invoicing" },
+    { "from": "team:data-eng", "type": "owner", "to": "application:revenue-reports" },
+    { "from": "person:maria-chen", "type": "stakeholder", "to": "application:storefront" },
+    { "from": "person:omar-haddad", "type": "sponsor", "to": "application:revenue-reports" },
+    { "from": "team:devex", "type": "operator", "to": "application:storefront", "scope": "On-call" },
+
+    { "from": "application:storefront", "type": "uses", "to": "platform:feature-flags", "purpose": "Feature rollouts" },
+    { "from": "application:storefront", "type": "depends-on", "to": "application:invoicing", "purpose": "Checkout payments" },
+    { "from": "application:invoicing", "type": "uses", "to": "platform:nexus", "purpose": "Build artifacts" },
+    { "from": "application:revenue-reports", "type": "uses", "to": "platform:snowflake", "purpose": "Warehouse" },
+    { "from": "application:revenue-reports", "type": "uses", "to": "platform:informatica", "purpose": "Loads from Invoicing" }
+  ]
+}

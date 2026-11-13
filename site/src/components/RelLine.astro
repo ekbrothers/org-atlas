@@ -1,0 +1,47 @@
+---
+// A short sample of a relationship's line style (from the registry), plus its glyph.
+import Icon from './Icon.astro';
+
+interface Props {
+  type: any; // relationship type from the registry
+  width?: number;
+  label?: boolean;
+  inverse?: boolean;
+}
+const { type, width = 44, label = false, inverse = false } = Astro.props;
+const s = type.style ?? {};
+const w = Math.max(s.weight ?? 2, s.line === 'double' ? 4 : 1);
+const dash = s.line === 'dashed' ? `${w * 3} ${w * 2}` : s.line === 'dotted' ? `${w} ${w * 1.6}` : undefined;
+const cap = s.line === 'dotted' ? 'round' : 'butt';
+---
+
+<span class="rel" title={`${type.label}: ${type.description ?? ''}`}>
+  <svg width={width} height="12" viewBox={`0 0 ${width} 12`} aria-hidden="true">
+    {
+      s.line === 'double' ? (
+        <>
+          <line x1="0" y1="4" x2={width} y2="4" stroke="currentColor" stroke-width="1.5" />
+          <line x1="0" y1="8" x2={width} y2="8" stroke="currentColor" stroke-width="1.5" />
+        </>
+      ) : (
+        <line x1={w / 2} y1="6" x2={width - w / 2} y2="6" stroke="currentColor" stroke-width={w} stroke-dasharray={dash} stroke-linecap={cap} />
+      )
+    }
+  </svg>
+  {s.glyph && <Icon name={s.glyph} size={14} />}
+  {label && <span class="rel-label">{inverse ? type.inverse : type.label}</span>}
+</span>
+
+<style>
+  .rel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .rel-label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>

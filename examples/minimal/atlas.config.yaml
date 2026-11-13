@@ -11,3 +11,7 @@ site:
 
 data:
   dir: data
+
+icons:
+  # Custom SVG logos (custom:<name>), relative to this file.
+  dir: icons

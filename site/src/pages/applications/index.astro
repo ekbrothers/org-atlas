@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import EntityIndex from '../../components/EntityIndex.astro';
+import { atlas } from '../../lib/atlas';
+const { model } = atlas();
+---
+
+<Base title="Applications">
+  <div class="page-header">
+    <span class="eyebrow">Technology</span>
+    <h1>Applications</h1>
+    <p>{model.applications.length} applications and solutions, the teams that own them and the platforms they run on.</p>
+  </div>
+  <EntityIndex kind="application" />
+</Base>

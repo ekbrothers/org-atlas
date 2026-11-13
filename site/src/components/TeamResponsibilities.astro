@@ -1,0 +1,233 @@
+---
+// What a team is accountable for: what it owns (and with whom), what it supports
+// or operates, the platforms its applications run on, and the stakeholders
+// outside the team who care about its work.
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import EntityRef from './EntityRef.astro';
+import RelLine from './RelLine.astro';
+import { atlas, href } from '../lib/atlas';
+
+interface Props {
+  team: any;
+}
+const { team } = Astro.props;
+const { model, vocab } = atlas();
+const urlOf = (e: any) => href(`${e.kind === 'platform' ? 'platforms' : 'applications'}/${e.id}/`);
+
+const owned = model.edgesFrom(team, 'owner').map((e: any) => ({
+  e,
+  coOwners: model.edgesTo(e.to, 'owner').filter((x: any) => x.from !== team),
+}));
+const other = vocab.relTypes
+  .filter((t: any) => t.category === 'accountability' && t.id !== 'owner')
+  .map((t: any) => ({ t, edges: model.edgesFrom(team, t.id) }))
+  .filter((g: any) => g.edges.length);
+
+// Platforms used by applications this team owns (derived).
+const ownedApps = owned.map((o: any) => o.e.to).filter((x: any) => x.kind === 'application');
+const runsOn = new Map<string, { platform: any; apps: any[] }>();
+for (const a of ownedApps) {
+  for (const u of model.edgesFrom(a, 'uses')) {
+    const k = u.to.id;
+    if (!runsOn.has(k)) runsOn.set(k, { platform: u.to, apps: [] });
+    runsOn.get(k)!.apps.push(a);
+  }
+}
+
+// Stakeholders and sponsors of what this team owns, excluding the team's own members.
+const memberIds = new Set(team.members.map((m: any) => m.person.id));
+const outside = new Map<string, { who: any; types: Set<string>; of: Set<string> }>();
+for (const { e } of owned) {
+  for (const s of [...model.edgesTo(e.to, 'stakeholder'), ...model.edgesTo(e.to, 'sponsor')]) {
+    if (s.from === team || (s.from.kind === 'person' && memberIds.has(s.from.id))) continue;
+    const k = `${s.from.kind}:${s.from.id}`;
+    if (!outside.has(k)) outside.set(k, { who: s.from, types: new Set(), of: new Set() });
+    outside.get(k)!.types.add(s.rel.label);
+    outside.get(k)!.of.add(e.to.name);
+  }
+}
+const nothing = !owned.length && !other.length;
+---
+
+{nothing && <p class="panel note muted">This team does not own or support any platforms or applications yet.</p>}
+
+{
+  owned.length > 0 && (
+    <section class="group">
+      <h2 class="eyebrow">
+        <RelLine type={vocab.relType.owner} width={24} /> Owns <span class="n">{owned.length}</span>
+      </h2>
+      <ul class="tiles">
+        {owned.map(({ e, coOwners }: any) => (
+          <li class="tile">
+            <Logo entity={e.to} size={40} />
+            <div class="tile-text">
+              <a href={urlOf(e.to)} class="tile-name">
+                {e.to.name}
+              </a>
+              <span class="muted small">
+                {e.to.kind === 'platform' ? 'Platform' : 'Application'}
+                {e.to.criticality ? ` | ${e.to.criticality}` : ''}
+              </span>
+              {e.scope && <span class="small">Scope: {e.scope}</span>}
+              {coOwners.length > 0 && (
+                <span class="shared small">
+                  <Icon name="shield-check" size={12} /> Shared with{' '}
+                  {coOwners.map((c: any, i: number) => (
+                    <>
+                      {i > 0 && ', '}
+                      <a href={c.from.kind === 'team' ? href(`teams/${c.from.id}/`) : undefined}>{c.from.name ?? c.from.displayName}</a>
+                    </>
+                  ))}
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  other.map((g: any) => (
+    <section class="group">
+      <h2 class="eyebrow">
+        <RelLine type={g.t} width={24} /> {g.t.label} <span class="n">{g.edges.length}</span>
+      </h2>
+      <ul class="tiles">
+        {g.edges.map((e: any) => (
+          <li class="tile">
+            <Logo entity={e.to} size={40} />
+            <div class="tile-text">
+              <a href={urlOf(e.to)} class="tile-name">
+                {e.to.name}
+              </a>
+              <span class="muted small">{e.to.kind === 'platform' ? 'Platform' : 'Application'}</span>
+              {(e.scope || e.note) && <span class="small">{e.scope ?? e.note}</span>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}
+
+{
+  runsOn.size > 0 && (
+    <section class="group">
+      <h2 class="eyebrow">
+        <RelLine type={vocab.relType.uses} width={24} /> Our applications run on <span class="n">{runsOn.size}</span>
+      </h2>
+      <ul class="logo-row">
+        {[...runsOn.values()].map(({ platform, apps }) => (
+          <li title={`Used by ${apps.map((a) => a.name).join(', ')}`}>
+            <EntityRef entity={platform} />
+            <span class="muted small">{apps.map((a) => a.name).join(', ')}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  outside.size > 0 && (
+    <section class="group">
+      <h2 class="eyebrow">
+        <RelLine type={vocab.relType.stakeholder} width={24} /> Stakeholders outside the team
+      </h2>
+      <ul class="outside">
+        {[...outside.values()].map(({ who, types, of }) => (
+          <li>
+            <EntityRef entity={who} />
+            <span class="muted small">
+              {[...types].join(' and ')} of {[...of].join(', ')}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .group {
+    margin-bottom: 28px;
+  }
+  .group h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .n {
+    background: var(--surface-tint);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .note {
+    margin: 0 0 28px;
+    padding: 14px 16px;
+    background: var(--warm);
+    font-size: 14px;
+  }
+  .tiles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .tile {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+  }
+  .tile-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .tile-name {
+    font-weight: 700;
+  }
+  .small {
+    font-size: 12px;
+  }
+  .shared {
+    display: inline;
+    color: var(--muted);
+  }
+  .logo-row,
+  .outside {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px 16px;
+  }
+  .logo-row li,
+  .outside li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .outside {
+    border: 2px dotted var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+</style>

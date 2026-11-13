@@ -48,6 +48,7 @@ export function loadConfig() {
       noindex: raw.site?.noindex ?? false,
     },
     dataDir: resolve(configDir, raw.data?.dir ?? 'data'),
+    iconsDir: resolve(configDir, raw.icons?.dir ?? 'overrides/icons'),
   };
 }
 

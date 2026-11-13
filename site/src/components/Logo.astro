@@ -1,0 +1,42 @@
+---
+// Platform or application logo on a white tile, so brand colors read the same
+// in light and dark themes.
+interface Props {
+  entity: any;
+  size?: number;
+}
+const { entity, size = 40 } = Astro.props;
+const logo = entity.logoSvg;
+const brand = logo?.source === 'simple-icons' || logo?.source === 'custom';
+---
+
+<span class:list={['logo', { generic: !brand }]} style={`--s:${size}px`} title={logo?.source === 'simple-icons' ? logo.title : undefined}>
+  <Fragment set:html={logo?.svg ?? ''} />
+</span>
+
+<style>
+  .logo {
+    display: inline-grid;
+    place-items: center;
+    width: var(--s);
+    height: var(--s);
+    flex: none;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #ccd4dc;
+    padding: calc(var(--s) * 0.18);
+  }
+  .logo :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .logo.generic {
+    background: var(--surface-tint);
+    border-color: var(--border);
+    color: var(--blue);
+  }
+  .logo.generic :global(svg) {
+    fill: currentColor;
+  }
+</style>

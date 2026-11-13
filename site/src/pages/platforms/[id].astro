@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import EntityDetail from '../../components/EntityDetail.astro';
+import { atlas } from '../../lib/atlas';
+
+export function getStaticPaths() {
+  return atlas().model.platforms.map((p: any) => ({ params: { id: p.id }, props: { id: p.id } }));
+}
+const entity = atlas().model.get('platform', Astro.props.id);
+---
+
+<Base title={entity.name}>
+  <EntityDetail entity={entity} />
+</Base>

@@ -1,0 +1,262 @@
+---
+// Detail page body for a platform or application.
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import EntityRef from './EntityRef.astro';
+import RelLine from './RelLine.astro';
+import RelationshipMap from './RelationshipMap.astro';
+import { atlas, href } from '../lib/atlas';
+
+interface Props {
+  entity: any;
+}
+const { entity } = Astro.props;
+const { model, vocab } = atlas();
+const isPlatform = entity.kind === 'platform';
+const section = isPlatform ? { label: 'Platforms', to: 'platforms/' } : { label: 'Applications', to: 'applications/' };
+
+const facts = [
+  ['Category', entity.category],
+  ['Type', !isPlatform ? (entity.type ?? 'application') : null],
+  ['Vendor', entity.vendor],
+  ['Hosting', entity.hosting],
+  ['Criticality', entity.criticality],
+  ['Lifecycle', entity.lifecycle ?? 'active'],
+  ['Built in-house', entity.proprietary ? 'Yes (proprietary)' : null],
+].filter(([, v]) => v);
+
+const accountability = vocab.relTypes
+  .filter((t: any) => t.category === 'accountability')
+  .flatMap((t: any) => model.edgesTo(entity, t.id));
+
+const usage = isPlatform ? model.edgesTo(entity, 'uses') : model.edgesFrom(entity, 'uses');
+const ownersOf = (e: any) => model.edgesTo(e, 'owner').map((x: any) => x.from);
+const links = entity.links ? Object.entries(entity.links) : [];
+---
+
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href={href(section.to)}>{section.label}</a>
+  <Icon name="chevron-right" size={12} />
+  <span aria-current="page">{entity.name}</span>
+</nav>
+
+<header class="head panel">
+  <Logo entity={entity} size={64} />
+  <div class="head-text">
+    <span class="eyebrow">{isPlatform ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Application'}</span>
+    <h1>{entity.name}</h1>
+    {entity.description && <p class="muted">{entity.description}</p>}
+  </div>
+</header>
+
+<h2 class="section-title">Relationship map</h2>
+<RelationshipMap entity={entity} />
+
+<div class="cols">
+  <section class="panel block">
+    <h2 class="eyebrow">Accountability</h2>
+    {accountability.length === 0 && <p class="muted">Nobody is recorded as owning or supporting this.</p>}
+    <table>
+      <tbody>
+        {
+          accountability.map((e: any) => (
+            <tr>
+              <td class="rel-cell">
+                <RelLine type={e.rel} width={28} label inverse />
+              </td>
+              <td>
+                <EntityRef entity={e.from} />
+              </td>
+              <td class="muted">{e.scope ?? e.note ?? ''}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel block">
+    <h2 class="eyebrow">Details</h2>
+    <dl class="kv">
+      {
+        facts.map(([k, v]) => (
+          <>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </>
+        ))
+      }
+      {
+        links.map(([k, v]: any) => (
+          <>
+            <dt>{k}</dt>
+            <dd>
+              <a href={v}>{v}</a>
+            </dd>
+          </>
+        ))
+      }
+    </dl>
+  </section>
+</div>
+
+<section class="panel block">
+  <h2 class="eyebrow">{isPlatform ? `Applications using ${entity.name}` : `Platforms ${entity.name} uses`} <span class="n">{usage.length}</span></h2>
+  {usage.length === 0 && <p class="muted">None recorded.</p>}
+  {
+    usage.length > 0 && (
+      <table>
+        <thead>
+          <tr>
+            <th>{isPlatform ? 'Application' : 'Platform'}</th>
+            <th>Purpose</th>
+            <th>Owned by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {usage.map((e: any) => {
+            const other = isPlatform ? e.from : e.to;
+            return (
+              <tr>
+                <td>
+                  <EntityRef entity={other} />
+                </td>
+                <td class="muted">{e.purpose ?? ''}</td>
+                <td>
+                  <div class="refs">
+                    {ownersOf(other).map((o: any) => (
+                      <EntityRef entity={o} />
+                    ))}
+                    {ownersOf(other).length === 0 && <span class="stamp-sm">Unowned</span>}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    )
+  }
+</section>
+
+<style>
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .head {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 20px 24px;
+    border-top: 4px solid var(--navy);
+    margin-bottom: 28px;
+  }
+  .head h1 {
+    font-size: 1.75rem;
+    color: var(--navy);
+    margin: 2px 0 4px;
+  }
+  .head p {
+    margin: 0;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .block {
+    padding: 18px 22px;
+    margin-bottom: 20px;
+  }
+  .block h2 {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .n {
+    background: var(--surface-tint);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 0 8px 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 8px 8px 8px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  .rel-cell {
+    width: 1%;
+    white-space: nowrap;
+    padding-right: 16px;
+  }
+  .refs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .kv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin: 0;
+    font-size: 14px;
+  }
+  .kv dt {
+    color: var(--muted);
+  }
+  .kv dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    text-transform: none;
+  }
+  .stamp-sm {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--danger);
+  }
+  @media (max-width: 900px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .rel-cell :global(svg) {
+      display: none;
+    }
+  }
+</style>

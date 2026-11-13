@@ -1,0 +1,15 @@
+# Example: a whole organization in one JSON bundle (data/atlas.json).
+schemaVersion: 1
+
+organization:
+  name: "Northwind Labs"
+
+site:
+  title: "Org Atlas"
+  noindex: false
+
+data:
+  dir: data
+
+icons:
+  dir: icons

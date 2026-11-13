@@ -1,0 +1,277 @@
+---
+// Every relationship type (from engine/vocab/relationships.yaml) and every
+// relationship recorded in the data.
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import RelLine from '../components/RelLine.astro';
+import EntityRef from '../components/EntityRef.astro';
+import { atlas } from '../lib/atlas';
+import { nameOf } from '../../../engine/lib/model.mjs';
+
+const { model, vocab } = atlas();
+const counts: Record<string, number> = {};
+for (const e of model.edges) counts[e.type] = (counts[e.type] ?? 0) + 1;
+// Structural relationships are derived from fields; count them too.
+counts['member-of'] = model.people.reduce((n: number, p: any) => n + p.teamRefs.length, 0);
+counts['leads'] = model.teams.filter((t: any) => t.leadPerson).length + model.units.filter((u: any) => u.leadPerson).length + (model.organization.leadPerson ? 1 : 0);
+counts['part-of'] = model.teams.filter((t: any) => t.unit).length;
+const categories = ['accountability', 'technical', 'structural'];
+const kindLabel = (k: string) => k.replace('-', ' ');
+---
+
+<Base title="Relationships">
+  <div class="page-header">
+    <span class="eyebrow">Diagram language</span>
+    <h1>Relationships</h1>
+    <p>
+      Every kind of relationship Org Atlas understands, how it is drawn and how to write it, followed by all {model.edges.length} relationships in this
+      dataset.
+    </p>
+  </div>
+
+  {
+    categories.map((cat) => (
+      <section class="panel block">
+        <h2>{cat[0].toUpperCase() + cat.slice(1)}</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Drawn as</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Write it as</th>
+                <th class="num">In use</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vocab.relTypes
+                .filter((t: any) => t.category === cat)
+                .map((t: any) => (
+                  <tr>
+                    <td>
+                      <strong>{t.label}</strong>
+                      <span class="muted small">
+                        {t.id} | reads back as "{t.inverse}"
+                      </span>
+                      <span class="small">{t.description}</span>
+                    </td>
+                    <td class="nowrap">
+                      <RelLine type={t} />
+                      <span class="muted small">
+                        {t.style?.line}, {t.style?.weight}px
+                      </span>
+                    </td>
+                    <td class="cap">{t.from.map(kindLabel).join(', ')}</td>
+                    <td class="cap">{t.to.map(kindLabel).join(', ')}</td>
+                    <td class="small">
+                      {t.structural ? (
+                        <span class="muted">Entity fields</span>
+                      ) : (
+                        <>
+                          <code>type: {t.id}</code>
+                          {t.inline && (
+                            <span>
+                              or <code>{t.inline}:</code> on the {t.to.join('/')}
+                            </span>
+                          )}
+                          {t['inline-on-source'] && (
+                            <span>
+                              or <code>{t['inline-on-source']}:</code> on the {t.from.join('/')}
+                            </span>
+                          )}
+                          {t.attributes?.length > 0 && <span class="muted">Optional: {t.attributes.join(', ')}</span>}
+                          {t.aliases?.length > 0 && <span class="muted">Also accepted: {t.aliases.join(', ')}</span>}
+                        </>
+                      )}
+                    </td>
+                    <td class="num">{counts[t.id] ?? 0}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="panel block">
+    <h2>All relationships</h2>
+    <form class="toolbar" onsubmit="return false">
+      <label class="field grow">
+        <Icon name="search" size={16} />
+        <input id="r-q" type="search" placeholder="Search by team, person, platform or application" aria-label="Search relationships" />
+      </label>
+      <label class="field">
+        <span class="field-label">Type</span>
+        <select id="r-type">
+          <option value="">All</option>
+          {vocab.relTypes.filter((t: any) => !t.structural).map((t: any) => <option value={t.id}>{t.label}</option>)}
+        </select>
+      </label>
+      <p id="r-count" class="muted small count"></p>
+    </form>
+    <div class="table-wrap">
+      <table id="r-table">
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>Relationship</th>
+            <th>To</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            model.edges.map((e: any) => (
+              <tr data-type={e.type} data-text={`${nameOf(e.from)} ${nameOf(e.to)} ${e.rel.label} ${e.scope ?? ''} ${e.purpose ?? ''}`.toLowerCase()}>
+                <td>
+                  <EntityRef entity={e.from} />
+                </td>
+                <td class="nowrap">
+                  <RelLine type={e.rel} width={28} label />
+                </td>
+                <td>
+                  <EntityRef entity={e.to} />
+                </td>
+                <td class="muted small">{e.scope ?? e.purpose ?? e.note ?? ''}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const q = document.querySelector('#r-q') as HTMLInputElement;
+  const type = document.querySelector('#r-type') as HTMLSelectElement;
+  const count = document.querySelector('#r-count') as HTMLElement;
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('#r-table tbody tr')];
+  const params = new URLSearchParams(location.search);
+  type.value = params.get('type') ?? '';
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const r of rows) {
+      const ok = (!type.value || r.dataset.type === type.value) && (!term || (r.dataset.text ?? '').includes(term));
+      r.hidden = !ok;
+      if (ok) n++;
+    }
+    count.textContent = `Showing ${n} of ${rows.length}`;
+  }
+  [q, type].forEach((el) => el.addEventListener('input', apply));
+  apply();
+</script>
+
+<style>
+  .block {
+    padding: 18px 22px;
+    margin-bottom: 20px;
+  }
+  .block h2 {
+    font-size: 1.05rem;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 0 12px 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  td > span,
+  td > strong {
+    display: block;
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  tr[hidden] {
+    display: none;
+  }
+  .small {
+    font-size: 12px;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+  .cap {
+    text-transform: capitalize;
+  }
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .field-label {
+    font-weight: 600;
+  }
+  .field.grow {
+    flex: 1 1 260px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 10px;
+    background: var(--surface);
+  }
+  .field.grow input {
+    border: 0;
+    flex: 1;
+    min-width: 0;
+    padding: 9px 0;
+    font: inherit;
+    font-size: 14px;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+  }
+  .field select {
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .count {
+    flex-basis: 100%;
+    margin: 0;
+  }
+  td :global(.ref) {
+    display: inline-flex;
+  }
+</style>

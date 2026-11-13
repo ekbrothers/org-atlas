@@ -1,0 +1,2628 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ekbrothers/org-atlas/schema/atlas.schema.json",
+  "title": "Org Atlas data file",
+  "description": "One Org Atlas data file (YAML or JSON). Either a bundle { atlas: 1, entities: [...], relationships: [...] }, a list { kind, items: [...] }, or a single entity { kind, id, ... }.",
+  "definitions": {
+    "organization": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "lead": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Person id of the top leader."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "business-unit": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "lead": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Person id."
+        },
+        "parent": {
+          "type": "string",
+          "description": "Organization id (optional)."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "team": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "parent": {
+          "type": "string",
+          "description": "Business unit id."
+        },
+        "type": {
+          "enum": [
+            "stream-aligned",
+            "platform",
+            "enabling",
+            "complicated-subsystem",
+            "shared-service",
+            "leadership"
+          ]
+        },
+        "lead": {
+          "type": "string",
+          "description": "Person id of the team lead."
+        },
+        "contacts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "person": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "role": {
+          "type": "string",
+          "description": "Free-text role, in their own words."
+        },
+        "tier": {
+          "enum": [
+            "executive",
+            "senior-leader",
+            "manager",
+            "team-lead",
+            "principal",
+            "ic"
+          ]
+        },
+        "discipline": {
+          "enum": [
+            "software-engineering",
+            "sre",
+            "infrastructure",
+            "security",
+            "data",
+            "architecture",
+            "product",
+            "design",
+            "quality",
+            "program",
+            "business-analysis",
+            "support",
+            "business"
+          ]
+        },
+        "employment": {
+          "enum": [
+            "fte",
+            "contractor",
+            "vendor",
+            "intern",
+            "vacancy",
+            "interim"
+          ]
+        },
+        "location": {
+          "type": "string"
+        },
+        "memberships": {
+          "type": "array",
+          "description": "Teams this person belongs to. Mark one as primary.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Team id."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "primary": {
+                    "type": "boolean"
+                  },
+                  "role": {
+                    "type": "string",
+                    "description": "Role on this team, if different."
+                  }
+                },
+                "required": [
+                  "team"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "platform": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "logo": {
+          "type": "string",
+          "pattern": "^(si|octicon|custom):.+$",
+          "description": "si:<simple-icons slug> (brand logo), octicon:<name> (generic icon) or custom:<file name in the icons dir>."
+        },
+        "category": {
+          "type": "string",
+          "description": "Free text, e.g. data, devops, infrastructure, observability, security, identity, integration, collaboration, business."
+        },
+        "vendor": {
+          "type": "string"
+        },
+        "hosting": {
+          "enum": [
+            "saas",
+            "cloud",
+            "self-hosted",
+            "on-prem",
+            "hybrid"
+          ]
+        },
+        "criticality": {
+          "enum": [
+            "T0",
+            "T1",
+            "T2",
+            "T3"
+          ],
+          "description": "T0 is most critical."
+        },
+        "lifecycle": {
+          "enum": [
+            "planned",
+            "pilot",
+            "active",
+            "contained",
+            "deprecated",
+            "sunset"
+          ]
+        },
+        "proprietary": {
+          "type": "boolean",
+          "description": "Built in-house."
+        },
+        "owners": {
+          "description": "Owner (relationship \"owner\"): Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "supporting": {
+          "description": "Supporting (relationship \"supporting\"): Does real work on it (engineering, support, operations) without being accountable. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "operators": {
+          "description": "Operator (relationship \"operator\"): Runs it day to day or carries the on-call pager. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "stakeholders": {
+          "description": "Stakeholder (relationship \"stakeholder\"): Cares about the outcome and is affected by changes. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "sponsors": {
+          "description": "Sponsor (relationship \"sponsor\"): Funds it or champions it at executive level. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "smes": {
+          "description": "Subject-matter expert (relationship \"sme\"): Knows it deeply and is the go-to person for questions. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "escalation": {
+          "description": "Escalation contact (relationship \"escalation\"): Who to escalate to when something is wrong and the owner is not responding. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "built-on": {
+          "description": "Built on (relationship \"built-on\"): A platform that is built on top of another platform. Bare ids are platform ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "application": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Stable identifier: lowercase letters, digits, dots, dashes or underscores, e.g. \"payments-core\"."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order among siblings (lower first)."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named URLs, e.g. { \"runbook\": \"https://...\" }."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Free-form extra data. Ignored by the engine."
+        },
+        "logo": {
+          "type": "string",
+          "pattern": "^(si|octicon|custom):.+$",
+          "description": "si:<simple-icons slug> (brand logo), octicon:<name> (generic icon) or custom:<file name in the icons dir>."
+        },
+        "category": {
+          "type": "string",
+          "description": "Free text, e.g. data, devops, infrastructure, observability, security, identity, integration, collaboration, business."
+        },
+        "vendor": {
+          "type": "string"
+        },
+        "hosting": {
+          "enum": [
+            "saas",
+            "cloud",
+            "self-hosted",
+            "on-prem",
+            "hybrid"
+          ]
+        },
+        "criticality": {
+          "enum": [
+            "T0",
+            "T1",
+            "T2",
+            "T3"
+          ],
+          "description": "T0 is most critical."
+        },
+        "lifecycle": {
+          "enum": [
+            "planned",
+            "pilot",
+            "active",
+            "contained",
+            "deprecated",
+            "sunset"
+          ]
+        },
+        "proprietary": {
+          "type": "boolean",
+          "description": "Built in-house."
+        },
+        "type": {
+          "enum": [
+            "application",
+            "solution",
+            "service",
+            "product"
+          ]
+        },
+        "owners": {
+          "description": "Owner (relationship \"owner\"): Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "supporting": {
+          "description": "Supporting (relationship \"supporting\"): Does real work on it (engineering, support, operations) without being accountable. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "operators": {
+          "description": "Operator (relationship \"operator\"): Runs it day to day or carries the on-call pager. Bare ids are team ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "stakeholders": {
+          "description": "Stakeholder (relationship \"stakeholder\"): Cares about the outcome and is affected by changes. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "sponsors": {
+          "description": "Sponsor (relationship \"sponsor\"): Funds it or champions it at executive level. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "smes": {
+          "description": "Subject-matter expert (relationship \"sme\"): Knows it deeply and is the go-to person for questions. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "escalation": {
+          "description": "Escalation contact (relationship \"escalation\"): Who to escalate to when something is wrong and the owner is not responding. Bare ids are person ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "platforms": {
+          "description": "Uses (relationship \"uses\"): The application runs on, or makes use of, the platform. Bare ids are platform ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "purpose": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "purpose": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "depends-on": {
+          "description": "Depends on (relationship \"depends-on\"): The application calls or needs another application to work. Bare ids are application ids.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                    },
+                    "purpose": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "anyOf": [
+                    {
+                      "required": [
+                        "ref"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+                      },
+                      "purpose": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "ref"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
+    },
+    "relationship": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "owner",
+            "owns",
+            "dri",
+            "accountable",
+            "service-owner",
+            "co-owner",
+            "supporting",
+            "supports",
+            "support",
+            "contributor",
+            "operator",
+            "operates",
+            "on-call",
+            "oncall",
+            "stakeholder",
+            "interested",
+            "sponsor",
+            "exec-sponsor",
+            "executive-sponsor",
+            "sme",
+            "expert",
+            "subject-matter-expert",
+            "escalation",
+            "escalate",
+            "escalation-contact",
+            "uses",
+            "runs-on",
+            "uses-platform",
+            "hosted-on",
+            "depends-on",
+            "depends",
+            "calls",
+            "built-on",
+            "platform-on"
+          ],
+          "description": "Relationship type. See engine/vocab/relationships.yaml."
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference to another entity: \"kind:id\" (e.g. \"team:payments-core\", \"person:jo-lindqvist\", \"platform:snowflake\"). A bare id uses the default kind for the field."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Which part this covers, e.g. for shared ownership."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why an application uses a platform."
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "bundleEntity": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "organization",
+            "business-unit",
+            "team",
+            "person",
+            "platform",
+            "application",
+            "solution"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "organization"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/organization"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "business-unit"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/business-unit"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "team"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/team"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "person"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/person"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "platform"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/platform"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "application"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/application"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "solution"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/application"
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "allOf": [
+    {
+      "if": {
+        "anyOf": [
+          {
+            "required": [
+              "entities"
+            ]
+          },
+          {
+            "required": [
+              "atlas"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "atlas": {
+            "const": 1,
+            "description": "Bundle format version."
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/bundleEntity"
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/relationship"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "else": {
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "organization",
+              "business-unit",
+              "team",
+              "person",
+              "platform",
+              "application",
+              "solution",
+              "relationship",
+              "relationships"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "organization"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/organization"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/organization"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "business-unit"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/business-unit"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/business-unit"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "team"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/team"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/team"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "person"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/person"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/person"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "platform"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/platform"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/platform"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "application"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/application"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/application"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "solution"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/application"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/application"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "relationship"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/relationship"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/relationship"
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "relationships"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "if": {
+                "required": [
+                  "items"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "kind": true,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/relationship"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "else": {
+                "$ref": "#/definitions/relationship"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -39,7 +39,7 @@ jobs:
       - name: Upstream guard (no user-owned files)
         if: github.repository == 'ekbrothers/org-atlas'
         run: |
-          for p in data atlas.config.yaml overrides; do
+          for p in data atlas.config.yaml overrides .vscode; do
             if [ -e "$p" ]; then
               echo "::error::'$p' is user-owned and must not be committed to the upstream toolkit repo."
               exit 1

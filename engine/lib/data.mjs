@@ -1,4 +1,4 @@
-// Reads every YAML file under the data directory.
+// Reads every YAML or JSON file under the data directory.
 // Phase 0: files are only parsed and counted. Schemas, entity kinds and
 // relationships arrive in Phase 1.
 
@@ -12,20 +12,21 @@ function walk(dir) {
     if (name.startsWith('.')) continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) out.push(...walk(full));
-    else if (/\.ya?ml$/i.test(name)) out.push(full);
+    else if (/\.(ya?ml|json)$/i.test(name)) out.push(full);
   }
   return out;
 }
 
 // Returns { files: [{ path, rel, doc }], errors: [{ rel, line, message }] }
-export function loadData(dataDir) {
+// `only` limits loading to a single file inside dataDir.
+export function loadData(dataDir, { only } = {}) {
   const files = [];
   const errors = [];
   if (!existsSync(dataDir)) {
     errors.push({ rel: dataDir, line: null, message: 'Data directory does not exist.' });
     return { files, errors };
   }
-  for (const path of walk(dataDir)) {
+  for (const path of only ? [only] : walk(dataDir)) {
     const rel = relative(process.cwd(), path);
     const parsed = parseDocument(readFileSync(path, 'utf8'), { prettyErrors: true });
     if (parsed.errors.length) {

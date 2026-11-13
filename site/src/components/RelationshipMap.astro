@@ -1,0 +1,224 @@
+---
+// A three-column relationship diagram around one platform or application:
+//   left   who is accountable (owner, supporting, operator, stakeholder, ...)
+//   center the entity
+//   right  technical links (uses / used by, depends on, built on)
+// Connector lines use each relationship type's line style from the registry.
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import EntityRef from './EntityRef.astro';
+import RelLine from './RelLine.astro';
+import { atlas } from '../lib/atlas';
+
+interface Props {
+  entity: any;
+}
+const { entity } = Astro.props;
+const { model, vocab } = atlas();
+
+const lineCss = (t: any) => {
+  const s = t.style ?? {};
+  const w = s.line === 'double' ? 4 : Math.max(1, s.weight ?? 2);
+  return `${w}px ${s.line ?? 'solid'} var(--navy)`;
+};
+
+const left = vocab.relTypes
+  .filter((t: any) => t.category === 'accountability')
+  .map((t: any) => ({ t, label: t.inverse, items: model.edgesTo(entity, t.id).map((e: any) => ({ other: e.from, e })) }))
+  .filter((g: any) => g.items.length);
+
+const right = vocab.relTypes
+  .filter((t: any) => t.category === 'technical')
+  .flatMap((t: any) => [
+    { t, label: t.label, items: model.edgesFrom(entity, t.id).map((e: any) => ({ other: e.to, e })) },
+    { t, label: t.inverse, items: model.edgesTo(entity, t.id).map((e: any) => ({ other: e.from, e })) },
+  ])
+  .filter((g: any) => g.items.length);
+
+const owners = model.edgesTo(entity, 'owner');
+const kindLabel = entity.kind === 'platform' ? 'Platform' : entity.type === 'solution' ? 'Solution' : 'Application';
+---
+
+<div class="map">
+  <div class="col col-left">
+    {left.length === 0 && <p class="empty muted">No one is accountable for this yet.</p>}
+    {
+      left.map((g: any) => (
+        <section class="group">
+          <h3>
+            <RelLine type={g.t} label inverse />
+          </h3>
+          <ul>
+            {g.items.map(({ other, e }: any) => (
+              <li class="item">
+                <EntityRef entity={other} />
+                {(e.scope || e.note) && <span class="detail">{e.scope ?? e.note}</span>}
+                <span class="conn conn-right" style={`border-top:${lineCss(g.t)}`} aria-hidden="true" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <div class="col col-center">
+    <div class:list={['center-card', { unowned: entity.unowned }]}>
+      <Logo entity={entity} size={56} />
+      <span class="eyebrow">{kindLabel}</span>
+      <strong class="center-name">{entity.name}</strong>
+      <div class="center-pills">
+        {entity.criticality && <span class="pill">{entity.criticality}</span>}
+        {owners.length > 1 && <span class="pill"><Icon name="shield-check" size={12} /> Shared ownership</span>}
+        {entity.unowned && <span class="stamp">Unowned</span>}
+        {entity.lifecycle && entity.lifecycle !== 'active' && <span class="pill pill-warn">{entity.lifecycle}</span>}
+      </div>
+    </div>
+  </div>
+
+  <div class="col col-right">
+    {right.length === 0 && <p class="empty muted">No technical links yet.</p>}
+    {
+      right.map((g: any) => (
+        <section class="group">
+          <h3>
+            <RelLine type={g.t} />
+            <span class="rel-label">{g.label}</span>
+          </h3>
+          <ul>
+            {g.items.map(({ other, e }: any) => (
+              <li class="item">
+                <span class="conn conn-left" style={`border-top:${lineCss(g.t)}`} aria-hidden="true" />
+                <EntityRef entity={other} />
+                {e.purpose && <span class="detail">{e.purpose}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .map {
+    --gap: 56px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px minmax(0, 1fr);
+    column-gap: var(--gap);
+    align-items: center;
+    background: var(--warm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .group h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .rel-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    box-shadow: var(--shadow);
+  }
+  .detail {
+    font-size: 12px;
+    color: var(--muted);
+    padding-left: 30px;
+  }
+  .conn {
+    position: absolute;
+    top: 50%;
+    width: var(--gap);
+    opacity: 0.55;
+  }
+  .conn-right {
+    left: 100%;
+  }
+  .conn-left {
+    right: 100%;
+  }
+  .center-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--navy);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    box-shadow: var(--shadow-hover);
+    position: relative;
+    z-index: 1;
+  }
+  .center-card.unowned {
+    border-top-color: var(--danger);
+  }
+  .center-name {
+    font-size: 1.1rem;
+    color: var(--navy);
+  }
+  .center-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  .stamp {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    border-radius: 3px;
+    padding: 0 6px;
+    transform: rotate(-4deg);
+  }
+  .empty {
+    font-size: 14px;
+    margin: 0;
+  }
+  @media (max-width: 900px) {
+    .map {
+      grid-template-columns: 1fr;
+      row-gap: 20px;
+      padding: 16px;
+    }
+    .col-center {
+      order: -1;
+    }
+    .conn {
+      display: none;
+    }
+  }
+</style>

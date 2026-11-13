@@ -4,6 +4,7 @@
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import PersonChip from '../../components/PersonChip.astro';
+import TeamResponsibilities from '../../components/TeamResponsibilities.astro';
 import { atlas, href } from '../../lib/atlas';
 import { headcount } from '../../../../engine/lib/model.mjs';
 
@@ -95,13 +96,8 @@ const siblings = team.unit?.teams.filter((t: any) => t !== team) ?? [];
         ))
       }
 
-      <section class="group">
-        <h2 class="eyebrow">Owns, supports and runs on</h2>
-        <p class="panel note muted">
-          Solutions, platforms and typed relationships (owner, supporting, stakeholder) are added in the next part of Phase 1. They
-          will appear here, with stakeholders shown outside the team boundary.
-        </p>
-      </section>
+      <h2 class="section-title">Responsibilities</h2>
+      <TeamResponsibilities team={team} />
     </div>
 
     <aside class="side-col">
@@ -201,6 +197,12 @@ const siblings = team.unit?.teams.filter((t: any) => t !== team) ?? [];
   }
   .group {
     margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    margin: 8px 0 16px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
   }
   .group h2 {
     margin-bottom: 12px;

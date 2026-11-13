@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import EntityIndex from '../../components/EntityIndex.astro';
+import { atlas } from '../../lib/atlas';
+const { model } = atlas();
+const shared = model.platforms.filter((p: any) => model.edgesTo(p, 'owner').length > 1).length;
+---
+
+<Base title="Platforms">
+  <div class="page-header">
+    <span class="eyebrow">Technology</span>
+    <h1>Platforms</h1>
+    <p>{model.platforms.length} shared platforms, who owns them ({shared} with shared ownership) and how many applications depend on each.</p>
+  </div>
+  <EntityIndex kind="platform" />
+</Base>

@@ -13,11 +13,15 @@
     "dev": "astro dev",
     "validate": "node engine/scripts/validate.mjs",
     "build": "node engine/scripts/validate.mjs && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "schema": "node engine/scripts/schema.mjs",
+    "export": "node engine/scripts/export.mjs"
   },
   "dependencies": {
     "@primer/octicons": "19.41.0",
+    "ajv": "8.20.0",
     "astro": "7.4.4",
+    "simple-icons": "16.35.0",
     "yaml": "2.9.1"
   }
 }

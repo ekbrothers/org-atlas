@@ -3,6 +3,8 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import Avatar from '../components/Avatar.astro';
+import RelLine from '../components/RelLine.astro';
+import { href } from '../lib/atlas';
 import { atlas } from '../lib/atlas';
 
 const { vocab } = atlas();
@@ -98,11 +100,36 @@ const sample = (over: any) => ({ id: 'x', displayName: 'Example', name: 'Example
   </div>
 
   <section class="panel block">
+    <h2>Relationships</h2>
+    <p class="muted small intro">
+      Line style shows the kind of responsibility: solid for accountability, dashed for hands-on support, dotted for interest. Heavier lines mean
+      more responsibility. Full details on the <a href={href('relationships/')}>Relationships</a> page.
+    </p>
+    <ul class="legend rels">
+      {
+        vocab.relTypes
+          .filter((t: any) => !t.structural)
+          .map((t: any) => (
+            <li>
+              <RelLine type={t} width={56} />
+              <div>
+                <strong>{t.label}</strong>
+                <span class="muted small">{t.description}</span>
+              </div>
+            </li>
+          ))
+      }
+    </ul>
+  </section>
+
+  <section class="panel block">
     <h2>Markers</h2>
     <ul class="plain">
       <li><span class="tag-lead">Lead</span> The team's lead</li>
       <li><Icon name="link" size={14} /> A shared member whose primary team is elsewhere</li>
       <li><span class="pill pill-warn">2 open</span> Open positions on a team</li>
+      <li><span class="stamp">Unowned</span> A platform or application with no owner</li>
+      <li><span class="pill">Shared ownership</span> More than one owner, each with an optional scope</li>
     </ul>
   </section>
 </Base>
@@ -198,6 +225,24 @@ const sample = (over: any) => ({ id: 'x', displayName: 'Example', name: 'Example
   .key.outline {
     border: 1px solid var(--navy);
     background: var(--surface);
+  }
+  .intro {
+    margin: -6px 0 14px;
+  }
+  .rels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px 24px;
+  }
+  .stamp {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    border-radius: 3px;
+    padding: 0 6px;
   }
   .tag-lead {
     font-size: 11px;

@@ -1,0 +1,55 @@
+---
+// A link to any entity, with an icon for its kind. People link to their primary team.
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import { href } from '../lib/atlas';
+import { nameOf } from '../../../engine/lib/model.mjs';
+
+interface Props {
+  entity: any;
+  logo?: boolean;
+}
+const { entity, logo = true } = Astro.props;
+const primaryTeam = entity.kind === 'person' ? entity.teamRefs?.find((r: any) => r.primary)?.team : null;
+const url =
+  entity.kind === 'team'
+    ? href(`teams/${entity.id}/`)
+    : entity.kind === 'platform'
+      ? href(`platforms/${entity.id}/`)
+      : entity.kind === 'application'
+        ? href(`applications/${entity.id}/`)
+        : primaryTeam
+          ? href(`teams/${primaryTeam.id}/`)
+          : null;
+const icon = { team: 'people', person: 'person', 'business-unit': 'organization', organization: 'organization' }[entity.kind as string] ?? 'package';
+const showLogo = logo && (entity.kind === 'platform' || entity.kind === 'application');
+const Tag = url ? 'a' : 'span';
+---
+
+<Tag class="ref" href={url ?? undefined}>
+  {showLogo ? <Logo entity={entity} size={22} /> : <span class="ref-icon"><Icon name={icon} size={14} /></span>}
+  <span class="ref-name">{nameOf(entity)}</span>
+</Tag>
+
+<style>
+  .ref {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-weight: 600;
+  }
+  .ref-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface-tint);
+    color: var(--blue);
+    flex: none;
+  }
+  .ref-name {
+    overflow-wrap: anywhere;
+  }
+</style>

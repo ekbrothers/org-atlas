@@ -1,0 +1,186 @@
+# Relationship registry. Every relationship Org Atlas understands is defined here,
+# and the legend, relationships page, validation and JSON Schema are all generated
+# from this file.
+#
+# Fields
+#   id           canonical type name, used as `type:` in relationship entries
+#   label        how the relationship reads from the source ("Payments Core is Owner of ...")
+#   inverse      how it reads from the target ("Snowflake is Owned by ...")
+#   category     accountability | technical | structural
+#   from / to    entity kinds allowed at each end
+#   default-from kind assumed when a reference has no "kind:" prefix (inline form)
+#   inline       field name for the inline shorthand on the target entity
+#   attributes   optional extra fields an entry may carry
+#   cardinality  min-per-target: entities of `to` kinds need at least this many
+#                (reported as a warning, e.g. "unowned")
+#   style        line: solid | dashed | dotted | double, weight in px, glyph = Octicon
+#   aliases      other names accepted for `type:` (case-insensitive)
+#   structural   true = derived from entity fields rather than written as an entry
+
+relationship-types:
+  # ---- Accountability: who is responsible for a platform or application ----
+  - id: owner
+    label: Owner
+    inverse: Owned by
+    category: accountability
+    description: Accountable for the platform or application. Several owners means shared ownership; use `scope` to say who owns what.
+    from: [team, person]
+    to: [platform, application]
+    default-from: team
+    inline: owners
+    attributes: [scope, note]
+    cardinality: { min-per-target: 1 }
+    style: { line: solid, weight: 4, glyph: shield-check }
+    aliases: [owns, dri, accountable, service-owner, co-owner]
+
+  - id: supporting
+    label: Supporting
+    inverse: Supported by
+    category: accountability
+    description: Does real work on it (engineering, support, operations) without being accountable.
+    from: [team, person]
+    to: [platform, application]
+    default-from: team
+    inline: supporting
+    attributes: [scope, note]
+    style: { line: dashed, weight: 2, glyph: tools }
+    aliases: [supports, support, contributor]
+
+  - id: operator
+    label: Operator
+    inverse: Operated by
+    category: accountability
+    description: Runs it day to day or carries the on-call pager.
+    from: [team, person]
+    to: [platform, application]
+    default-from: team
+    inline: operators
+    attributes: [scope, note]
+    style: { line: dashed, weight: 2, glyph: bell }
+    aliases: [operates, on-call, oncall]
+
+  - id: stakeholder
+    label: Stakeholder
+    inverse: Stakeholders
+    category: accountability
+    description: Cares about the outcome and is affected by changes.
+    from: [team, person]
+    to: [platform, application]
+    default-from: person
+    inline: stakeholders
+    attributes: [note]
+    style: { line: dotted, weight: 2, glyph: eye }
+    aliases: [interested]
+
+  - id: sponsor
+    label: Sponsor
+    inverse: Sponsored by
+    category: accountability
+    description: Funds it or champions it at executive level.
+    from: [team, person]
+    to: [platform, application]
+    default-from: person
+    inline: sponsors
+    attributes: [note]
+    style: { line: solid, weight: 2, glyph: rocket }
+    aliases: [exec-sponsor, executive-sponsor]
+
+  - id: sme
+    label: Subject-matter expert
+    inverse: Subject-matter experts
+    category: accountability
+    description: Knows it deeply and is the go-to person for questions.
+    from: [person, team]
+    to: [platform, application]
+    default-from: person
+    inline: smes
+    attributes: [note]
+    style: { line: dotted, weight: 1, glyph: mortar-board }
+    aliases: [expert, subject-matter-expert]
+
+  - id: escalation
+    label: Escalation contact
+    inverse: Escalates to
+    category: accountability
+    description: Who to escalate to when something is wrong and the owner is not responding.
+    from: [person, team]
+    to: [platform, application]
+    default-from: person
+    inline: escalation
+    attributes: [note]
+    style: { line: solid, weight: 1, glyph: alert }
+    aliases: [escalate, escalation-contact]
+
+  # ---- Technical: how applications and platforms connect ----
+  - id: uses
+    label: Uses
+    inverse: Used by
+    category: technical
+    description: The application runs on, or makes use of, the platform.
+    from: [application]
+    to: [platform]
+    default-from: application
+    inline-on-source: platforms
+    default-to: platform
+    attributes: [purpose, note]
+    style: { line: solid, weight: 2, glyph: plug }
+    aliases: [runs-on, uses-platform, hosted-on]
+
+  - id: depends-on
+    label: Depends on
+    inverse: Depended on by
+    category: technical
+    description: The application calls or needs another application to work.
+    from: [application]
+    to: [application]
+    default-from: application
+    inline-on-source: depends-on
+    default-to: application
+    attributes: [purpose, note]
+    style: { line: solid, weight: 1, glyph: arrow-right }
+    aliases: [depends, calls]
+
+  - id: built-on
+    label: Built on
+    inverse: Underpins
+    category: technical
+    description: A platform that is built on top of another platform.
+    from: [platform]
+    to: [platform]
+    default-from: platform
+    inline-on-source: built-on
+    default-to: platform
+    attributes: [note]
+    style: { line: solid, weight: 1, glyph: stack }
+    aliases: [platform-on]
+
+  # ---- Structural: derived from entity fields, listed here so every relationship is documented ----
+  - id: member-of
+    label: Member of
+    inverse: Members
+    category: structural
+    structural: true
+    description: A person belongs to a team (person `memberships`). One membership is primary.
+    from: [person]
+    to: [team]
+    style: { line: solid, weight: 1, glyph: people }
+
+  - id: leads
+    label: Leads
+    inverse: Led by
+    category: structural
+    structural: true
+    description: A person leads the organization, a business unit or a team (`lead` field).
+    from: [person]
+    to: [organization, business-unit, team]
+    style: { line: solid, weight: 2, glyph: star }
+
+  - id: part-of
+    label: Part of
+    inverse: Contains
+    category: structural
+    structural: true
+    description: A team belongs to a business unit (team `parent`).
+    from: [team]
+    to: [business-unit]
+    style: { line: solid, weight: 2, glyph: organization }

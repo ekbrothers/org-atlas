@@ -4,7 +4,8 @@
 //   CNAME       when site.domain is set in atlas.config.yaml
 //   robots.txt  "Disallow: /" when site.noindex is true, otherwise allow all
 
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { buildSchema } from './schema.mjs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
@@ -15,6 +16,10 @@ export default function pagesIntegration(config) {
       'astro:build:done': ({ dir, logger }) => {
         const out = fileURLToPath(dir);
         writeFileSync(join(out, '.nojekyll'), '');
+
+        // Publish the JSON Schema so editors and LLMs can fetch it from the site.
+        mkdirSync(join(out, 'schema'), { recursive: true });
+        writeFileSync(join(out, 'schema', 'atlas.schema.json'), JSON.stringify(buildSchema(), null, 2) + '\n');
 
         if (config.site.domain) {
           const domain = config.site.domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');

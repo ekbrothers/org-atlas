@@ -26,6 +26,12 @@ jobs:
 
       - run: npm run validate
 
+      # The committed schema must match the vocabulary files.
+      - name: Schema is up to date
+        run: |
+          npm run schema
+          git diff --exit-code schema/ || (echo "::error::schema/atlas.schema.json is out of date. Run npm run schema and commit." && exit 1)
+
       - run: npx astro build
 
       # The upstream toolkit repo must never contain user-owned files, so that
@@ -34,7 +40,7 @@ jobs:
       - name: Upstream guard (no user-owned files)
         if: github.repository == 'ekbrothers/org-atlas'
         run: |
-          for p in data atlas.config.yaml overrides; do
+          for p in data atlas.config.yaml overrides .vscode; do
             if [ -e "$p" ]; then
               echo "::error::'$p' is user-owned and must not be committed to the upstream toolkit repo."
               exit 1

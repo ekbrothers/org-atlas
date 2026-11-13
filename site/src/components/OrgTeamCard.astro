@@ -4,6 +4,7 @@
 import Icon from './Icon.astro';
 import Avatar from './Avatar.astro';
 import PersonChip from './PersonChip.astro';
+import Logo from './Logo.astro';
 import { atlas, href } from '../lib/atlas';
 import { headcount } from '../../../engine/lib/model.mjs';
 
@@ -11,7 +12,7 @@ interface Props {
   team: any;
 }
 const { team } = Astro.props;
-const { vocab } = atlas();
+const { vocab, model } = atlas();
 const type = team.type ? vocab.teamType[team.type] : null;
 const hc = headcount(team);
 const disciplines = [...new Set(team.members.map((m: any) => m.person.discipline).filter(Boolean))].join(' ');
@@ -24,6 +25,12 @@ const searchText = [
   .join(' ')
   .toLowerCase();
 const others = team.members.filter((m: any) => m.person !== team.leadPerson);
+const owned = model.edgesFrom(team, 'owner').map((e: any) => e.to);
+// Everything this team is involved with: any accountability link, plus platforms its owned applications use.
+const involved = new Set<string>();
+for (const e of model.edgesFrom(team)) involved.add(`${e.to.kind}:${e.to.id}`);
+for (const a of owned.filter((x: any) => x.kind === 'application'))
+  for (const u of model.edgesFrom(a, 'uses')) involved.add(`platform:${u.to.id}`);
 ---
 
 <article
@@ -33,6 +40,7 @@ const others = team.members.filter((m: any) => m.person !== team.leadPerson);
   data-type={team.type ?? ''}
   data-disc={disciplines}
   data-text={searchText}
+  data-rel={[...involved].join(' ')}
 >
   <header class="tc-head">
     <a class="tc-name" href={href(`teams/${team.id}/`)}>{team.name}</a>
@@ -71,6 +79,18 @@ const others = team.members.filter((m: any) => m.person !== team.leadPerson);
       ))
     }
   </ul>
+
+  {
+    owned.length > 0 && (
+      <div class="tc-owns" title={`Owns: ${owned.map((o: any) => o.name).join(', ')}`}>
+        <span class="tc-owns-label">Owns</span>
+        {owned.slice(0, 6).map((o: any) => (
+          <Logo entity={o} size={22} />
+        ))}
+        {owned.length > 6 && <span class="tc-more">+{owned.length - 6}</span>}
+      </div>
+    )
+  }
 
   <footer class="tc-foot">
     <span title="People whose primary team this is"><Icon name="people" size={14} /> {hc.filled}</span>
@@ -129,6 +149,20 @@ const others = team.members.filter((m: any) => m.person !== team.leadPerson);
     font-size: 12px;
     color: var(--muted);
     font-weight: 600;
+  }
+  .tc-owns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .tc-owns-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
   }
   .tc-people {
     display: none;

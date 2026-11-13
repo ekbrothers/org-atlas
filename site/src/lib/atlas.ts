@@ -10,7 +10,7 @@ export function atlas() {
   const config = loadConfig();
   const vocab = loadVocab();
   const { files } = loadData(config.dataDir);
-  const model = buildModel(files, vocab);
+  const model = buildModel(files, vocab, { iconsDir: config.iconsDir });
   cache = { config, vocab, model, site: resolveSite(config) };
   return cache;
 }

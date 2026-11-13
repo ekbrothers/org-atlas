@@ -1,0 +1,270 @@
+---
+// Filterable card grid of platforms or applications.
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import EntityRef from './EntityRef.astro';
+import { atlas, href } from '../lib/atlas';
+
+interface Props {
+  kind: 'platform' | 'application';
+}
+const { kind } = Astro.props;
+const { model } = atlas();
+const list = kind === 'platform' ? model.platforms : model.applications;
+const path = kind === 'platform' ? 'platforms' : 'applications';
+const categories = [...new Set(list.map((e: any) => (kind === 'platform' ? e.category : e.criticality)).filter(Boolean))].sort();
+const ownerTeams = [...new Map(list.flatMap((e: any) => model.edgesTo(e, 'owner').map((x: any) => [x.from.id, x.from]))).values()].sort(
+  (a: any, b: any) => a.name.localeCompare(b.name),
+);
+const usageCount = (e: any) => (kind === 'platform' ? model.edgesTo(e, 'uses').length : model.edgesFrom(e, 'uses').length);
+---
+
+<form class="toolbar panel" onsubmit="return false">
+  <label class="field grow">
+    <Icon name="search" size={16} />
+    <input id="x-q" type="search" placeholder={`Search ${path}`} autocomplete="off" aria-label={`Search ${path}`} />
+  </label>
+  <label class="field">
+    <span class="field-label">{kind === 'platform' ? 'Category' : 'Criticality'}</span>
+    <select id="x-cat">
+      <option value="">All</option>
+      {categories.map((c: any) => <option value={c}>{c}</option>)}
+    </select>
+  </label>
+  <label class="field">
+    <span class="field-label">Owner</span>
+    <select id="x-owner">
+      <option value="">Any</option>
+      {ownerTeams.map((t: any) => <option value={`${t.kind}:${t.id}`}>{t.name ?? t.displayName}</option>)}
+    </select>
+  </label>
+  <label class="check"><input id="x-shared" type="checkbox" /> Shared ownership</label>
+  <label class="check"><input id="x-unowned" type="checkbox" /> Unowned</label>
+  <p id="x-count" class="count muted" aria-live="polite"></p>
+</form>
+
+<ul class="cards">
+  {
+    list.map((e: any) => {
+      const owners = model.edgesTo(e, 'owner');
+      const supporting = model.edgesTo(e, 'supporting');
+      return (
+        <li
+          class="card panel"
+          data-cat={kind === 'platform' ? (e.category ?? '') : (e.criticality ?? '')}
+          data-owners={owners.map((o: any) => `${o.from.kind}:${o.from.id}`).join(' ')}
+          data-text={[e.name, e.description, e.vendor, ...owners.map((o: any) => o.from.name ?? o.from.displayName)].join(' ').toLowerCase()}
+        >
+          <div class="card-head">
+            <Logo entity={e} size={44} />
+            <div>
+              <a class="card-name" href={href(`${path}/${e.id}/`)}>
+                {e.name}
+              </a>
+              <span class="muted small">{[e.category, e.vendor ?? (e.proprietary ? 'In-house' : null), e.criticality].filter(Boolean).join(' | ')}</span>
+            </div>
+          </div>
+          {e.description && <p class="desc">{e.description}</p>}
+          <div class="owners">
+            <span class="label">
+              <Icon name="shield-check" size={12} /> {owners.length > 1 ? 'Shared ownership' : 'Owner'}
+            </span>
+            {owners.map((o: any) => (
+              <EntityRef entity={o.from} />
+            ))}
+            {owners.length === 0 && <span class="stamp">Unowned</span>}
+          </div>
+          {supporting.length > 0 && (
+            <div class="owners">
+              <span class="label">
+                <Icon name="tools" size={12} /> Supporting
+              </span>
+              {supporting.map((o: any) => (
+                <EntityRef entity={o.from} />
+              ))}
+            </div>
+          )}
+          <div class="foot muted small">
+            <Icon name="plug" size={12} /> {kind === 'platform' ? `Used by ${usageCount(e)} application${usageCount(e) === 1 ? '' : 's'}` : `Uses ${usageCount(e)} platform${usageCount(e) === 1 ? '' : 's'}`}
+          </div>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<script>
+  const q = document.querySelector('#x-q') as HTMLInputElement;
+  const cat = document.querySelector('#x-cat') as HTMLSelectElement;
+  const owner = document.querySelector('#x-owner') as HTMLSelectElement;
+  const shared = document.querySelector('#x-shared') as HTMLInputElement;
+  const unowned = document.querySelector('#x-unowned') as HTMLInputElement;
+  const count = document.querySelector('#x-count') as HTMLParagraphElement;
+  const cards = [...document.querySelectorAll<HTMLElement>('.card')];
+  const params = new URLSearchParams(location.search);
+  q.value = params.get('q') ?? '';
+  owner.value = params.get('owner') ?? '';
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const c of cards) {
+      const owners = (c.dataset.owners ?? '').split(' ').filter(Boolean);
+      const ok =
+        (!term || (c.dataset.text ?? '').includes(term)) &&
+        (!cat.value || c.dataset.cat === cat.value) &&
+        (!owner.value || owners.includes(owner.value)) &&
+        (!shared.checked || owners.length > 1) &&
+        (!unowned.checked || owners.length === 0);
+      c.hidden = !ok;
+      if (ok) shown++;
+    }
+    count.textContent = `Showing ${shown} of ${cards.length}`;
+  }
+  [q, cat, owner, shared, unowned].forEach((el) => el.addEventListener('input', apply));
+  apply();
+</script>
+
+<style>
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    background: var(--warm);
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .field-label {
+    font-weight: 600;
+  }
+  .field.grow {
+    flex: 1 1 240px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 10px;
+  }
+  .field.grow input {
+    border: 0;
+    flex: 1;
+    min-width: 0;
+    padding: 9px 0;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+  }
+  .field select {
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    min-width: 150px;
+    text-transform: capitalize;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    padding-bottom: 8px;
+  }
+  .count {
+    margin: 0;
+    font-size: 13px;
+    flex-basis: 100%;
+  }
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border-top: 3px solid var(--navy);
+  }
+  .card[hidden] {
+    display: none;
+  }
+  .card-head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .card-head > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .card-name {
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--navy);
+  }
+  .small {
+    font-size: 12px;
+    text-transform: capitalize;
+  }
+  .desc {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .owners {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    font-size: 14px;
+  }
+  .label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-basis: 100%;
+  }
+  .stamp {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    border-radius: 3px;
+    padding: 0 6px;
+  }
+  .foot {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: none;
+  }
+</style>

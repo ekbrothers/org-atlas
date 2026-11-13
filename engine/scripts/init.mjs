@@ -60,12 +60,39 @@ try {
   // Write config
   writeFileSync(USER_CONFIG, configTemplate({ orgName, noindex: realData }));
 
+  // Starter icons (custom logos) go to overrides/icons, without overwriting yours.
+  const starterIcons = join(EXAMPLES, starter.name, 'icons');
+  if (existsSync(starterIcons)) {
+    mkdirSync(join(OVERRIDES, 'icons'), { recursive: true });
+    cpSync(starterIcons, join(OVERRIDES, 'icons'), { recursive: true, force: false, errorOnExist: false });
+  }
+
+  // Editor autocomplete and validation for data files (VS Code YAML / JSON).
+  const vscode = join(ROOT, '.vscode', 'settings.json');
+  if (!existsSync(vscode)) {
+    mkdirSync(join(ROOT, '.vscode'), { recursive: true });
+    writeFileSync(
+      vscode,
+      JSON.stringify(
+        {
+          'yaml.schemas': { './schema/atlas.schema.json': ['data/**/*.yaml', 'data/**/*.yml'] },
+          'json.schemas': [{ fileMatch: ['data/**/*.json'], url: './schema/atlas.schema.json' }],
+        },
+        null,
+        2,
+      ) + '\n',
+    );
+  }
+
   // Overrides folder (kept even on --force, it may hold your customizations)
   if (!existsSync(OVERRIDES)) {
     mkdirSync(OVERRIDES, { recursive: true });
+  }
+  if (!existsSync(join(OVERRIDES, 'README.md'))) {
+    mkdirSync(OVERRIDES, { recursive: true });
     writeFileSync(
       join(OVERRIDES, 'README.md'),
-      '# Overrides\n\nYour customizations live here: extra vocabulary, theme tweaks, custom icons and\nquestions. This folder is yours; upstream updates never touch it.\n\nSupported from Phase 1 onward. See docs/PLAN.md.\n',
+      '# Overrides\n\nYour customizations live here. This folder is yours; upstream updates never touch it.\n\n- `icons/`: custom SVG logos, used as `logo: custom:<file name without .svg>`\n\nCustom vocabulary, themes and questions arrive in later phases. See docs/PLAN.md.\n',
     );
   }
 
@@ -129,7 +156,11 @@ site:
   noindex: ${noindex}
 
 data:
-  # Folder holding your YAML data, relative to this file.
+  # Folder holding your YAML or JSON data, relative to this file.
   dir: data
+
+icons:
+  # Custom SVG logos for proprietary platforms: logo: custom:<name> loads <dir>/<name>.svg
+  dir: overrides/icons
 `;
 }
