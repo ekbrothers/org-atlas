@@ -4,6 +4,7 @@
 //   agent/tool.json                     tool / function definition for structured output
 //   .claude/agents/org-atlas-author.md  Claude Code subagent
 //   AGENTS.md                           instructions for coding agents
+//   agent/README.md                     how to set the agent up in each tool
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from '../lib/config.mjs';
@@ -14,11 +15,12 @@ import { loadVocab } from '../lib/model.mjs';
 // Your overrides are included; the bundled demo's are not (upstream files describe the defaults).
 const config = loadConfig();
 
-const { body, tool, claudeAgent, agentsMd } = buildAgent(loadVocab({ overridesDir: config.demo ? null : config.vocabDir }));
+const { body, tool, claudeAgent, agentsMd, readme } = buildAgent(loadVocab({ overridesDir: config.demo ? null : config.vocabDir }));
 mkdirSync(join(ROOT, 'agent'), { recursive: true });
 mkdirSync(join(ROOT, '.claude', 'agents'), { recursive: true });
 writeFileSync(join(ROOT, 'agent', 'org-atlas-agent.md'), body);
 writeFileSync(join(ROOT, 'agent', 'tool.json'), JSON.stringify(tool, null, 2) + '\n');
 writeFileSync(join(ROOT, '.claude', 'agents', 'org-atlas-author.md'), claudeAgent);
 writeFileSync(join(ROOT, 'AGENTS.md'), agentsMd);
-console.log('Wrote agent/org-atlas-agent.md, agent/tool.json, .claude/agents/org-atlas-author.md, AGENTS.md');
+writeFileSync(join(ROOT, 'agent', 'README.md'), readme);
+console.log('Wrote agent/org-atlas-agent.md, agent/README.md, agent/tool.json, .claude/agents/org-atlas-author.md, AGENTS.md');

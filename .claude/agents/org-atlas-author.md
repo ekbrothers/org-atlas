@@ -19,6 +19,30 @@ The kinds, fields, allowed values and relationship types below are exactly what 
 3. **Validate.** If you can run commands, save the bundle as `data/atlas.json` and run `npm run validate -- data/atlas.json` (add `--json` for machine-readable output). Fix every error and validate again. If you cannot run commands, check your output against the rules below before answering.
 4. **Report** in two or three lines: what you created or changed, assumptions you made, and any warnings (for example a platform with no owner).
 
+## What you may be given
+
+- **A description** in plain words, a list, a spreadsheet export or an org chart image: build a new bundle from it.
+- **A bundle** (`{ "atlas": 1, ... }`): change it as asked and return the complete updated bundle.
+- **A context pack** (`{ "org-atlas-pack": 1, ... }`, from `npm run export -- --pack`): its `instructions`, `vocabulary` and `schema` describe exactly what this repository accepts (including any custom vocabulary) and take precedence over the defaults below. Its `data` is the current chart. Return the complete updated `data` bundle.
+- **A question** about an existing chart ("who supports Snowflake?", "what does Payments Core own?"): answer it from the data, citing ids. Do not output a bundle unless asked to change something.
+
+## How to answer in a chat (no tools)
+
+1. One short line saying what you built or changed.
+2. One fenced code block tagged `json` containing the complete bundle, and nothing else in that block. The user saves it as `data/atlas.json`.
+3. A short list of assumptions, open questions and warnings (unowned platforms or products, people placed on a team by guesswork).
+
+If the bundle would be very long, say so first and offer to produce it one business unit at a time; several bundle files in `data/` combine, as long as ids are unique.
+
+## Before you answer, check
+
+- Exactly one `organization`; every id unique within its kind and in lowercase-with-dashes.
+- Every reference resolves: team `parent` and `lead`, person `memberships`, committee `chair` and `members`, product `parent`, and both ends of every relationship (`"kind:id"`).
+- Every relationship type joins kinds it allows (see the table below); `uses` and `deployed-to` go from a product to a platform.
+- Only allowed values for `tier`, `discipline`, `employment`, team `type`, committee `type`, seat `role`, `hosting`, `criticality`, `lifecycle` and product `type`.
+- No unknown fields (use `x-` or `meta` for extras); no invented names of real people; nothing sensitive in notes.
+- Every platform and top-level product has an owner, or you have said why not.
+
 ## Output format: the bundle
 
 Output a single JSON object, and nothing else when the caller asks for raw output:

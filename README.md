@@ -26,10 +26,10 @@
 
 ## Quickstart
 
-You need [Node.js](https://nodejs.org/) 22.23.4 or newer.
+You need [Node.js](https://nodejs.org/) 22.23.4 or newer. In the commands below, replace `<owner>` with the GitHub account or organization that hosts the Org Atlas toolkit you are cloning.
 
 ```bash
-git clone https://github.com/ekbrothers/org-atlas.git my-atlas
+git clone https://github.com/<owner>/org-atlas.git my-atlas
 ```
 
 ```bash
@@ -179,7 +179,7 @@ The first checks a file an LLM wrote (add `--json` for machine-readable output).
 
 ### The authoring agent
 
-A ready-made agent that creates and edits charts, generated from the vocabulary and schema so it always matches the toolkit:
+A ready-made agent that creates and edits charts, generated from the vocabulary and schema so it always matches the toolkit. **[agent/README.md](agent/README.md) has step-by-step setup for ChatGPT, Claude, Gemini, Copilot, LLM APIs and Claude Code.**
 
 | File | Use it with |
 |---|---|
@@ -238,7 +238,7 @@ Org Atlas itself is public, but your organization's data probably should not be.
 Your files (`atlas.config.yaml`, `data/`, `overrides/`) never exist in this upstream repository, so pulling updates does not conflict with them.
 
 ```bash
-git remote add upstream https://github.com/ekbrothers/org-atlas.git
+git remote add upstream https://github.com/<owner>/org-atlas.git
 ```
 
 ```bash

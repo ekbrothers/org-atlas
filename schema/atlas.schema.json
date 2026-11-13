@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/ekbrothers/org-atlas/schema/atlas.schema.json",
+  "$id": "urn:org-atlas:schema:data-file",
   "title": "Org Atlas data file",
   "description": "One Org Atlas data file (YAML or JSON). Either a bundle { atlas: 1, entities: [...], relationships: [...] }, a list { kind, items: [...] }, or a single entity { kind, id, ... }.",
   "definitions": {

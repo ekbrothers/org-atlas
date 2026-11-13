@@ -35,9 +35,10 @@ jobs:
 
       - run: npm ci
 
-      # Upstream toolkit repo only: user-owned files must never be committed there.
+      # Upstream toolkit repo only (repository variable ORG_ATLAS_UPSTREAM = "true"):
+      # user-owned files must never be committed there.
       - name: Upstream guard (no user-owned files)
-        if: github.repository == 'ekbrothers/org-atlas'
+        if: vars.ORG_ATLAS_UPSTREAM == 'true'
         run: |
           for p in data atlas.config.yaml overrides .vscode; do
             if [ -e "$p" ]; then

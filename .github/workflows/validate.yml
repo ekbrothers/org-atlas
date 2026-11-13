@@ -36,9 +36,10 @@ jobs:
 
       # The upstream toolkit repo must never contain user-owned files, so that
       # people who clone it can pull updates without merge conflicts.
-      # This step only runs in the upstream repo, not in your copy.
+      # This step only runs where the repository variable ORG_ATLAS_UPSTREAM is "true"
+      # (set it in the toolkit's own repository, never in your copy).
       - name: Upstream guard (no user-owned files)
-        if: github.repository == 'ekbrothers/org-atlas'
+        if: vars.ORG_ATLAS_UPSTREAM == 'true'
         run: |
           for p in data atlas.config.yaml overrides .vscode; do
             if [ -e "$p" ]; then
